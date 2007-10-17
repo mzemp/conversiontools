@@ -19,6 +19,7 @@ EXE5	= $(BASE5)$(EXT)
 EXE6	= $(BASE6)$(EXT)
 EXE7	= $(BASE7)$(EXT)
 EXE8	= $(BASE8)$(EXT)
+VERSION = 1.0
 
 # Compiler stuff
 
@@ -86,4 +87,4 @@ clean:
 	-rm -f *.o *~ $(EXE1) $(EXE2) $(EXE3) $(EXE4) $(EXE5) $(EXE6) $(EXE7) $(EXE8)
 
 tar:
-	cd ..; tar cvf - conversiontools/*.c conversiontools/*.h conversiontools/Makefile > conversiontools.tar
+	cd ..; tar cvf - conversiontools/*.c conversiontools/*.h conversiontools/Makefile > conversiontools-$(VERSION).tar
