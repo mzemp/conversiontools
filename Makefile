@@ -11,6 +11,8 @@ BASE5	= tb2ts
 BASE6	= gb2ts
 BASE7	= tsdpp2ts
 BASE8	= ts2tsdpp
+BASE9	= ts2silo
+BASE10	= tsdpp2silo
 EXE1	= $(BASE1)$(EXT)
 EXE2	= $(BASE2)$(EXT) 
 EXE3	= $(BASE3)$(EXT)
@@ -19,7 +21,9 @@ EXE5	= $(BASE5)$(EXT)
 EXE6	= $(BASE6)$(EXT)
 EXE7	= $(BASE7)$(EXT)
 EXE8	= $(BASE8)$(EXT)
-VERSION = 1.0
+EXE9	= $(BASE9)$(EXT)
+EXE10	= $(BASE10)$(EXT)
+VERSION = 1.1
 
 # Compiler stuff
 
@@ -27,7 +31,11 @@ CC	= gcc
 CFLAGS	= -O3 -lm -Wall
 CFLAGS7	= $(CFLAGS) -DDPP -DDPPWSP
 CFLAGS8	= $(CFLAGS) -DDPP -DDPPRSP
+CFLAGS9	= $(CFLAGS) -I/usr/local/visit/silo/4.5.1/linux-x86_64/include
+CFLAGS10= $(CFLAGS) -DDPP -I/usr/local/visit/silo/4.5.1/linux-x86_64/include
 LIBS	= 
+LIBS9	= -L/usr/local/visit/silo/4.5.1/linux-x86_64/lib -lsilo -lm
+LIBS10	= -L/usr/local/visit/silo/4.5.1/linux-x86_64/lib -lsilo -lm
 
 # Object definition
 
@@ -39,10 +47,12 @@ OBJ5	= $(BASE5).o IOfunctions.o
 OBJ6	= $(BASE6).o IOfunctions.o
 OBJ7	= $(BASE7).o IOfunctions7.o
 OBJ8	= $(BASE8).o IOfunctions8.o
+OBJ9	= $(BASE9).o IOfunctions.o
+OBJ10	= $(BASE10).o IOfunctions10.o
 
 # Rules
 
-all:	$(EXE1) $(EXE2) $(EXE3) $(EXE4) $(EXE5) $(EXE6) $(EXE7) $(EXE8)
+all:	$(EXE1) $(EXE2) $(EXE3) $(EXE4) $(EXE5) $(EXE6) $(EXE7) $(EXE8) $(EXE9)
 
 $(EXE1): $(OBJ1) Makefile
 	$(CC) $(CFLAGS) $(OBJ1) -o $(EXE1) $(LIBS)
@@ -68,6 +78,12 @@ $(EXE7): $(OBJ7) Makefile
 $(EXE8): $(OBJ8) Makefile
 	$(CC) $(CFLAGS8) $(OBJ8) -o $(EXE8) $(LIBS)
 
+$(EXE9): $(OBJ9) Makefile
+	$(CC) $(CFLAGS9) $(OBJ9) -o $(EXE9) $(LIBS9)
+
+$(EXE10): $(OBJ10) Makefile
+	$(CC) $(CFLAGS10) $(OBJ10) -o $(EXE10) $(LIBS10)
+
 IOfunctions.o: IOfunctions.h
 	$(CC) $(CFLAGS) -c IOfunctions.c $(LIBS)
 
@@ -83,8 +99,14 @@ IOfunctions8.o: IOfunctions.h
 $(BASE8).o: $(BASE8).c
 	$(CC) $(CFLAGS8) -c $(BASE8).c $(LIBS)
 
+IOfunctions10.o: IOfunctions.h
+	$(CC) $(CFLAGS10) -c IOfunctions.c -o IOfunctions10.o $(LIBS10)
+
+$(BASE10).o: $(BASE10).c
+	$(CC) $(CFLAGS10) -c $(BASE9).c $(LIBS10)
+
 clean:
-	-rm -f *.o *~ $(EXE1) $(EXE2) $(EXE3) $(EXE4) $(EXE5) $(EXE6) $(EXE7) $(EXE8)
+	-rm -f *.o *~ $(EXE1) $(EXE2) $(EXE3) $(EXE4) $(EXE5) $(EXE6) $(EXE7) $(EXE8) $(EXE9) $(EXE10)
 
 tar:
 	cd ..; tar cvf - conversiontools/*.c conversiontools/*.h conversiontools/Makefile > conversiontools-$(VERSION).tar
