@@ -52,7 +52,7 @@ OBJ10	= $(BASE10).o IOfunctions10.o
 
 # Rules
 
-all:	$(EXE1) $(EXE2) $(EXE3) $(EXE4) $(EXE5) $(EXE6) $(EXE7) $(EXE8) $(EXE9)
+all:	$(EXE1) $(EXE2) $(EXE3) $(EXE4) $(EXE5) $(EXE6) $(EXE7) $(EXE8) $(EXE9) $(EXE10)
 
 $(EXE1): $(OBJ1) Makefile
 	$(CC) $(CFLAGS) $(OBJ1) -o $(EXE1) $(LIBS)
@@ -103,7 +103,7 @@ IOfunctions10.o: IOfunctions.h
 	$(CC) $(CFLAGS10) -c IOfunctions.c -o IOfunctions10.o $(LIBS10)
 
 $(BASE10).o: $(BASE10).c
-	$(CC) $(CFLAGS10) -c $(BASE9).c $(LIBS10)
+	$(CC) $(CFLAGS10) -c $(BASE10).c $(LIBS10)
 
 clean:
 	-rm -f *.o *~ $(EXE1) $(EXE2) $(EXE3) $(EXE4) $(EXE5) $(EXE6) $(EXE7) $(EXE8) $(EXE9) $(EXE10)

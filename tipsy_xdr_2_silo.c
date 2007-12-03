@@ -80,13 +80,23 @@ int main(int argc, char **argv) {
     /*
     ** Create silo file
     */
-    dbfile = DBCreate(outputname,DB_CLOBBER,DB_LOCAL,"N-body simulation data",DB_PDB);
+    dbfile = DBCreate(outputname,DB_CLOBBER,DB_LOCAL,"N-body",DB_PDB);
     assert(dbfile != NULL);
     /*
-    ** Read in tipsy file and get arrays ready
+    ** Read in tipsy file, write out header stuff and get arrays ready
     */
     xdrstdio_create(&xdrs,stdin,XDR_DECODE);
     read_tipsy_standard_header(&xdrs,&th);
+    i = 1;
+    DBMkDir(dbfile,"header");
+    DBSetDir(dbfile,"/header");
+    DBWrite(dbfile,"ntotal",&th.ntotal,&i,1,DB_INT);
+    DBWrite(dbfile,"ngas",&th.ngas,&i,1,DB_INT);
+    DBWrite(dbfile,"ndark",&th.ndark,&i,1,DB_INT);
+    DBWrite(dbfile,"nstar",&th.nstar,&i,1,DB_INT);
+    DBWrite(dbfile,"time",&th.time,&i,1,DB_DOUBLE);
+    DBWrite(dbfile,"ndim",&th.ndim,&i,1,DB_INT);
+    DBSetDir(dbfile,"/");
 #ifdef DPP
     pos = malloc(th.ndim*sizeof(double *));
 #else
@@ -145,6 +155,8 @@ int main(int argc, char **argv) {
 	    temp[i] = gp.temp;
 	    metals[i] = gp.metals;
 	    }
+	DBMkDir(dbfile,"gas");
+	DBSetDir(dbfile,"/gas");
 #ifdef DPP
 	DBPutPointmesh(dbfile,"gas_pos",th.ndim,pos,th.ngas,DB_DOUBLE,NULL);
 #else
@@ -157,6 +169,7 @@ int main(int argc, char **argv) {
 	DBPutPointvar1(dbfile,"gas_metals","gas_pos",phi,th.ngas,DB_FLOAT,NULL);
 	DBPutPointvar1(dbfile,"gas_rho","gas_pos",phi,th.ngas,DB_FLOAT,NULL);
 	DBPutPointvar1(dbfile,"gas_temp","gas_pos",phi,th.ngas,DB_FLOAT,NULL);
+	DBSetDir(dbfile,"/");
 	}
     /*
     ** Process dark matter particles
@@ -193,6 +206,8 @@ int main(int argc, char **argv) {
 	    eps[i] = dp.eps;
 	    phi[i] = dp.phi;
 	    }
+	DBMkDir(dbfile,"dark");
+	DBSetDir(dbfile,"/dark");
 #ifdef DPP
 	DBPutPointmesh(dbfile,"dark_pos",th.ndim,pos,th.ndark,DB_DOUBLE,NULL);
 #else
@@ -202,6 +217,7 @@ int main(int argc, char **argv) {
 	DBPutPointvar1(dbfile,"dark_mass","dark_pos",mass,th.ndark,DB_FLOAT,NULL);
 	DBPutPointvar1(dbfile,"dark_eps","dark_pos",eps,th.ndark,DB_FLOAT,NULL);
 	DBPutPointvar1(dbfile,"dark_phi","dark_pos",phi,th.ndark,DB_FLOAT,NULL);
+	DBSetDir(dbfile,"/");
 	}
     /*
     ** Process star particles
@@ -239,6 +255,8 @@ int main(int argc, char **argv) {
 	    metals[i] = sp.phi;
 	    tform[i] = sp.tform;
 	    }
+	DBMkDir(dbfile,"star");
+	DBSetDir(dbfile,"/star");
 #ifdef DPP
 	DBPutPointmesh(dbfile,"star_pos",th.ndim,pos,th.nstar,DB_DOUBLE,NULL);
 #else
@@ -250,6 +268,7 @@ int main(int argc, char **argv) {
 	DBPutPointvar1(dbfile,"star_phi","star_pos",phi,th.nstar,DB_FLOAT,NULL);
 	DBPutPointvar1(dbfile,"star_metals","star_pos",metals,th.nstar,DB_FLOAT,NULL);
 	DBPutPointvar1(dbfile,"star_tfrom","star_pos",tform,th.nstar,DB_FLOAT,NULL);
+	DBSetDir(dbfile,"/");
 	}
     /*
     ** Clean up a bit
@@ -275,21 +294,27 @@ int main(int argc, char **argv) {
 	    for (i = 0; i < th.ngas; i++) {
 		assert(fscanf(file,"%f",&mass[i]) == 1);
 		}
+	    DBSetDir(dbfile,"/gas");
 	    DBPutPointvar1(dbfile,"gas_den","gas_pos",mass,th.ngas,DB_FLOAT,NULL);
+	    DBSetDir(dbfile,"/");
 	    }
 	if (th.ndark > 0) {
 	    mass = realloc(mass,th.ndark*sizeof(float));
 	    for (i = 0; i < th.ndark; i++) {
 		assert(fscanf(file,"%f",&mass[i]) == 1);
 		}
+	    DBSetDir(dbfile,"/dark");
 	    DBPutPointvar1(dbfile,"dark_den","dark_pos",mass,th.ndark,DB_FLOAT,NULL);
+	    DBSetDir(dbfile,"/");
 	    }
 	if (th.nstar > 0) {
 	    mass = realloc(mass,th.nstar*sizeof(float));
 	    for (i = 0; i < th.nstar; i++) {
 		assert(fscanf(file,"%f",&mass[i]) == 1);
 		}
+	    DBSetDir(dbfile,"/star");
 	    DBPutPointvar1(dbfile,"star_den","star_pos",mass,th.nstar,DB_FLOAT,NULL);
+	    DBSetDir(dbfile,"/");
 	    }
 	fclose(file);
 	}
@@ -302,21 +327,27 @@ int main(int argc, char **argv) {
 	    for (i = 0; i < th.ngas; i++) {
 		assert(fscanf(file,"%f",&mass[i]) == 1);
 		}
+	    DBSetDir(dbfile,"/gas");
 	    DBPutPointvar1(dbfile,"gas_psd","gas_pos",mass,th.ngas,DB_FLOAT,NULL);
+	    DBSetDir(dbfile,"/");
 	    }
 	if (th.ndark > 0) {
 	    mass = realloc(mass,th.ndark*sizeof(float));
 	    for (i = 0; i < th.ndark; i++) {
 		assert(fscanf(file,"%f",&mass[i]) == 1);
 		}
+	    DBSetDir(dbfile,"/dark");
 	    DBPutPointvar1(dbfile,"dark_psd","dark_pos",mass,th.ndark,DB_FLOAT,NULL);
+	    DBSetDir(dbfile,"/");
 	    }
 	if (th.nstar > 0) {
 	    mass = realloc(mass,th.nstar*sizeof(float));
 	    for (i = 0; i < th.nstar; i++) {
 		assert(fscanf(file,"%f",&mass[i]) == 1);
 		}
+	    DBSetDir(dbfile,"/star");
 	    DBPutPointvar1(dbfile,"star_psd","star_pos",mass,th.nstar,DB_FLOAT,NULL);
+	    DBSetDir(dbfile,"/ ");
 	    }
 	fclose(file);
 	}
@@ -338,8 +369,8 @@ void usage(void) {
     fprintf(stderr,"Please specify the following parametes:\n");
     fprintf(stderr,"\n");
     fprintf(stderr,"-o <name>   : name of output file in silo format\n");
-    fprintf(stderr,"-den <name> : name of density file in Tipsy array format\n");
-    fprintf(stderr,"-psd <name> : name of phase space density fiel in Tipsy aray format\n");
+    fprintf(stderr,"-den <name> : name of density file in tipsy array format\n");
+    fprintf(stderr,"-psd <name> : name of phase space density file in tipsy array format\n");
     fprintf(stderr,"< input file in tipsy standard binary format\n");
     fprintf(stderr,"\n");
     exit(1);
