@@ -125,7 +125,7 @@ $(BASE12).o: $(BASE12).c
 	$(CC) $(CFLAGS12) -c $(BASE12).c $(LIBS)
 
 clean:
-	-rm -f *.o *~ $(EXE1) $(EXE2) $(EXE3) $(EXE4) $(EXE5) $(EXE6) $(EXE7) $(EXE8) $(EXE9) $(EXE10)
+	-rm -f *.o *~ $(EXE1) $(EXE2) $(EXE3) $(EXE4) $(EXE5) $(EXE6) $(EXE7) $(EXE8) $(EXE9) $(EXE10) $(EXE11) $(EXE12)
 
 tar:
 	cd ..; tar cvf - conversiontools/*.c conversiontools/*.h conversiontools/Makefile > conversiontools-$(VERSION).tar
