@@ -3,27 +3,27 @@
 # Executable
 
 EXT	= 64
-BASE1	= ts2ta
-BASE2	= ts2tb
-BASE3	= ts2gb
-BASE4	= ta2ts
-BASE5	= tb2ts
-BASE6	= gb2ts
-BASE7	= tsdpp2ts
-BASE8	= ts2tsdpp
-BASE9	= ts2silo
+BASE01	= ts2ta
+BASE02	= ts2tb
+BASE03	= ts2gb
+BASE04	= ta2ts
+BASE05	= tb2ts
+BASE06	= gb2ts
+BASE07	= tsdpp2ts
+BASE08	= ts2tsdpp
+BASE09	= ts2silo
 BASE10	= tsdpp2silo
 BASE11	= tscom2tsphy
 BASE12	= tsdppcom2tsdppphy
-EXE1	= $(BASE1)$(EXT)
-EXE2	= $(BASE2)$(EXT) 
-EXE3	= $(BASE3)$(EXT)
-EXE4	= $(BASE4)$(EXT)
-EXE5	= $(BASE5)$(EXT)
-EXE6	= $(BASE6)$(EXT)
-EXE7	= $(BASE7)$(EXT)
-EXE8	= $(BASE8)$(EXT)
-EXE9	= $(BASE9)$(EXT)
+EXE01	= $(BASE01)$(EXT)
+EXE02	= $(BASE02)$(EXT) 
+EXE03	= $(BASE03)$(EXT)
+EXE04	= $(BASE04)$(EXT)
+EXE05	= $(BASE05)$(EXT)
+EXE06	= $(BASE06)$(EXT)
+EXE07	= $(BASE07)$(EXT)
+EXE08	= $(BASE08)$(EXT)
+EXE09	= $(BASE09)$(EXT)
 EXE10	= $(BASE10)$(EXT)
 EXE11	= $(BASE11)$(EXT)
 EXE12	= $(BASE12)$(EXT)
@@ -31,62 +31,64 @@ VERSION = 1.1
 
 # Compiler stuff
 
-CC	= gcc
-CFLAGS	= -O3 -lm -Wall
-CFLAGS7	= $(CFLAGS) -DDPP -DDPPWSP
-CFLAGS8	= $(CFLAGS) -DDPP -DDPPRSP
-CFLAGS9	= $(CFLAGS) -I/usr/local/visit/silo/4.5.1/linux-x86_64/include
-CFLAGS10= $(CFLAGS) -DDPP -I/usr/local/visit/silo/4.5.1/linux-x86_64/include
-CFLAGS12= -DDPP
-LIBS	= -lm
-LIBS9	= -L/usr/local/visit/silo/4.5.1/linux-x86_64/lib -lsilo -lm
-LIBS10	= -L/usr/local/visit/silo/4.5.1/linux-x86_64/lib -lsilo -lm
+CC		= gcc
+CFLAGS		= -O3 -lm -Wall
+CFLAGS07	= $(CFLAGS) -DDPP -DDPPWSP
+CFLAGS08	= $(CFLAGS) -DDPP -DDPPRSP
+CFLAGS09	= $(CFLAGS) -I/usr/local/visit/silo/4.5.1/linux-x86_64/include
+CFLAGS10	= $(CFLAGS) -DDPP -I/usr/local/visit/silo/4.5.1/linux-x86_64/include
+CFLAGS12	= $(CFLAGS) -DDPP
+LIBS		= -lm
+LIBS09		= -L/usr/local/visit/silo/4.5.1/linux-x86_64/lib -lsilo -lm
+LIBS10		= -L/usr/local/visit/silo/4.5.1/linux-x86_64/lib -lsilo -lm
 
 # Object definition
 
-OBJ1	= $(BASE1).o IOfunctions.o
-OBJ2	= $(BASE2).o IOfunctions.o
-OBJ3	= $(BASE3).o IOfunctions.o
-OBJ4	= $(BASE4).o IOfunctions.o
-OBJ5	= $(BASE5).o IOfunctions.o
-OBJ6	= $(BASE6).o IOfunctions.o
-OBJ7	= $(BASE7).o IOfunctions7.o
-OBJ8	= $(BASE8).o IOfunctions8.o
-OBJ9	= $(BASE9).o IOfunctions.o
+OBJ01	= $(BASE01).o IOfunctions.o
+OBJ02	= $(BASE02).o IOfunctions.o
+OBJ03	= $(BASE03).o IOfunctions.o
+OBJ04	= $(BASE04).o IOfunctions.o
+OBJ05	= $(BASE05).o IOfunctions.o
+OBJ06	= $(BASE06).o IOfunctions.o
+OBJ07	= $(BASE07).o IOfunctions07.o
+OBJ08	= $(BASE08).o IOfunctions08.o
+OBJ09	= $(BASE09).o IOfunctions.o
 OBJ10	= $(BASE10).o IOfunctions10.o
 OBJ11	= $(BASE11).o IOfunctions.o
 OBJ12	= $(BASE12).o IOfunctions12.o
 
 # Rules
 
-all:	$(EXE1) $(EXE2) $(EXE3) $(EXE4) $(EXE5) $(EXE6) $(EXE7) $(EXE8) $(EXE9) $(EXE10) $(EXE11) $(EXE12)
+all:	$(EXE01) $(EXE02) $(EXE03) $(EXE04) $(EXE05) \
+	$(EXE06) $(EXE07) $(EXE08) $(EXE09) $(EXE10) \
+	$(EXE11) $(EXE12)
 
-$(EXE1): $(OBJ1) Makefile
-	$(CC) $(CFLAGS) $(OBJ1) -o $(EXE1) $(LIBS)
+$(EXE01): $(OBJ01) Makefile
+	$(CC) $(CFLAGS) $(OBJ01) -o $(EXE01) $(LIBS)
 
-$(EXE2): $(OBJ2) Makefile
-	$(CC) $(CFLAGS) $(OBJ2) -o $(EXE2) $(LIBS)
+$(EXE02): $(OBJ02) Makefile
+	$(CC) $(CFLAGS) $(OBJ02) -o $(EXE02) $(LIBS)
 
-$(EXE3): $(OBJ3) Makefile
-	$(CC) $(CFLAGS) $(OBJ3) -o $(EXE3) $(LIBS)
+$(EXE03): $(OBJ03) Makefile
+	$(CC) $(CFLAGS) $(OBJ03) -o $(EXE03) $(LIBS)
 
-$(EXE4): $(OBJ4) Makefile
-	$(CC) $(CFLAGS) $(OBJ4) -o $(EXE4) $(LIBS)
+$(EXE04): $(OBJ04) Makefile
+	$(CC) $(CFLAGS) $(OBJ04) -o $(EXE04) $(LIBS)
 
-$(EXE5): $(OBJ5) Makefile
-	$(CC) $(CFLAGS) $(OBJ5) -o $(EXE5) $(LIBS)
+$(EXE05): $(OBJ05) Makefile
+	$(CC) $(CFLAGS) $(OBJ05) -o $(EXE05) $(LIBS)
 
-$(EXE6): $(OBJ6) Makefile
-	$(CC) $(CFLAGS) $(OBJ6) -o $(EXE6) $(LIBS)
+$(EXE06): $(OBJ06) Makefile
+	$(CC) $(CFLAGS) $(OBJ06) -o $(EXE06) $(LIBS)
 
-$(EXE7): $(OBJ7) Makefile
-	$(CC) $(CFLAGS7) $(OBJ7) -o $(EXE7) $(LIBS)
+$(EXE07): $(OBJ07) Makefile
+	$(CC) $(CFLAGS7) $(OBJ07) -o $(EXE07) $(LIBS)
 
-$(EXE8): $(OBJ8) Makefile
-	$(CC) $(CFLAGS8) $(OBJ8) -o $(EXE8) $(LIBS)
+$(EXE08): $(OBJ08) Makefile
+	$(CC) $(CFLAGS08) $(OBJ08) -o $(EXE08) $(LIBS)
 
-$(EXE9): $(OBJ9) Makefile
-	$(CC) $(CFLAGS9) $(OBJ9) -o $(EXE9) $(LIBS9)
+$(EXE09): $(OBJ09) Makefile
+	$(CC) $(CFLAGS09) $(OBJ09) -o $(EXE09) $(LIBS09)
 
 $(EXE10): $(OBJ10) Makefile
 	$(CC) $(CFLAGS10) $(OBJ10) -o $(EXE10) $(LIBS10)
@@ -100,17 +102,17 @@ $(EXE12): $(OBJ12) Makefile
 IOfunctions.o: IOfunctions.h
 	$(CC) $(CFLAGS) -c IOfunctions.c $(LIBS)
 
-IOfunctions7.o: IOfunctions.h
-	$(CC) $(CFLAGS7) -c IOfunctions.c -o IOfunctions7.o $(LIBS)
+IOfunctions07.o: IOfunctions.h
+	$(CC) $(CFLAGS07) -c IOfunctions.c -o IOfunctions07.o $(LIBS)
 
-$(BASE7).o: $(BASE7).c
-	$(CC) $(CFLAGS7) -c $(BASE7).c $(LIBS)
+$(BASE07).o: $(BASE07).c
+	$(CC) $(CFLAGS07) -c $(BASE07).c $(LIBS)
 
-IOfunctions8.o: IOfunctions.h
-	$(CC) $(CFLAGS8) -c IOfunctions.c -o IOfunctions8.o $(LIBS)
+IOfunctions08.o: IOfunctions.h
+	$(CC) $(CFLAGS08) -c IOfunctions.c -o IOfunctions08.o $(LIBS)
 
-$(BASE8).o: $(BASE8).c
-	$(CC) $(CFLAGS8) -c $(BASE8).c $(LIBS)
+$(BASE08).o: $(BASE08).c
+	$(CC) $(CFLAGS08) -c $(BASE08).c $(LIBS)
 
 IOfunctions10.o: IOfunctions.h
 	$(CC) $(CFLAGS10) -c IOfunctions.c -o IOfunctions10.o $(LIBS10)
@@ -125,7 +127,10 @@ $(BASE12).o: $(BASE12).c
 	$(CC) $(CFLAGS12) -c $(BASE12).c $(LIBS)
 
 clean:
-	-rm -f *.o *~ $(EXE1) $(EXE2) $(EXE3) $(EXE4) $(EXE5) $(EXE6) $(EXE7) $(EXE8) $(EXE9) $(EXE10) $(EXE11) $(EXE12)
+	-rm -f *.o *~ \
+	$(EXE01) $(EXE02) $(EXE03) $(EXE04) $(EXE05) \
+	$(EXE06) $(EXE07) $(EXE08) $(EXE09) $(EXE10) \
+	$(EXE11) $(EXE12)
 
 tar:
 	cd ..; tar cvf - conversiontools/*.c conversiontools/*.h conversiontools/Makefile > conversiontools-$(VERSION).tar
