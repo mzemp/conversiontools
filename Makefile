@@ -13,6 +13,8 @@ BASE7	= tsdpp2ts
 BASE8	= ts2tsdpp
 BASE9	= ts2silo
 BASE10	= tsdpp2silo
+BASE11	= tscom2tsphy
+BASE12	= tsdppcom2tsdppphy
 EXE1	= $(BASE1)$(EXT)
 EXE2	= $(BASE2)$(EXT) 
 EXE3	= $(BASE3)$(EXT)
@@ -23,6 +25,8 @@ EXE7	= $(BASE7)$(EXT)
 EXE8	= $(BASE8)$(EXT)
 EXE9	= $(BASE9)$(EXT)
 EXE10	= $(BASE10)$(EXT)
+EXE11	= $(BASE11)$(EXT)
+EXE12	= $(BASE12)$(EXT)
 VERSION = 1.1
 
 # Compiler stuff
@@ -33,7 +37,8 @@ CFLAGS7	= $(CFLAGS) -DDPP -DDPPWSP
 CFLAGS8	= $(CFLAGS) -DDPP -DDPPRSP
 CFLAGS9	= $(CFLAGS) -I/usr/local/visit/silo/4.5.1/linux-x86_64/include
 CFLAGS10= $(CFLAGS) -DDPP -I/usr/local/visit/silo/4.5.1/linux-x86_64/include
-LIBS	= 
+CFLAGS12= -DDPP
+LIBS	= -lm
 LIBS9	= -L/usr/local/visit/silo/4.5.1/linux-x86_64/lib -lsilo -lm
 LIBS10	= -L/usr/local/visit/silo/4.5.1/linux-x86_64/lib -lsilo -lm
 
@@ -49,10 +54,12 @@ OBJ7	= $(BASE7).o IOfunctions7.o
 OBJ8	= $(BASE8).o IOfunctions8.o
 OBJ9	= $(BASE9).o IOfunctions.o
 OBJ10	= $(BASE10).o IOfunctions10.o
+OBJ11	= $(BASE11).o IOfunctions.o
+OBJ12	= $(BASE12).o IOfunctions12.o
 
 # Rules
 
-all:	$(EXE1) $(EXE2) $(EXE3) $(EXE4) $(EXE5) $(EXE6) $(EXE7) $(EXE8) $(EXE9) $(EXE10)
+all:	$(EXE1) $(EXE2) $(EXE3) $(EXE4) $(EXE5) $(EXE6) $(EXE7) $(EXE8) $(EXE9) $(EXE10) $(EXE11) $(EXE12)
 
 $(EXE1): $(OBJ1) Makefile
 	$(CC) $(CFLAGS) $(OBJ1) -o $(EXE1) $(LIBS)
@@ -84,6 +91,12 @@ $(EXE9): $(OBJ9) Makefile
 $(EXE10): $(OBJ10) Makefile
 	$(CC) $(CFLAGS10) $(OBJ10) -o $(EXE10) $(LIBS10)
 
+$(EXE11): $(OBJ11) Makefile
+	$(CC) $(CFLAGS11) $(OBJ11) -o $(EXE11) $(LIBS)
+
+$(EXE12): $(OBJ12) Makefile
+	$(CC) $(CFLAGS12) $(OBJ12) -o $(EXE12) $(LIBS)
+
 IOfunctions.o: IOfunctions.h
 	$(CC) $(CFLAGS) -c IOfunctions.c $(LIBS)
 
@@ -104,6 +117,12 @@ IOfunctions10.o: IOfunctions.h
 
 $(BASE10).o: $(BASE10).c
 	$(CC) $(CFLAGS10) -c $(BASE10).c $(LIBS10)
+
+IOfunctions12.o: IOfunctions.h
+	$(CC) $(CFLAGS12) -c IOfunctions.c -o IOfunctions12.o $(LIBS)
+
+$(BASE12).o: $(BASE12).c
+	$(CC) $(CFLAGS12) -c $(BASE12).c $(LIBS)
 
 clean:
 	-rm -f *.o *~ $(EXE1) $(EXE2) $(EXE3) $(EXE4) $(EXE5) $(EXE6) $(EXE7) $(EXE8) $(EXE9) $(EXE10)
