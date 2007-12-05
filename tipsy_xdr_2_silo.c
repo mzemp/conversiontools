@@ -20,6 +20,28 @@ int main(int argc, char **argv) {
 
     int i, j;
     int denfile = 0, psdfile = 0;
+    int nvar = 8;
+    int types[] = {DB_VARTYPE_SCALAR,DB_VARTYPE_SCALAR,DB_VARTYPE_SCALAR,
+		    DB_VARTYPE_SCALAR,DB_VARTYPE_SCALAR,DB_VARTYPE_SCALAR,
+		    DB_VARTYPE_SCALAR,DB_VARTYPE_SCALAR};
+    const char *gas_names[] = {"gas/gas_rx","gas/gas_ry","gas/gas_rz",
+			   "gas/gas_vx","gas/gas_vy","gas/gas_vz",
+			   "gas/gas_mag_r","gas/gas_mag_v"};
+    const char *gas_defs[] = {"coord(<gas/gas_pos>)[0]","coord(<gas/gas_pos>)[1]","coord(<gas/gas_pos>)[2]",
+			  "dot(<gas/gas_vel>,{1,0,0})","dot(<gas/gas_vel>,{0,1,0})","dot(<gas/gas_vel>,{0,1,0})",
+			  "polar_radius(<gas/gas_pos>)","magnitude(<gas/gas_vel>)"};
+    const char *dark_names[] = {"dark/dark_rx","dark/dark_ry","dark/dark_rz",
+			   "dark/dark_vx","dark/dark_vy","dark/dark_vz",
+			   "dark/dark_mag_r","dark/dark_mag_v"};
+    const char *dark_defs[] = {"coord(<dark/dark_pos>)[0]","coord(<dark/dark_pos>)[1]","coord(<dark/dark_pos>)[2]",
+			  "dot(<dark/dark_vel>,{1,0,0})","dot(<dark/dark_vel>,{0,1,0})","dot(<dark/dark_vel>,{0,1,0})",
+			  "polar_radius(<dark/dark_pos>)","magnitude(<dark/dark_vel>)"};
+    const char *star_names[] = {"star/star_rx","star/star_ry","star/star_rz",
+			   "star/star_vx","star/star_vy","star/star_vz",
+			   "star/star_mag_r","star/star_mag_v"};
+    const char *star_defs[] = {"coord(<star/star_pos>)[0]","coord(<star/star_pos>)[1]","coord(<star/star_pos>)[2]",
+			  "dot(<star/star_vel>,{1,0,0})","dot(<star/star_vel>,{0,1,0})","dot(<star/star_vel>,{0,1,0})",
+			  "polar_radius(<star/star_pos>)","magnitude(<star/star_vel>)"};
     char outputname[100], denfilename[100], psdfilename[100];
 #ifdef DPP
     double **pos;
@@ -169,6 +191,7 @@ int main(int argc, char **argv) {
 	DBPutPointvar1(dbfile,"gas_metals","gas_pos",phi,th.ngas,DB_FLOAT,NULL);
 	DBPutPointvar1(dbfile,"gas_rho","gas_pos",phi,th.ngas,DB_FLOAT,NULL);
 	DBPutPointvar1(dbfile,"gas_temp","gas_pos",phi,th.ngas,DB_FLOAT,NULL);
+	DBPutDefvars(dbfile,"variables",nvar,gas_names,types,gas_defs,NULL);
 	DBSetDir(dbfile,"/");
 	}
     /*
@@ -217,6 +240,7 @@ int main(int argc, char **argv) {
 	DBPutPointvar1(dbfile,"dark_mass","dark_pos",mass,th.ndark,DB_FLOAT,NULL);
 	DBPutPointvar1(dbfile,"dark_eps","dark_pos",eps,th.ndark,DB_FLOAT,NULL);
 	DBPutPointvar1(dbfile,"dark_phi","dark_pos",phi,th.ndark,DB_FLOAT,NULL);
+	DBPutDefvars(dbfile,"variables",nvar,dark_names,types,dark_defs,NULL);
 	DBSetDir(dbfile,"/");
 	}
     /*
@@ -268,6 +292,7 @@ int main(int argc, char **argv) {
 	DBPutPointvar1(dbfile,"star_phi","star_pos",phi,th.nstar,DB_FLOAT,NULL);
 	DBPutPointvar1(dbfile,"star_metals","star_pos",metals,th.nstar,DB_FLOAT,NULL);
 	DBPutPointvar1(dbfile,"star_tfrom","star_pos",tform,th.nstar,DB_FLOAT,NULL);
+	DBPutDefvars(dbfile,"variables",nvar,star_names,types,star_defs,NULL);
 	DBSetDir(dbfile,"/");
 	}
     /*
