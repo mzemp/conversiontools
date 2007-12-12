@@ -197,7 +197,7 @@ int main(int argc, char **argv) {
     fprintf(stderr,"rcen   = (%+.6e,%+.6e,%+.6e) LUold\n",rcen[0],rcen[1],rcen[2]);
     fprintf(stderr,"vcen   = (%+.6e,%+.6e,%+.6e) VUold\n",vcen[0],vcen[1],vcen[2]);
     fprintf(stderr,"mscale = %.6e MUnew/MUold\n",mscale);
-    fprintf(stderr,"xscale = %.6e LUnew/LUold\n",rscale);
+    fprintf(stderr,"rscale = %.6e LUnew/LUold\n",rscale);
     fprintf(stderr,"vscale = %.6e VUnew/VUold\n",vscale);
     fprintf(stderr,"Hubble = %.6e VUnew/LUnew\n",hubble);
     fprintf(stderr,"\n");
