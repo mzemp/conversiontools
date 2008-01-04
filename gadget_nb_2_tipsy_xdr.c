@@ -1,9 +1,7 @@
 /* 
 ** gb2ts.c
 **
-** Program written in order to convert gadget binary format to tipsy standard binary format
-**
-** written by Marcel Zemp, mzemp@ucolick.org, May 2007
+** written by Marcel Zemp
 */
 
 #include <stdio.h>

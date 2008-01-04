@@ -1,15 +1,12 @@
 /* 
 ** tb2ts.c
 **
-** Program written in order to convert tipsy binary format to tipsy standard binary format
-**
-** written by Marcel Zemp, mzemp@ucolick.org, April 2007
+** written by Marcel Zemp
 */
 
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <malloc.h>
 #include <assert.h>
 #include "IOfunctions.h"
 
@@ -18,7 +15,11 @@ void usage(void);
 int main(int argc, char **argv) {
 
     int i;
-    TIPSY_STRUCTURE *ts;
+    TIPSY_HEADER th;
+    GAS_PARTICLE gp;
+    DARK_PARTICLE dp;
+    STAR_PARTICLE sp;
+    XDR xdrs;
 
     i = 1;
     while (i < argc) {
@@ -29,16 +30,24 @@ int main(int argc, char **argv) {
             usage();
             }
         }
-    ts = malloc(sizeof(TIPSY_STRUCTURE));
-    assert(ts != NULL);
-    ts->th = NULL;
-    ts->gp = NULL;
-    ts->dp = NULL;
-    ts->sp = NULL;
-    read_tipsy_binary(stdin,ts);
-    write_tipsy_standard(stdout,ts);
+    xdrstdio_create(&xdrs,stdout,XDR_DECODE);
+    assert(fread(&th,sizeof(TIPSY_HEADER),1,stdin) == 1);
+    write_tipsy_standard_header(&xdrs,&th);
+    for (i = 0; i < th.ngas; i++) {
+	assert(fread(&gp,sizeof(GAS_PARTICLE),1,stdin) == 1);
+	write_tipsy_standard_gas(&xdrs,&gp);
+	}
+    for (i = 0; i < th.ndark; i++) {
+	assert(fread(&dp,sizeof(DARK_PARTICLE),1,stdin) == 1);
+	write_tipsy_standard_dark(&xdrs,&dp);
+	}
+    for (i = 0; i < th.nstar; i++) {
+	assert(fread(&sp,sizeof(STAR_PARTICLE),1,stdin) == 1);
+	write_tipsy_standard_star(&xdrs,&sp);
+	}
+    xdr_destroy(&xdrs);
     fprintf(stderr,"Time: %g Ntotal: %d Ngas: %d Ndark: %d Nstar: %d\n",
-	    ts->th->time,ts->th->ntotal,ts->th->ngas,ts->th->ndark,ts->th->nstar);
+	    th.time,th.ntotal,th.ngas,th.ndark,th.nstar);
     exit(0);
     }
 

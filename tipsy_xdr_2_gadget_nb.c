@@ -1,9 +1,7 @@
 /* 
 ** ts2gb.c
 **
-** Program written in order to convert tipsy standard binary format to gadget binary format
-**
-** written by Marcel Zemp, mzemp@ucolick.org, May 2007
+** written by Marcel Zemp
 */
 
 #include <stdio.h>

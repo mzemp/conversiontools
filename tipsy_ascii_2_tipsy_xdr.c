@@ -1,9 +1,7 @@
 /* 
 ** ta2ts.c
 **
-** Program written in order to convert tipsy ascii format to tipsy standard binary format
-**
-** written by Marcel Zemp, mzemp@ucolick.org, April 2007
+** written by Marcel Zemp
 */
 
 #include <stdio.h>
