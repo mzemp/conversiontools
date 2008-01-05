@@ -36,23 +36,23 @@ TOOLS	= $(EXE01) $(EXE02) $(EXE03) $(EXE04) $(EXE05) \
 # Compiler stuff
 
 CC	= gcc
-CFLAGS	= -O3 -lm -Wall -I$(SILOPATH)/include
-LIBS	= -lm -L$(SILOPATH)/lib -lsilo
+CFLAGS	= -O3 -Wall -I$(SILO_PATH)/include -I$(IOF_PATH)/include
+LIBS	= -lm -L$(SILO_PATH)/lib -lsilo -L$(IOF_PATH)/lib -liof
 
 # Object definition
 
-OBJ01	= $(BASE01).o IOfunctions.o
-OBJ02	= $(BASE02).o IOfunctions.o
-OBJ03	= $(BASE03).o IOfunctions.o
-OBJ04	= $(BASE04).o IOfunctions.o
-OBJ05	= $(BASE05).o IOfunctions.o
-OBJ06	= $(BASE06).o IOfunctions.o
-OBJ07	= $(BASE07).o IOfunctions.o
-OBJ08	= $(BASE08).o IOfunctions.o
-OBJ09	= $(BASE09).o IOfunctions.o
-OBJ10	= $(BASE10).o IOfunctions.o
-OBJ11	= $(BASE11).o IOfunctions.o
-OBJ12	= $(BASE12).o IOfunctions.o
+OBJ01	= $(BASE01).o
+OBJ02	= $(BASE02).o
+OBJ03	= $(BASE03).o
+OBJ04	= $(BASE04).o
+OBJ05	= $(BASE05).o
+OBJ06	= $(BASE06).o
+OBJ07	= $(BASE07).o
+OBJ08	= $(BASE08).o
+OBJ09	= $(BASE09).o
+OBJ10	= $(BASE10).o
+OBJ11	= $(BASE11).o
+OBJ12	= $(BASE12).o
 
 # Rules
 

@@ -10,7 +10,7 @@
 #include <stdlib.h>
 #include <malloc.h>
 #include <assert.h>
-#include "IOfunctions.h"
+#include <iof.h>
 
 void usage(void);
 
