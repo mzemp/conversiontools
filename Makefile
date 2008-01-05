@@ -29,18 +29,15 @@ EXE11	= $(BASE11)$(EXT)
 EXE12	= $(BASE12)$(EXT)
 VERSION = 1.1
 
+TOOLS	= $(EXE01) $(EXE02) $(EXE03) $(EXE04) $(EXE05) \
+	$(EXE06) $(EXE07) $(EXE08) $(EXE09) $(EXE10) \
+	$(EXE11) $(EXE12)
+
 # Compiler stuff
 
-CC		= gcc
-CFLAGS		= -O3 -lm -Wall
-CFLAGS07	= $(CFLAGS) -DDPP -DDPPWSP
-CFLAGS08	= $(CFLAGS) -DDPP -DDPPRSP
-CFLAGS09	= $(CFLAGS) -I$(SILOPATH)/include
-CFLAGS10	= $(CFLAGS) -DDPP -I$(SILOPATH)/include
-CFLAGS12	= $(CFLAGS) -DDPP
-LIBS		= -lm
-LIBS09		= $(LIBS) -L$(SILOPATH)/lib -lsilo
-LIBS10		= $(LIBS) -L$(SILOPATH)/lib -lsilo
+CC	= gcc
+CFLAGS	= -O3 -lm -Wall -I$(SILOPATH)/include
+LIBS	= -lm -L$(SILOPATH)/lib -lsilo
 
 # Object definition
 
@@ -50,18 +47,16 @@ OBJ03	= $(BASE03).o IOfunctions.o
 OBJ04	= $(BASE04).o IOfunctions.o
 OBJ05	= $(BASE05).o IOfunctions.o
 OBJ06	= $(BASE06).o IOfunctions.o
-OBJ07	= $(BASE07).o IOfunctions07.o
-OBJ08	= $(BASE08).o IOfunctions08.o
-OBJ09	= $(BASE09).o IOfunctions09.o
-OBJ10	= $(BASE10).o IOfunctions10.o
+OBJ07	= $(BASE07).o IOfunctions.o
+OBJ08	= $(BASE08).o IOfunctions.o
+OBJ09	= $(BASE09).o IOfunctions.o
+OBJ10	= $(BASE10).o IOfunctions.o
 OBJ11	= $(BASE11).o IOfunctions.o
-OBJ12	= $(BASE12).o IOfunctions12.o
+OBJ12	= $(BASE12).o IOfunctions.o
 
 # Rules
 
-all:	$(EXE01) $(EXE02) $(EXE03) $(EXE04) $(EXE05) \
-	$(EXE06) $(EXE07) $(EXE08) $(EXE09) $(EXE10) \
-	$(EXE11) $(EXE12)
+all:	$(TOOLS)
 
 $(EXE01): $(OBJ01) Makefile
 	$(CC) $(CFLAGS) $(OBJ01) -o $(EXE01) $(LIBS)
@@ -82,61 +77,25 @@ $(EXE06): $(OBJ06) Makefile
 	$(CC) $(CFLAGS) $(OBJ06) -o $(EXE06) $(LIBS)
 
 $(EXE07): $(OBJ07) Makefile
-	$(CC) $(CFLAGS07) $(OBJ07) -o $(EXE07) $(LIBS)
+	$(CC) $(CFLAGS) $(OBJ07) -o $(EXE07) $(LIBS)
 
 $(EXE08): $(OBJ08) Makefile
-	$(CC) $(CFLAGS08) $(OBJ08) -o $(EXE08) $(LIBS)
+	$(CC) $(CFLAGS) $(OBJ08) -o $(EXE08) $(LIBS)
 
 $(EXE09): $(OBJ09) Makefile
-	$(CC) $(CFLAGS09) $(OBJ09) -o $(EXE09) $(LIBS09)
+	$(CC) $(CFLAGS) $(OBJ09) -o $(EXE09) $(LIBS)
 
 $(EXE10): $(OBJ10) Makefile
-	$(CC) $(CFLAGS10) $(OBJ10) -o $(EXE10) $(LIBS10)
+	$(CC) $(CFLAGS) $(OBJ10) -o $(EXE10) $(LIBS)
 
 $(EXE11): $(OBJ11) Makefile
 	$(CC) $(CFLAGS) $(OBJ11) -o $(EXE11) $(LIBS)
 
 $(EXE12): $(OBJ12) Makefile
-	$(CC) $(CFLAGS12) $(OBJ12) -o $(EXE12) $(LIBS)
-
-IOfunctions.o: IOfunctions.h
-	$(CC) $(CFLAGS) -c IOfunctions.c $(LIBS)
-
-IOfunctions07.o: IOfunctions.h
-	$(CC) $(CFLAGS07) -c IOfunctions.c -o IOfunctions07.o $(LIBS)
-
-$(BASE07).o: $(BASE07).c
-	$(CC) $(CFLAGS07) -c $(BASE07).c $(LIBS)
-
-IOfunctions08.o: IOfunctions.h
-	$(CC) $(CFLAGS08) -c IOfunctions.c -o IOfunctions08.o $(LIBS)
-
-$(BASE08).o: $(BASE08).c
-	$(CC) $(CFLAGS08) -c $(BASE08).c $(LIBS)
-
-IOfunctions09.o: IOfunctions.h
-	$(CC) $(CFLAGS09) -c IOfunctions.c -o IOfunctions09.o $(LIBS09)
-
-$(BASE09).o: $(BASE09).c
-	$(CC) $(CFLAGS09) -c $(BASE09).c $(LIBS09)
-
-IOfunctions10.o: IOfunctions.h
-	$(CC) $(CFLAGS10) -c IOfunctions.c -o IOfunctions10.o $(LIBS10)
-
-$(BASE10).o: $(BASE10).c
-	$(CC) $(CFLAGS10) -c $(BASE10).c $(LIBS10)
-
-IOfunctions12.o: IOfunctions.h
-	$(CC) $(CFLAGS12) -c IOfunctions.c -o IOfunctions12.o $(LIBS)
-
-$(BASE12).o: $(BASE12).c
-	$(CC) $(CFLAGS12) -c $(BASE12).c $(LIBS)
+	$(CC) $(CFLAGS) $(OBJ12) -o $(EXE12) $(LIBS)
 
 clean:
-	-rm -f *.o *~ \
-	$(EXE01) $(EXE02) $(EXE03) $(EXE04) $(EXE05) \
-	$(EXE06) $(EXE07) $(EXE08) $(EXE09) $(EXE10) \
-	$(EXE11) $(EXE12)
+	-rm -f *.o *~ $(TOOLS)
 
 tar:
 	cd ..; tar cvf - conversiontools/*.c conversiontools/*.h conversiontools/Makefile > conversiontools-$(VERSION).tar

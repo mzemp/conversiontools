@@ -1,10 +1,7 @@
 /* 
 ** tsdpp2ts.c
 **
-** Program written in order to convert tipsy standard binary format with double precision positions
-** to tipsy standard binary format with single precision positions
-**
-** written by Marcel Zemp, mzemp@ucolick.org, April 2007
+** written by Marcel Zemp
 */
 
 #include <stdio.h>
@@ -19,7 +16,14 @@ void usage(void);
 int main(int argc, char **argv) {
 
     int i;
-    TIPSY_STRUCTURE *ts;
+    TIPSY_HEADER th;
+    GAS_PARTICLE gp;
+    DARK_PARTICLE dp;
+    STAR_PARTICLE sp;
+    GAS_PARTICLE_DPP gpdpp;
+    DARK_PARTICLE_DPP dpdpp;
+    STAR_PARTICLE_DPP spdpp;
+    XDR xdrsin, xdrsout;
 
     i = 1;
     while (i < argc) {
@@ -30,16 +34,29 @@ int main(int argc, char **argv) {
             usage();
             }
         }
-    ts = malloc(sizeof(TIPSY_STRUCTURE));
-    assert(ts != NULL);
-    ts->th = NULL;
-    ts->gp = NULL;
-    ts->dp = NULL;
-    ts->sp = NULL;
-    read_tipsy_standard(stdin,ts);
-    write_tipsy_standard(stdout,ts);
+    xdrstdio_create(&xdrsin,stdin,XDR_DECODE);
+    xdrstdio_create(&xdrsout,stdout,XDR_ENCODE);
+    read_tipsy_standard_header(&xdrsin,&th);
+    write_tipsy_standard_header(&xdrsout,&th);
+    for (i = 0; i < th.ngas; i++) {
+	read_tipsy_standard_gas_dpp(&xdrsin,&gpdpp);
+	copy_gpdpp_to_gp(&gpdpp,&gp);
+	write_tipsy_standard_gas(&xdrsout,&gp);
+	}
+    for (i = 0; i < th.ndark; i++) {
+	read_tipsy_standard_dark_dpp(&xdrsin,&dpdpp);
+	copy_dpdpp_to_dp(&dpdpp,&dp);
+	write_tipsy_standard_dark(&xdrsout,&dp);
+	}
+    for (i = 0; i < th.nstar; i++) {
+	read_tipsy_standard_star_dpp(&xdrsin,&spdpp);
+	copy_spdpp_to_sp(&spdpp,&sp);
+	write_tipsy_standard_star(&xdrsout,&sp);
+	}
+    xdr_destroy(&xdrsin);
+    xdr_destroy(&xdrsout);
     fprintf(stderr,"Time: %g Ntotal: %d Ngas: %d Ndark: %d Nstar: %d\n",
-	    ts->th->time,ts->th->ntotal,ts->th->ngas,ts->th->ndark,ts->th->nstar);
+	    th.time,th.ntotal,th.ngas,th.ndark,th.nstar);
     exit(0);
     }
 
@@ -49,10 +66,10 @@ void usage(void) {
     fprintf(stderr,"Program converts tipsy standard binary format with double precision positions\n");
     fprintf(stderr,"to tipsy standard binary format with single precision positions\n");
     fprintf(stderr,"\n");
-    fprintf(stderr,"Please specify the following parametes:\n");
+    fprintf(stderr,"Please specify the following parameters:\n");
     fprintf(stderr,"\n");
-    fprintf(stderr,"< input file in tipsy standard binary format with double precision positions\n");
-    fprintf(stderr,"> output file in tipsy standard binary format with single precision positions\n");
+    fprintf(stderr,"< <name> : input file in tipsy standard binary format with double precision positions\n");
+    fprintf(stderr,"> <name> : output file in tipsy standard binary format with single precision positions\n");
     fprintf(stderr,"\n");
     exit(1);
     }

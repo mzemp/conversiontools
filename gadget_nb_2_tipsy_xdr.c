@@ -110,8 +110,14 @@ int main(int argc, char **argv) {
 	}
     fprintf(stderr,"Time: %g Ntotal: %d Ngas: %d Ndark: %d Nstar: %d\n",
 	    ts->th->time,ts->th->ntotal,ts->th->ngas,ts->th->ndark,ts->th->nstar);
-    fprintf(stderr,"a: %g dx: %g dy: %g dz: %g dof: %g mmw: %g uvf: %g\n",
-	    a,dx,dy,dz,dof,mmw,uvf);
+    fprintf(stderr,"Used values:\n");
+    fprintf(stderr,"a   = %.6e\n",a);
+    fprintf(stderr,"dx  = %.6e LU\n",dx);
+    fprintf(stderr,"dy  = %.6e LU\n",dy);
+    fprintf(stderr,"dz  = %.6e LU\n",dz);
+    fprintf(stderr,"dof = %.6e\n",dof);
+    fprintf(stderr,"mmw = %.6e mp\n",mmw);
+    fprintf(stderr,"uvf = %.6e m s^-1\n",uvf);
     exit(0);
     }
 
@@ -120,17 +126,17 @@ void usage(void) {
     fprintf(stderr,"\n");
     fprintf(stderr,"Program converts gadget binary format to tipsy standard binary format\n");
     fprintf(stderr,"\n");
-    fprintf(stderr,"Please specify the following parametes:\n");
+    fprintf(stderr,"Please specify the following parameters:\n");
     fprintf(stderr,"\n");
-    fprintf(stderr,"< input file in gadget binary format\n");
-    fprintf(stderr,"> output file in tipsy standard binary format\n");
-    fprintf(stderr,"-a   : expansion factor [write -a time for cosmological rus] (default: a = 1)\n");
-    fprintf(stderr,"-dx  : shift along x-axis (default: dx = 0)\n");
-    fprintf(stderr,"-dy  : shift along y-axis (default: dy = 0)\n");
-    fprintf(stderr,"-dz  : shift along z-axis (default: dz = 0)\n");
-    fprintf(stderr,"-dof : degrees of freedom of gas (default: dof = 3 => gamma = (dof+2)/dof = 5/3)\n");
-    fprintf(stderr,"-mmw : mean molecular weight of gas in units of proton mass (default: mmw = 1)\n");
-    fprintf(stderr,"-uvf : internal unit of velocity in m s^-1 (default: uvf = 977.79219 => 977.79219 m s^-1 = 1 kpc Gyr^-1)\n");
+    fprintf(stderr,"-a <value>   : expansion factor [write -a time for cosmological runs] (default: a = 1)\n");
+    fprintf(stderr,"-dx <value>  : shift along x-axis [LU] (default: dx = 0 LU)\n");
+    fprintf(stderr,"-dy <value>  : shift along y-axis [LU] (default: dy = 0 LU)\n");
+    fprintf(stderr,"-dz <value>  : shift along z-axis [LU] (default: dz = 0 LU)\n");
+    fprintf(stderr,"-dof <value> : degrees of freedom of gas (default: dof = 3 => gamma = (dof+2)/dof = 5/3)\n");
+    fprintf(stderr,"-mmw <value> : mean molecular weight of gas [mp] (default: mmw = 1 mp)\n");
+    fprintf(stderr,"-uvf <value> : internal unit of velocity [m s^-1] (default: uvf = 977.79219 m s^-1 => 977.79219 m s^-1 = 1 kpc Gyr^-1)\n");
+    fprintf(stderr,"< <name>     : input file in gadget binary format\n");
+    fprintf(stderr,"> <name>     : output file in tipsy standard binary format\n");
     fprintf(stderr,"\n");
     exit(1);
     }

@@ -1,9 +1,7 @@
 /* 
-** ts2silo.c
+** tsdpp2silo.c
 **
-** Program written in order to convert tipsy standard binary format to silo format
-**
-** written by Marcel Zemp, mzemp@ucolick.org, November 2007
+** written by Marcel Zemp
 */
 
 #include <stdio.h>
@@ -43,11 +41,7 @@ int main(int argc, char **argv) {
 			  "dot(<star/star_vel>,{1,0,0})","dot(<star/star_vel>,{0,1,0})","dot(<star/star_vel>,{0,0,1})",
 			  "polar_radius(<star/star_pos>)","magnitude(<star/star_vel>)"};
     char outputname[100], denfilename[100], psdfilename[100];
-#ifdef DPP
     double **pos;
-#else
-    float **pos;
-#endif
     float **vel;
     float *mass;
     float *eps;
@@ -56,13 +50,13 @@ int main(int argc, char **argv) {
     float *temp;
     float *metals;
     float *tform;
-    XDR xdrs;
     TIPSY_HEADER th;
-    GAS_PARTICLE gp;
-    DARK_PARTICLE dp;
-    STAR_PARTICLE sp;
+    GAS_PARTICLE_DPP gpdpp;
+    DARK_PARTICLE_DPP dpdpp;
+    STAR_PARTICLE_DPP spdpp;
     DBfile *dbfile = NULL;
     FILE *file;
+    XDR xdrs;
 
     i = 1;
     while (i < argc) {
@@ -119,11 +113,7 @@ int main(int argc, char **argv) {
     DBWrite(dbfile,"time",&th.time,&i,1,DB_DOUBLE);
     DBWrite(dbfile,"ndim",&th.ndim,&i,1,DB_INT);
     DBSetDir(dbfile,"/");
-#ifdef DPP
     pos = malloc(th.ndim*sizeof(double *));
-#else
-    pos = malloc(th.ndim*sizeof(float *));
-#endif
     assert(pos != NULL);
     vel = malloc(th.ndim*sizeof(float *));
     assert(vel != NULL);
@@ -143,11 +133,7 @@ int main(int argc, char **argv) {
     */
     if (th.ngas > 0) {
 	for (j = 0; j < th.ndim; j++) {
-#ifdef DPP
 	    pos[j] = realloc(pos[j],th.ngas*sizeof(double));
-#else
-	    pos[j] = realloc(pos[j],th.ngas*sizeof(float));
-#endif
 	    assert(pos[j] != NULL);
 	    vel[j] = realloc(vel[j],th.ngas*sizeof(float));
 	    assert(vel[j] != NULL);
@@ -165,27 +151,23 @@ int main(int argc, char **argv) {
 	metals = realloc(metals,th.ngas*sizeof(float));
 	assert(metals != NULL);
 	for (i = 0; i < th.ngas; i++) {
-	    read_tipsy_standard_gas(&xdrs,&gp);
+	    read_tipsy_standard_gas_dpp(&xdrs,&gpdpp);
 	    for (j = 0; j < th.ndim; j++) {
-		pos[j][i] = gp.pos[j];
-		vel[j][i] = gp.vel[j];
+		pos[j][i] = gpdpp.pos[j];
+		vel[j][i] = gpdpp.vel[j];
 		}
-	    mass[i] = gp.mass;
-	    eps[i] = gp.hsmooth;
-	    phi[i] = gp.phi;
-	    rho[i] = gp.metals;
-	    temp[i] = gp.temp;
-	    metals[i] = gp.metals;
+	    mass[i] = gpdpp.mass;
+	    eps[i] = gpdpp.hsmooth;
+	    phi[i] = gpdpp.phi;
+	    rho[i] = gpdpp.metals;
+	    temp[i] = gpdpp.temp;
+	    metals[i] = gpdpp.metals;
 	    }
 	DBMkDir(dbfile,"gas");
 	DBSetDir(dbfile,"/gas");
-#ifdef DPP
-	DBPutPointmesh(dbfile,"gas_pos",th.ndim,pos,th.ngas,DB_DOUBLE,NULL);
-#else
-	DBPutPointmesh(dbfile,"gas_pos",th.ndim,pos,th.ngas,DB_FLOAT,NULL);
-#endif
+	DBPutPointmesh(dbfile,"gas_pos",th.ndim,(float **)pos,th.ngas,DB_DOUBLE,NULL);
 	DBPutPointvar(dbfile,"gas_vel","gas_pos",th.ndim,vel,th.ngas,DB_FLOAT,NULL);
-	DBPutPointvar1(dbfile,"gas_mass","gas_pos",mass,th.ngas,DB_FLOAT,NULL);
+	DBPutPointvar1(dbfile,"gas_mass","gas_pos",mass,th.ngas,DB_DOUBLE,NULL);
 	DBPutPointvar1(dbfile,"gas_hsmooth","gas_pos",eps,th.ngas,DB_FLOAT,NULL);
 	DBPutPointvar1(dbfile,"gas_phi","gas_pos",phi,th.ngas,DB_FLOAT,NULL);
 	DBPutPointvar1(dbfile,"gas_metals","gas_pos",phi,th.ngas,DB_FLOAT,NULL);
@@ -204,11 +186,7 @@ int main(int argc, char **argv) {
 	    temp = realloc(rho,0*sizeof(float));
 	    }
 	for (j = 0; j < th.ndim; j++) {
-#ifdef DPP
 	    pos[j] = realloc(pos[j],th.ndark*sizeof(double));
-#else
-	    pos[j] = realloc(pos[j],th.ndark*sizeof(float));
-#endif
 	    assert(pos[j] != NULL);
 	    vel[j] = realloc(vel[j],th.ndark*sizeof(float));
 	    assert(vel[j] != NULL);
@@ -220,22 +198,18 @@ int main(int argc, char **argv) {
 	phi = realloc(phi,th.ndark*sizeof(float));
 	assert(phi != NULL);
 	for (i = 0; i < th.ndark; i++) {
-	    read_tipsy_standard_dark(&xdrs,&dp);
+	    read_tipsy_standard_dark_dpp(&xdrs,&dpdpp);
 	    for (j = 0; j < th.ndim; j++) {
-		pos[j][i] = dp.pos[j];
-		vel[j][i] = dp.vel[j];
+		pos[j][i] = dpdpp.pos[j];
+		vel[j][i] = dpdpp.vel[j];
 		}
-	    mass[i] = dp.mass;
-	    eps[i] = dp.eps;
-	    phi[i] = dp.phi;
+	    mass[i] = dpdpp.mass;
+	    eps[i] = dpdpp.eps;
+	    phi[i] = dpdpp.phi;
 	    }
 	DBMkDir(dbfile,"dark");
 	DBSetDir(dbfile,"/dark");
-#ifdef DPP
-	DBPutPointmesh(dbfile,"dark_pos",th.ndim,pos,th.ndark,DB_DOUBLE,NULL);
-#else
-	DBPutPointmesh(dbfile,"dark_pos",th.ndim,pos,th.ndark,DB_FLOAT,NULL);
-#endif
+	DBPutPointmesh(dbfile,"dark_pos",th.ndim,(float **)pos,th.ndark,DB_DOUBLE,NULL);
 	DBPutPointvar(dbfile,"dark_vel","dark_pos",th.ndim,vel,th.ndark,DB_FLOAT,NULL);
 	DBPutPointvar1(dbfile,"dark_mass","dark_pos",mass,th.ndark,DB_FLOAT,NULL);
 	DBPutPointvar1(dbfile,"dark_eps","dark_pos",eps,th.ndark,DB_FLOAT,NULL);
@@ -248,11 +222,7 @@ int main(int argc, char **argv) {
     */
     if (th.nstar > 0) {
 	for (j = 0; j < th.ndim; j++) {
-#ifdef DPP
 	    pos[j] = realloc(pos[j],th.nstar*sizeof(double));
-#else
-	    pos[j] = realloc(pos[j],th.nstar*sizeof(float));
-#endif
 	    assert(pos[j] != NULL);
 	    vel[j] = realloc(vel[j],th.nstar*sizeof(float));
 	    assert(vel[j] != NULL);
@@ -268,24 +238,20 @@ int main(int argc, char **argv) {
 	tform = realloc(tform,th.nstar*sizeof(float));
 	assert(tform != NULL);
 	for (i = 0; i < th.nstar; i++) {
-	    read_tipsy_standard_star(&xdrs,&sp);
+	    read_tipsy_standard_star_dpp(&xdrs,&spdpp);
 	    for (j = 0; j < th.ndim; j++) {
-		pos[j][i] = sp.pos[j];
-		vel[j][i] = sp.vel[j];
+		pos[j][i] = spdpp.pos[j];
+		vel[j][i] = spdpp.vel[j];
 		}
-	    mass[i] = sp.mass;
-	    eps[i] = sp.eps;
-	    phi[i] = sp.phi;
-	    metals[i] = sp.phi;
-	    tform[i] = sp.tform;
+	    mass[i] = spdpp.mass;
+	    eps[i] = spdpp.eps;
+	    phi[i] = spdpp.phi;
+	    metals[i] = spdpp.phi;
+	    tform[i] = spdpp.tform;
 	    }
 	DBMkDir(dbfile,"star");
 	DBSetDir(dbfile,"/star");
-#ifdef DPP
-	DBPutPointmesh(dbfile,"star_pos",th.ndim,pos,th.nstar,DB_DOUBLE,NULL);
-#else
-	DBPutPointmesh(dbfile,"star_pos",th.ndim,pos,th.nstar,DB_FLOAT,NULL);
-#endif
+	DBPutPointmesh(dbfile,"star_pos",th.ndim,(float **)pos,th.nstar,DB_DOUBLE,NULL);
 	DBPutPointvar(dbfile,"star_vel","star_pos",th.ndim,vel,th.nstar,DB_FLOAT,NULL);
 	DBPutPointvar1(dbfile,"star_mass","star_pos",mass,th.nstar,DB_FLOAT,NULL);
 	DBPutPointvar1(dbfile,"star_eps","star_pos",eps,th.nstar,DB_FLOAT,NULL);
@@ -312,6 +278,7 @@ int main(int argc, char **argv) {
     */
     if (denfile == 1) {
 	file = fopen(denfilename,"r");
+	assert(file != NULL);
 	assert(fscanf(file,"%d",&i) == 1);
 	assert(i == th.ntotal);
 	if (th.ngas > 0) {
@@ -345,6 +312,7 @@ int main(int argc, char **argv) {
 	}
     if (psdfile == 1) {
 	file = fopen(psdfilename,"r");
+	assert(file != NULL);
 	assert(fscanf(file,"%d",&i) == 1);
 	assert(i == th.ntotal);
 	if (th.ngas > 0) {
@@ -391,12 +359,12 @@ void usage(void) {
     fprintf(stderr,"\n");
     fprintf(stderr,"Program converts tipsy standard binary format to silo format\n");
     fprintf(stderr,"\n");
-    fprintf(stderr,"Please specify the following parametes:\n");
+    fprintf(stderr,"Please specify the following parameters:\n");
     fprintf(stderr,"\n");
-    fprintf(stderr,"-o <name>   : name of output file in silo format with double precision position\n");
-    fprintf(stderr,"-den <name> : name of density file in tipsy array format\n");
-    fprintf(stderr,"-psd <name> : name of phase space density file in tipsy array format\n");
-    fprintf(stderr,"< input file in tipsy standard binary format with double precision position\n");
+    fprintf(stderr,"-o <name>   : output file in silo format\n");
+    fprintf(stderr,"-den <name> : density file in tipsy array format\n");
+    fprintf(stderr,"-psd <name> : phase space density file in tipsy array format\n");
+    fprintf(stderr,"< <name>    : input file in tipsy standard binary format with double precision positions\n");
     fprintf(stderr,"\n");
     exit(1);
     }

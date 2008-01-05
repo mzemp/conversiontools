@@ -1,9 +1,7 @@
 /* 
 ** ts2ta.c
 **
-** Program written in order to convert tipsy standard binary format to tipsy ascii format
-**
-** written by Marcel Zemp, mzemp@ucolick.org, April 2007
+** written by Marcel Zemp
 */
 
 #include <stdio.h>
@@ -47,10 +45,10 @@ void usage(void) {
     fprintf(stderr,"\n");
     fprintf(stderr,"Program converts tipsy standard binary format to tipsy ascii format\n");
     fprintf(stderr,"\n");
-    fprintf(stderr,"Please specify the following parametes:\n");
+    fprintf(stderr,"Please specify the following parameters:\n");
     fprintf(stderr,"\n");
-    fprintf(stderr,"< input file in tipsy standard binary format\n");
-    fprintf(stderr,"> output file in tipsy ascii format\n");
+    fprintf(stderr,"< <name> : input file in tipsy standard binary format\n");
+    fprintf(stderr,"> <name> : output file in tipsy ascii format\n");
     fprintf(stderr,"\n");
     exit(1);
     }

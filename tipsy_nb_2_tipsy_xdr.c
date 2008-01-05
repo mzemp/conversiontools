@@ -31,18 +31,18 @@ int main(int argc, char **argv) {
             }
         }
     xdrstdio_create(&xdrs,stdout,XDR_DECODE);
-    assert(fread(&th,sizeof(TIPSY_HEADER),1,stdin) == 1);
+    read_tipsy_binary_header(stdin,&th);
     write_tipsy_standard_header(&xdrs,&th);
     for (i = 0; i < th.ngas; i++) {
-	assert(fread(&gp,sizeof(GAS_PARTICLE),1,stdin) == 1);
+	read_tipsy_binary_gas(stdin,&gp);
 	write_tipsy_standard_gas(&xdrs,&gp);
 	}
     for (i = 0; i < th.ndark; i++) {
-	assert(fread(&dp,sizeof(DARK_PARTICLE),1,stdin) == 1);
+	read_tipsy_binary_dark(stdin,&dp);
 	write_tipsy_standard_dark(&xdrs,&dp);
 	}
     for (i = 0; i < th.nstar; i++) {
-	assert(fread(&sp,sizeof(STAR_PARTICLE),1,stdin) == 1);
+	read_tipsy_binary_star(stdin,&sp);
 	write_tipsy_standard_star(&xdrs,&sp);
 	}
     xdr_destroy(&xdrs);
@@ -56,10 +56,10 @@ void usage(void) {
     fprintf(stderr,"\n");
     fprintf(stderr,"Program converts tipsy binary format to tipsy standard binary format\n");
     fprintf(stderr,"\n");
-    fprintf(stderr,"Please specify the following parametes:\n");
+    fprintf(stderr,"Please specify the following parameters:\n");
     fprintf(stderr,"\n");
-    fprintf(stderr,"< input file in tipsy binary format\n");
-    fprintf(stderr,"> output file in tipsy standard binary format\n");
+    fprintf(stderr,"< <name> : input file in tipsy binary format\n");
+    fprintf(stderr,"> <name> : output file in tipsy standard binary format\n");
     fprintf(stderr,"\n");
     exit(1);
     }

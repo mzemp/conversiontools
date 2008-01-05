@@ -1,10 +1,7 @@
 /* 
-** comoving2physical.c
+** tsdppcom2tsdppphy.c
 **
-** Program written in order to convert output from cosmological simulations
-** from comoving to physical coordinates
-**
-** written by Marcel Zemp, mzemp@ucolick.org, November 2007
+** written by Marcel Zemp
 */
 
 #include <stdio.h>
@@ -13,8 +10,6 @@
 #include <stdlib.h>
 #include <malloc.h>
 #include <assert.h>
-#include <rpc/types.h>
-#include <rpc/xdr.h>
 #include "IOfunctions.h"
 
 void usage(void);
@@ -25,10 +20,10 @@ int main(int argc, char **argv) {
     double rcen[3], vcen[3];
     double mscale, rscale, vscale, hubble;
     TIPSY_HEADER th;
-    GAS_PARTICLE gp;
-    DARK_PARTICLE dp;
-    STAR_PARTICLE sp;
-    XDR xdrin, xdrout;
+    GAS_PARTICLE_DPP gpdpp;
+    DARK_PARTICLE_DPP dpdpp;
+    STAR_PARTICLE_DPP spdpp;
+    XDR xdrsin, xdrsout;
 
     for (j = 0; j < 3; j++) {
 	rcen[j] = 0;
@@ -38,11 +33,9 @@ int main(int argc, char **argv) {
     rscale = 1;
     vscale = 1;
     hubble = 0;
-
     /*
     ** Read in arguments
     */
-
     i = 1;
     while (i < argc) {
 	if (strcmp(argv[i],"-rxcen") == 0) {
@@ -137,82 +130,74 @@ int main(int argc, char **argv) {
 	    usage();
 	    }
 	}
-
     /*
     ** Read in old header and write out new one
     */
-
-    xdrstdio_create(&xdrin,stdin,XDR_DECODE);
-    read_tipsy_standard_header(&xdrin,&th);
-    xdrstdio_create(&xdrout,stdout,XDR_ENCODE);
-    write_tipsy_standard_header(&xdrout,&th);
-
+    xdrstdio_create(&xdrsin,stdin,XDR_DECODE);
+    xdrstdio_create(&xdrsout,stdout,XDR_ENCODE);
+    read_tipsy_standard_header(&xdrsin,&th);
+    write_tipsy_standard_header(&xdrsout,&th);
     /*
     ** Add shifts to particles and write them out
     */
-
     for(i = 0; i < th.ngas; i++) {
-	read_tipsy_standard_gas(&xdrin,&gp);
+	read_tipsy_standard_gas_dpp(&xdrsin,&gpdpp);
 	for(j = 0; j < 3; j++) {
-	    gp.pos[j] = (gp.pos[j]-rcen[j])*rscale;
-	    gp.vel[j] = (gp.vel[j]-vcen[j])*vscale;
-	    gp.vel[j] += hubble*gp.pos[j];
+	    gpdpp.pos[j] = (gpdpp.pos[j]-rcen[j])*rscale;
+	    gpdpp.vel[j] = (gpdpp.vel[j]-vcen[j])*vscale;
+	    gpdpp.vel[j] += hubble*gpdpp.pos[j];
 	    }
-	gp.mass *= mscale;
-	write_tipsy_standard_gas(&xdrout,&gp);
+	gpdpp.mass *= mscale;
+	write_tipsy_standard_gas_dpp(&xdrsout,&gpdpp);
 	}
     for(i = 0; i < th.ndark; i++) {
-	read_tipsy_standard_dark(&xdrin,&dp);
+	read_tipsy_standard_dark_dpp(&xdrsin,&dpdpp);
 	for(j = 0; j < 3; j++) {
-	    dp.pos[j] = (dp.pos[j]-rcen[j])*rscale;
-	    dp.vel[j] = (dp.vel[j]-vcen[j])*vscale;
-	    dp.vel[j] += hubble*dp.pos[j];
+	    dpdpp.pos[j] = (dpdpp.pos[j]-rcen[j])*rscale;
+	    dpdpp.vel[j] = (dpdpp.vel[j]-vcen[j])*vscale;
+	    dpdpp.vel[j] += hubble*dpdpp.pos[j];
 	    }
-	dp.mass *= mscale;
-	write_tipsy_standard_dark(&xdrout,&dp);
+	dpdpp.mass *= mscale;
+	write_tipsy_standard_dark_dpp(&xdrsout,&dpdpp);
 	}
     for(i = 0; i < th.nstar; i++) {
-	read_tipsy_standard_star(&xdrin,&sp);
+	read_tipsy_standard_star_dpp(&xdrsin,&spdpp);
 	for(j = 0; j < 3; j++) {
-	    sp.pos[j] = (sp.pos[j]-rcen[j])*rscale;
-	    sp.vel[j] = (sp.vel[j]-vcen[j])*vscale;
-	    sp.vel[j] += hubble*sp.pos[j];
+	    spdpp.pos[j] = (spdpp.pos[j]-rcen[j])*rscale;
+	    spdpp.vel[j] = (spdpp.vel[j]-vcen[j])*vscale;
+	    spdpp.vel[j] += hubble*spdpp.pos[j];
 	    }
-	sp.mass *= mscale;
-	write_tipsy_standard_star(&xdrout,&sp);
+	spdpp.mass *= mscale;
+	write_tipsy_standard_star_dpp(&xdrsout,&spdpp);
 	}
-
     /*
     ** Clean up and write some output
     */
-
-    xdr_destroy(&xdrin);
-    xdr_destroy(&xdrout);
-
-    fprintf(stderr,"\n");
-    fprintf(stderr,"Command line:\n\n");
-    for (i = 0; i < argc; i++) fprintf(stderr,"%s ",argv[i]);
-    fprintf(stderr,"\n\n");
-    fprintf(stderr,"Used values:\n\n");
+    xdr_destroy(&xdrsin);
+    xdr_destroy(&xdrsout);
+    fprintf(stderr,"Time: %g Ntotal: %d Ngas: %d Ndark: %d Nstar: %d\n",
+	    th.time,th.ntotal,th.ngas,th.ndark,th.nstar);
+    fprintf(stderr,"Used values:\n");
     fprintf(stderr,"rcen   = (%+.6e,%+.6e,%+.6e) LUold\n",rcen[0],rcen[1],rcen[2]);
     fprintf(stderr,"vcen   = (%+.6e,%+.6e,%+.6e) VUold\n",vcen[0],vcen[1],vcen[2]);
     fprintf(stderr,"mscale = %.6e MUnew/MUold\n",mscale);
-    fprintf(stderr,"xscale = %.6e LUnew/LUold\n",rscale);
+    fprintf(stderr,"rscale = %.6e LUnew/LUold\n",rscale);
     fprintf(stderr,"vscale = %.6e VUnew/VUold\n",vscale);
     fprintf(stderr,"Hubble = %.6e VUnew/LUnew\n",hubble);
-    fprintf(stderr,"\n");
-
     exit(0);
     }
 
 void usage(void) {
 
     fprintf(stderr,"\n");
-    fprintf(stderr,"Comoving2physical makes a coordinate transformation from comoving to physical coordinates.\n\n");
+    fprintf(stderr,"Program makes a coordinate transformation from comoving to physical coordinates.\n");
+    fprintf(stderr,"\n");
     fprintf(stderr,"m_new = m_old*mscale\n");
     fprintf(stderr,"r_new = (r_old-r_cen)*rscale\n");
-    fprintf(stderr,"v_new = (v_old-v_cen)*vscale + Hubble*r_new\n\n");
-    fprintf(stderr,"You can specify the following arguments:\n\n");
+    fprintf(stderr,"v_new = (v_old-v_cen)*vscale + Hubble*r_new\n");
+    fprintf(stderr,"\n");
+    fprintf(stderr,"Please specify the following parameters:\n");
+    fprintf(stderr,"\n");
     fprintf(stderr,"-rxcen <value>  : x-coordinate of centre [LUold] (default: 0 LUold)\n");
     fprintf(stderr,"-rycen <value>  : y-coordinate of centre [LUold] (default: 0 LUold)\n");
     fprintf(stderr,"-rzcen <value>  : z-coordinate of centre [LUold] (default: 0 LUold)\n");
@@ -223,8 +208,8 @@ void usage(void) {
     fprintf(stderr,"-rscale <value> : coordinate scale factor [LUnew/LUold] (default: 1 LUnew/LUold)\n");
     fprintf(stderr,"-vscale <value> : velocity scale factor [VUnew/VUold] (default: 1 VUnew/VUold)\n");
     fprintf(stderr,"-Hubble <value> : Hubble parameter [VUnew/LUnew] (default: 0 VUnew/LUnew; special value: sqrt_8pi_3)\n");
-    fprintf(stderr,"< <name>        : name of input file (Tipsy standard binary with double precision positions)\n");
-    fprintf(stderr,"> <name>        : name of output file (Tipsy standard binary with double precision positions)\n");
+    fprintf(stderr,"< <name>        : input file in tipsy standard binary format with double precision positions\n");
+    fprintf(stderr,"> <name>        : output file in tipsy standard binary format with double precision positions\n");
     fprintf(stderr,"\n");
     exit(1);
     }
