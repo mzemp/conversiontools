@@ -36,8 +36,8 @@ TOOLS	= $(EXE01) $(EXE02) $(EXE03) $(EXE04) $(EXE05) \
 # Compiler stuff
 
 CC	= gcc
-CFLAGS	= -O3 -Wall -I$(SILO_PATH)/include -I$(IOF_PATH)/include
-LIBS	= -lm -L$(SILO_PATH)/lib -lsilo -L$(IOF_PATH)/lib -liof
+CFLAGS	= -O3 -Wall -I$(LOCAL_LIB_PATH)/include
+LIBS	= -L$(LOCAL_LIB_PATH)/lib -lm -lsilo -liof
 
 # Object definition
 
