@@ -2,19 +2,24 @@
 
 # Executable
 
+VERSION = 1.1
 EXT	= 64
 BASE01	= ts2ta
 BASE02	= ts2tb
-BASE03	= ts2gb
-BASE04	= ta2ts
-BASE05	= tb2ts
-BASE06	= gb2ts
-BASE07	= tsdpp2ts
-BASE08	= ts2tsdpp
-BASE09	= ts2silo
-BASE10	= tsdpp2silo
+BASE03	= ta2ts
+BASE04	= tb2ts
+BASE05	= tsdpp2tadpp
+BASE06	= tsdpp2tbdpp
+BASE07	= tadpp2tsdpp
+BASE08	= tbdpp2tsdpp
+BASE09	= ts2tsdpp
+BASE10	= tsdpp2ts
 BASE11	= tscom2tsphy
 BASE12	= tsdppcom2tsdppphy
+BASE13	= ts2gb
+BASE14	= gb2ts
+BASE15	= ts2silo
+BASE16	= tsdpp2silo
 EXE01	= $(BASE01)$(EXT)
 EXE02	= $(BASE02)$(EXT) 
 EXE03	= $(BASE03)$(EXT)
@@ -27,11 +32,15 @@ EXE09	= $(BASE09)$(EXT)
 EXE10	= $(BASE10)$(EXT)
 EXE11	= $(BASE11)$(EXT)
 EXE12	= $(BASE12)$(EXT)
-VERSION = 1.1
+EXE13	= $(BASE13)$(EXT)
+EXE14	= $(BASE14)$(EXT)
+EXE15	= $(BASE15)$(EXT)
+EXE16	= $(BASE16)$(EXT)
 
 TOOLS	= $(EXE01) $(EXE02) $(EXE03) $(EXE04) $(EXE05) \
 	$(EXE06) $(EXE07) $(EXE08) $(EXE09) $(EXE10) \
-	$(EXE11) $(EXE12)
+	$(EXE11) $(EXE12) $(EXE13) $(EXE14) $(EXE15) \
+	$(EXE16)
 
 # Compiler stuff
 
@@ -53,6 +62,10 @@ OBJ09	= $(BASE09).o
 OBJ10	= $(BASE10).o
 OBJ11	= $(BASE11).o
 OBJ12	= $(BASE12).o
+OBJ13	= $(BASE13).o
+OBJ14	= $(BASE14).o
+OBJ15	= $(BASE15).o
+OBJ16	= $(BASE16).o
 
 # Rules
 
@@ -93,6 +106,18 @@ $(EXE11): $(OBJ11) Makefile
 
 $(EXE12): $(OBJ12) Makefile
 	$(CC) $(CFLAGS) $(OBJ12) -o $(EXE12) $(LIBS)
+
+$(EXE13): $(OBJ13) Makefile
+	$(CC) $(CFLAGS) $(OBJ13) -o $(EXE13) $(LIBS)
+
+$(EXE14): $(OBJ14) Makefile
+	$(CC) $(CFLAGS) $(OBJ14) -o $(EXE14) $(LIBS)
+
+$(EXE15): $(OBJ15) Makefile
+	$(CC) $(CFLAGS) $(OBJ15) -o $(EXE15) $(LIBS)
+
+$(EXE16): $(OBJ16) Makefile
+	$(CC) $(CFLAGS) $(OBJ16) -o $(EXE16) $(LIBS)
 
 clean:
 	-rm -f *.o *~ $(TOOLS)
