@@ -38,7 +38,7 @@ int main(int argc, char **argv) {
 	assert(ah.N[3] == 0);
 	for (i = 0; i < ah.N[0]; i++) {
 	    read_array_particle(&xdrs,&ah,&ap);
-	    assert(fprintf(stdout,"%d",ap.ia[0]) > 0);
+	    assert(fprintf(stdout,"%d\n",ap.ia[0]) > 0);
 	    }
 	}
     else if (ah.N[2] == 1) {
