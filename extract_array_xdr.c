@@ -100,9 +100,9 @@ int main(int argc, char **argv) {
 	}
     xdr_destroy(&xdrs1);
     xdr_destroy(&xdrs2);
-    fprintf(stderr,"Ntotal1: %d Ni1: %d Nf1: %d Nd1: %d\n",
+    fprintf(stderr,"Ntotal_in: %d Ni_in: %d Nf_in: %d Nd_in: %d\n",
 	    ah1.N[0],ah1.N[1],ah1.N[2],ah1.N[3]);
-    fprintf(stderr,"Ntotal2: %d Ni2: %d Nf2: %d Nd2: %d\n",
+    fprintf(stderr,"Ntotal_out: %d Ni_out: %d Nf_out: %d Nd_out: %d\n",
 	    ah2.N[0],ah2.N[1],ah2.N[2],ah2.N[3]);
     exit(0);
     }
