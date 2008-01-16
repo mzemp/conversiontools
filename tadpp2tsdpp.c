@@ -35,10 +35,8 @@ int main(int argc, char **argv) {
     tsdpp->spdpp = NULL;
     read_tipsy_ascii_dpp(stdin,tsdpp);
     write_tipsy_standard_dpp(stdout,tsdpp);
-    fprintf(stderr,"\n");
     fprintf(stderr,"Time: %g Ntotal: %d Ngas: %d Ndark: %d Nstar: %d\n",
 	    tsdpp->th->time,tsdpp->th->ntotal,tsdpp->th->ngas,tsdpp->th->ndark,tsdpp->th->nstar);
-    fprintf(stderr,"\n");
     exit(0);
     }
 
