@@ -148,6 +148,9 @@ int main(int argc, char **argv) {
 	    gpdpp.vel[j] += hubble*gpdpp.pos[j];
 	    }
 	gpdpp.mass *= mscale;
+	gpdpp.rho *= mscale/(rscale*rscale*rscale);
+	gpdpp.hsmooth *= rscale;
+	gpdpp.phi *= mscale*vscale*vscale;
 	write_tipsy_standard_gas_dpp(&xdrsout,&gpdpp);
 	}
     for(i = 0; i < th.ndark; i++) {
@@ -158,6 +161,8 @@ int main(int argc, char **argv) {
 	    dpdpp.vel[j] += hubble*dpdpp.pos[j];
 	    }
 	dpdpp.mass *= mscale;
+	dpdpp.eps *= rscale;
+	dpdpp.phi *= mscale*vscale*vscale;
 	write_tipsy_standard_dark_dpp(&xdrsout,&dpdpp);
 	}
     for(i = 0; i < th.nstar; i++) {
@@ -168,6 +173,8 @@ int main(int argc, char **argv) {
 	    spdpp.vel[j] += hubble*spdpp.pos[j];
 	    }
 	spdpp.mass *= mscale;
+	spdpp.eps *= rscale;
+	spdpp.phi *= mscale*vscale*vscale;
 	write_tipsy_standard_star_dpp(&xdrsout,&spdpp);
 	}
     /*
@@ -192,9 +199,12 @@ void usage(void) {
     fprintf(stderr,"\n");
     fprintf(stderr,"Program makes a coordinate transformation from comoving to physical coordinates.\n");
     fprintf(stderr,"\n");
-    fprintf(stderr,"m_new = m_old*mscale\n");
-    fprintf(stderr,"r_new = (r_old-r_cen)*rscale\n");
-    fprintf(stderr,"v_new = (v_old-v_cen)*vscale + Hubble*r_new\n");
+    fprintf(stderr,"r_new = (r_old-r_cen)*rscale (position)\n");
+    fprintf(stderr,"v_new = (v_old-v_cen)*vscale + Hubble*r_new (velocity)\n");
+    fprintf(stderr,"m_new = m_old*mscale (mass)\n");
+    fprintf(stderr,"l_new = l_old*rscale (length)\n");
+    fprintf(stderr,"E_new = E_old*mscale*vscale^2 (energy)\n");
+    fprintf(stderr,"Temperature, metals and formation time are left unchanged.\n");
     fprintf(stderr,"\n");
     fprintf(stderr,"Please specify the following parameters:\n");
     fprintf(stderr,"\n");
