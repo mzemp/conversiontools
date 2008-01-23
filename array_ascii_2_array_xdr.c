@@ -20,6 +20,10 @@ int main(int argc, char **argv) {
     ARRAY_PARTICLE ap;
     XDR xdrs;
 
+    for (i = 0; i < 4; i++) {
+	ah.N[i] = 0;
+	}
+
     xdrstdio_create(&xdrs,stdout,XDR_ENCODE);
     i = 1;
     while (i < argc) {
@@ -48,6 +52,10 @@ int main(int argc, char **argv) {
             usage();
             }
         }
+    if ((ah.N[1] == 0) && (ah.N[2] == 0) && (ah.N[3] == 0)) {
+	fprintf(stderr,"No array type specified!\n");
+	usage();
+	}
     allocate_array_particle(&ah,&ap);
     assert(fscanf(stdin,"%d",&ah.N[0]) == 1);
     write_array_header(&xdrs,&ah);
