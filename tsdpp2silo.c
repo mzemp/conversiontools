@@ -17,7 +17,7 @@ void usage(void);
 int main(int argc, char **argv) {
 
     int i, j;
-    int denfile = 0, psdfile = 0;
+    int arrayfile = 0;
     int nvar = 8;
     int types[] = {DB_VARTYPE_SCALAR,DB_VARTYPE_SCALAR,DB_VARTYPE_SCALAR,
 		    DB_VARTYPE_SCALAR,DB_VARTYPE_SCALAR,DB_VARTYPE_SCALAR,
@@ -40,7 +40,7 @@ int main(int argc, char **argv) {
     const char *star_defs[] = {"coord(<star/star_pos>)[0]","coord(<star/star_pos>)[1]","coord(<star/star_pos>)[2]",
 			  "dot(<star/star_vel>,{1,0,0})","dot(<star/star_vel>,{0,1,0})","dot(<star/star_vel>,{0,0,1})",
 			  "polar_radius(<star/star_pos>)","magnitude(<star/star_vel>)"};
-    char outputname[100], denfilename[100], psdfilename[100];
+    char outputname[100], arrayfilename[100], arrayname[100];
     double **pos;
     float **vel;
     float *mass;
@@ -50,10 +50,15 @@ int main(int argc, char **argv) {
     float *temp;
     float *metals;
     float *tform;
+    int **ia;
+    float **fa;
+    double **da;
     TIPSY_HEADER th;
     GAS_PARTICLE_DPP gpdpp;
     DARK_PARTICLE_DPP dpdpp;
     STAR_PARTICLE_DPP spdpp;
+    ARRAY_HEADER ah;
+    ARRAY_PARTICLE ap;
     DBfile *dbfile = NULL;
     FILE *file;
     XDR xdrs;
@@ -68,22 +73,13 @@ int main(int argc, char **argv) {
             strcpy(outputname,argv[i]);
             i++;
             }
-	else if (strcmp(argv[i],"-den") == 0) {
+	else if (strcmp(argv[i],"-array") == 0) {
             i++;
             if (i >= argc) {
                 usage();
                 }
-	    denfile = 1;
-            strcpy(denfilename,argv[i]);
-            i++;
-            }
-	else if (strcmp(argv[i],"-psd") == 0) {
-            i++;
-            if (i >= argc) {
-                usage();
-                }
-	    psdfile = 1;
-            strcpy(psdfilename,argv[i]);
+	    arrayfile = 1;
+            strcpy(arrayfilename,argv[i]);
             i++;
             }
 	else if ((strcmp(argv[i],"-h") == 0) || (strcmp(argv[i],"-help") == 0)) {
@@ -128,6 +124,9 @@ int main(int argc, char **argv) {
     temp = NULL;
     metals = NULL;
     tform = NULL;
+    ia = NULL;
+    fa = NULL;
+    da = NULL;
     /*
     ** Process gas particles
     */
@@ -167,7 +166,7 @@ int main(int argc, char **argv) {
 	DBSetDir(dbfile,"/gas");
 	DBPutPointmesh(dbfile,"gas_pos",th.ndim,(float **)pos,th.ngas,DB_DOUBLE,NULL);
 	DBPutPointvar(dbfile,"gas_vel","gas_pos",th.ndim,vel,th.ngas,DB_FLOAT,NULL);
-	DBPutPointvar1(dbfile,"gas_mass","gas_pos",mass,th.ngas,DB_DOUBLE,NULL);
+	DBPutPointvar1(dbfile,"gas_mass","gas_pos",mass,th.ngas,DB_FLOAT,NULL);
 	DBPutPointvar1(dbfile,"gas_hsmooth","gas_pos",eps,th.ngas,DB_FLOAT,NULL);
 	DBPutPointvar1(dbfile,"gas_phi","gas_pos",phi,th.ngas,DB_FLOAT,NULL);
 	DBPutPointvar1(dbfile,"gas_metals","gas_pos",phi,th.ngas,DB_FLOAT,NULL);
@@ -267,6 +266,7 @@ int main(int argc, char **argv) {
     xdr_destroy(&xdrs);
     free(pos);
     free(vel);
+    free(mass);
     free(eps);
     free(phi);
     free(rho);
@@ -274,73 +274,155 @@ int main(int argc, char **argv) {
     free(metals);
     free(tform);
     /*
-    ** Now check if there are some additional arrays (use mass array for that)
+    ** Now check if there are some additional arrays
     */
-    if (denfile == 1) {
-	file = fopen(denfilename,"r");
+    if (arrayfile == 1) {
+	file = fopen(arrayfilename,"r");
 	assert(file != NULL);
-	assert(fscanf(file,"%d",&i) == 1);
-	assert(i == th.ntotal);
+	xdrstdio_create(&xdrs,file,XDR_DECODE);
+	read_array_header(&xdrs,&ah);
+	assert(ah.N[0] == th.ntotal);
+	allocate_array_particle(&ah,&ap);
+	if (ah.N[1] > 0) {
+	    ia = realloc(ia,ah.N[1]*sizeof(int *));
+	    assert(ia != NULL);
+	    for (j = 0; j < ah.N[1]; j++) {
+		ia[j] = NULL;
+		}
+	    }
+	if (ah.N[2] > 0) {
+	    fa = realloc(fa,ah.N[2]*sizeof(float *));
+	    assert(fa != NULL);
+	    for (j = 0; j < ah.N[2]; j++) {
+		fa[j] = NULL;
+		}
+	    }
+	if (ah.N[3] > 0) {
+	    da = realloc(da,ah.N[3]*sizeof(double *));
+	    assert(da != NULL);
+	    for (j = 0; j < ah.N[2]; j++) {
+		da[j] = NULL;
+		}
+	    }
 	if (th.ngas > 0) {
-	    mass = realloc(mass,th.ngas*sizeof(float));
+	    for (j = 0; j < ah.N[1]; j++) {
+		ia[j] = realloc(ia[j],th.ngas*sizeof(int));
+		assert(ia[j] != NULL);
+		}
+	    for (j = 0; j < ah.N[2]; j++) {
+		fa[j] = realloc(fa[j],th.ngas*sizeof(float));
+		assert(fa[j] != NULL);
+		}
+	    for (j = 0; j < ah.N[3]; j++) {
+		da[j] = realloc(da[j],th.ngas*sizeof(double));
+		assert(da[j] != NULL);
+		}
 	    for (i = 0; i < th.ngas; i++) {
-		assert(fscanf(file,"%f",&mass[i]) == 1);
+		read_array_particle(&xdrs,&ah,&ap);
+		for (j = 0; j < ah.N[1]; j++) {
+		    ia[j][i] = ap.ia[j];
+		    }
+		for (j = 0; j < ah.N[2]; j++) {
+		    fa[j][i] = ap.fa[j];
+		    }
+		for (j = 0; j < ah.N[3]; j++) {
+		    da[j][i] = ap.da[j];
+		    }
 		}
 	    DBSetDir(dbfile,"/gas");
-	    DBPutPointvar1(dbfile,"gas_den","gas_pos",mass,th.ngas,DB_FLOAT,NULL);
+		for (j = 0; j < ah.N[1]; j++) {
+		    sprintf(arrayname,"gas_i%d",j+1);
+		    DBPutPointvar1(dbfile,arrayname,"gas_pos",(float *)ia[j],th.ngas,DB_INT,NULL);
+		    }
+		for (j = 0; j < ah.N[2]; j++) {
+		    sprintf(arrayname,"gas_f%d",j+1);
+		    DBPutPointvar1(dbfile,arrayname,"gas_pos",fa[j],th.ngas,DB_FLOAT,NULL);
+		    }
+		for (j = 0; j < ah.N[3]; j++) {
+		    sprintf(arrayname,"gas_d%d",j+1);
+		    DBPutPointvar1(dbfile,arrayname,"gas_pos",(float *)da[j],th.ngas,DB_DOUBLE,NULL);
+		    }
 	    DBSetDir(dbfile,"/");
 	    }
 	if (th.ndark > 0) {
-	    mass = realloc(mass,th.ndark*sizeof(float));
+	    for (j = 0; j < ah.N[1]; j++) {
+		ia[j] = realloc(ia[j],th.ndark*sizeof(int));
+		assert(ia[j] != NULL);
+		}
+	    for (j = 0; j < ah.N[2]; j++) {
+		fa[j] = realloc(fa[j],th.ndark*sizeof(float));
+		assert(fa[j] != NULL);
+		}
+	    for (j = 0; j < ah.N[3]; j++) {
+		da[j] = realloc(da[j],th.ndark*sizeof(double));
+		assert(da[j] != NULL);
+		}
 	    for (i = 0; i < th.ndark; i++) {
-		assert(fscanf(file,"%f",&mass[i]) == 1);
+		read_array_particle(&xdrs,&ah,&ap);
+		for (j = 0; j < ah.N[1]; j++) {
+		    ia[j][i] = ap.ia[j];
+		    }
+		for (j = 0; j < ah.N[2]; j++) {
+		    fa[j][i] = ap.fa[j];
+		    }
+		for (j = 0; j < ah.N[3]; j++) {
+		    da[j][i] = ap.da[j];
+		    }
 		}
 	    DBSetDir(dbfile,"/dark");
-	    DBPutPointvar1(dbfile,"dark_den","dark_pos",mass,th.ndark,DB_FLOAT,NULL);
+		for (j = 0; j < ah.N[1]; j++) {
+		    sprintf(arrayname,"dark_i%d",j+1);
+		    DBPutPointvar1(dbfile,arrayname,"dark_pos",(float *)ia[j],th.ndark,DB_INT,NULL);
+		    }
+		for (j = 0; j < ah.N[2]; j++) {
+		    sprintf(arrayname,"dark_f%d",j+1);
+		    DBPutPointvar1(dbfile,arrayname,"dark_pos",fa[j],th.ndark,DB_FLOAT,NULL);
+		    }
+		for (j = 0; j < ah.N[3]; j++) {
+		    sprintf(arrayname,"dark_d%d",j+1);
+		    DBPutPointvar1(dbfile,arrayname,"dark_pos",(float *)da[j],th.ndark,DB_DOUBLE,NULL);
+		    }
 	    DBSetDir(dbfile,"/");
 	    }
 	if (th.nstar > 0) {
-	    mass = realloc(mass,th.nstar*sizeof(float));
+	    for (j = 0; j < ah.N[1]; j++) {
+		ia[j] = realloc(ia[j],th.nstar*sizeof(int));
+		assert(ia[j] != NULL);
+		}
+	    for (j = 0; j < ah.N[2]; j++) {
+		fa[j] = realloc(fa[j],th.nstar*sizeof(float));
+		assert(fa[j] != NULL);
+		}
+	    for (j = 0; j < ah.N[3]; j++) {
+		da[j] = realloc(da[j],th.nstar*sizeof(double));
+		assert(da[j] != NULL);
+		}
 	    for (i = 0; i < th.nstar; i++) {
-		assert(fscanf(file,"%f",&mass[i]) == 1);
+		read_array_particle(&xdrs,&ah,&ap);
+		for (j = 0; j < ah.N[1]; j++) {
+		    ia[j][i] = ap.ia[j];
+		    }
+		for (j = 0; j < ah.N[2]; j++) {
+		    fa[j][i] = ap.fa[j];
+		    }
+		for (j = 0; j < ah.N[3]; j++) {
+		    da[j][i] = ap.da[j];
+		    }
 		}
 	    DBSetDir(dbfile,"/star");
-	    DBPutPointvar1(dbfile,"star_den","star_pos",mass,th.nstar,DB_FLOAT,NULL);
+		for (j = 0; j < ah.N[1]; j++) {
+		    sprintf(arrayname,"star_i%d",j+1);
+		    DBPutPointvar1(dbfile,arrayname,"star_pos",(float *)ia[j],th.nstar,DB_INT,NULL);
+		    }
+		for (j = 0; j < ah.N[2]; j++) {
+		    sprintf(arrayname,"star_f%d",j+1);
+		    DBPutPointvar1(dbfile,arrayname,"star_pos",fa[j],th.nstar,DB_FLOAT,NULL);
+		    }
+		for (j = 0; j < ah.N[3]; j++) {
+		    sprintf(arrayname,"star_d%d",j+1);
+		    DBPutPointvar1(dbfile,arrayname,"star_pos",(float *)da[j],th.nstar,DB_DOUBLE,NULL);
+		    }
 	    DBSetDir(dbfile,"/");
-	    }
-	fclose(file);
-	}
-    if (psdfile == 1) {
-	file = fopen(psdfilename,"r");
-	assert(file != NULL);
-	assert(fscanf(file,"%d",&i) == 1);
-	assert(i == th.ntotal);
-	if (th.ngas > 0) {
-	    mass = realloc(mass,th.ngas*sizeof(float));
-	    for (i = 0; i < th.ngas; i++) {
-		assert(fscanf(file,"%f",&mass[i]) == 1);
-		}
-	    DBSetDir(dbfile,"/gas");
-	    DBPutPointvar1(dbfile,"gas_psd","gas_pos",mass,th.ngas,DB_FLOAT,NULL);
-	    DBSetDir(dbfile,"/");
-	    }
-	if (th.ndark > 0) {
-	    mass = realloc(mass,th.ndark*sizeof(float));
-	    for (i = 0; i < th.ndark; i++) {
-		assert(fscanf(file,"%f",&mass[i]) == 1);
-		}
-	    DBSetDir(dbfile,"/dark");
-	    DBPutPointvar1(dbfile,"dark_psd","dark_pos",mass,th.ndark,DB_FLOAT,NULL);
-	    DBSetDir(dbfile,"/");
-	    }
-	if (th.nstar > 0) {
-	    mass = realloc(mass,th.nstar*sizeof(float));
-	    for (i = 0; i < th.nstar; i++) {
-		assert(fscanf(file,"%f",&mass[i]) == 1);
-		}
-	    DBSetDir(dbfile,"/star");
-	    DBPutPointvar1(dbfile,"star_psd","star_pos",mass,th.nstar,DB_FLOAT,NULL);
-	    DBSetDir(dbfile,"/ ");
 	    }
 	fclose(file);
 	}
@@ -348,9 +430,12 @@ int main(int argc, char **argv) {
     ** Finish up and write some output
     */
     DBClose(dbfile);
-    free(mass);
     fprintf(stderr,"Time: %g Ntotal: %d Ngas: %d Ndark: %d Nstar: %d\n",
 	    th.time,th.ntotal,th.ngas,th.ndark,th.nstar);
+    if (arrayfile == 1) {
+	fprintf(stderr,"Ntotal: %d Ni: %d Nf: %d Nd: %d\n",
+		ah.N[0],ah.N[1],ah.N[2],ah.N[3]);
+	}
     exit(0);
     }
 
@@ -361,10 +446,9 @@ void usage(void) {
     fprintf(stderr,"\n");
     fprintf(stderr,"Please specify the following parameters:\n");
     fprintf(stderr,"\n");
-    fprintf(stderr,"-o <name>   : output file in silo format\n");
-    fprintf(stderr,"-den <name> : density file in tipsy array format\n");
-    fprintf(stderr,"-psd <name> : phase space density file in tipsy array format\n");
-    fprintf(stderr,"< <name>    : input file in tipsy standard binary format with double precision positions\n");
+    fprintf(stderr,"-o <name>     : output file in silo format\n");
+    fprintf(stderr,"-array <name> : array file in array standard binary format\n");
+    fprintf(stderr,"< <name>      : input file in tipsy standard binary format with double precision positions\n");
     fprintf(stderr,"\n");
     exit(1);
     }

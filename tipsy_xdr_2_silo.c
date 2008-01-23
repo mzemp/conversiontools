@@ -340,13 +340,12 @@ int main(int argc, char **argv) {
 		    }
 		for (j = 0; j < ah.N[3]; j++) {
 		    sprintf(arrayname,"gas_d%d",j+1);
-		    DBPutPointvar1(dbfile,arrayname,"gas_pos",(float *)da[j],th.ngas,DB_FLOAT,NULL);
+		    DBPutPointvar1(dbfile,arrayname,"gas_pos",(float *)da[j],th.ngas,DB_DOUBLE,NULL);
 		    }
 	    DBSetDir(dbfile,"/");
 	    }
 	if (th.ndark > 0) {
 	    for (j = 0; j < ah.N[1]; j++) {
-		fprintf(stderr,"hello int\n");
 		ia[j] = realloc(ia[j],th.ndark*sizeof(int));
 		assert(ia[j] != NULL);
 		}
