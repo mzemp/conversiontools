@@ -17,6 +17,7 @@ void usage(void);
 int main(int argc, char **argv) {
 
     int i, j;
+    int positionprecision = 0;
     int arrayfile = 0;
     int nvar = 8;
     int types[] = {DB_VARTYPE_SCALAR,DB_VARTYPE_SCALAR,DB_VARTYPE_SCALAR,
@@ -41,7 +42,8 @@ int main(int argc, char **argv) {
 			  "dot(<star/star_vel>,{1,0,0})","dot(<star/star_vel>,{0,1,0})","dot(<star/star_vel>,{0,0,1})",
 			  "polar_radius(<star/star_pos>)","magnitude(<star/star_vel>)"};
     char outputname[100], arrayfilename[100], arrayname[100];
-    float **pos;
+    float **posf = NULL;
+    double **posd = NULL;;
     float **vel;
     float *mass;
     float *eps;
@@ -57,6 +59,9 @@ int main(int argc, char **argv) {
     GAS_PARTICLE gp;
     DARK_PARTICLE dp;
     STAR_PARTICLE sp;
+    GAS_PARTICLE_DPP gpdpp;
+    DARK_PARTICLE_DPP dpdpp;
+    STAR_PARTICLE_DPP spdpp;
     ARRAY_HEADER ah;
     ARRAY_PARTICLE ap;
     DBfile *dbfile = NULL;
@@ -65,7 +70,16 @@ int main(int argc, char **argv) {
 
     i = 1;
     while (i < argc) {
-	if (strcmp(argv[i],"-o") == 0) {
+        if (strcmp(argv[i],"-spp") == 0) {
+            positionprecision = 0;
+            i++;
+            }
+        else if (strcmp(argv[i],"-dpp") == 0) {
+            positionprecision = 1;
+            i++;
+            }
+
+	else if (strcmp(argv[i],"-o") == 0) {
             i++;
             if (i >= argc) {
                 usage();
@@ -109,12 +123,23 @@ int main(int argc, char **argv) {
     DBWrite(dbfile,"time",&th.time,&i,1,DB_DOUBLE);
     DBWrite(dbfile,"ndim",&th.ndim,&i,1,DB_INT);
     DBSetDir(dbfile,"/");
-    pos = malloc(th.ndim*sizeof(float *));
-    assert(pos != NULL);
+    if (positionprecision == 0) {
+	posf = realloc(posf,th.ndim*sizeof(float *));
+	assert(posf != NULL);
+	}
+    else if (positionprecision == 1) {
+	posd = realloc(posd,th.ndim*sizeof(double *));
+	assert(posd != NULL);
+	}
     vel = malloc(th.ndim*sizeof(float *));
     assert(vel != NULL);
     for (j = 0; j < th.ndim; j++) {
-	pos[j] = NULL;
+	if (positionprecision == 0) {
+	    posf[j] = NULL;
+	    }
+	else if (positionprecision == 1) {
+	    posd[j] = NULL;
+	    }
 	vel[j] = NULL;
 	}
     mass = NULL;
@@ -132,8 +157,14 @@ int main(int argc, char **argv) {
     */
     if (th.ngas > 0) {
 	for (j = 0; j < th.ndim; j++) {
-	    pos[j] = realloc(pos[j],th.ngas*sizeof(float));
-	    assert(pos[j] != NULL);
+	    if (positionprecision == 0) {
+		posf[j] = realloc(posf[j],th.ngas*sizeof(float));
+		assert(posf[j] != NULL);
+		}
+	    else if (positionprecision == 1) {
+		posd[j] = realloc(posd[j],th.ngas*sizeof(double));
+		assert(posd[j] != NULL);
+		}
 	    vel[j] = realloc(vel[j],th.ngas*sizeof(float));
 	    assert(vel[j] != NULL);
 	    }
@@ -150,21 +181,41 @@ int main(int argc, char **argv) {
 	metals = realloc(metals,th.ngas*sizeof(float));
 	assert(metals != NULL);
 	for (i = 0; i < th.ngas; i++) {
-	    read_tipsy_standard_gas(&xdrs,&gp);
-	    for (j = 0; j < th.ndim; j++) {
-		pos[j][i] = gp.pos[j];
-		vel[j][i] = gp.vel[j];
+	    if (positionprecision == 0) {
+		read_tipsy_standard_gas(&xdrs,&gp);
+		for (j = 0; j < th.ndim; j++) {
+		    posf[j][i] = gp.pos[j];
+		    vel[j][i] = gp.vel[j];
+		    }
+		mass[i] = gp.mass;
+		eps[i] = gp.hsmooth;
+		phi[i] = gp.phi;
+		rho[i] = gp.metals;
+		temp[i] = gp.temp;
+		metals[i] = gp.metals;
 		}
-	    mass[i] = gp.mass;
-	    eps[i] = gp.hsmooth;
-	    phi[i] = gp.phi;
-	    rho[i] = gp.metals;
-	    temp[i] = gp.temp;
-	    metals[i] = gp.metals;
+	    else if (positionprecision == 1) {
+		read_tipsy_standard_gas_dpp(&xdrs,&gpdpp);
+		for (j = 0; j < th.ndim; j++) {
+		    posd[j][i] = gpdpp.pos[j];
+		    vel[j][i] = gpdpp.vel[j];
+		    }
+		mass[i] = gpdpp.mass;
+		eps[i] = gpdpp.hsmooth;
+		phi[i] = gpdpp.phi;
+		rho[i] = gpdpp.metals;
+		temp[i] = gpdpp.temp;
+		metals[i] = gpdpp.metals;
+		}
 	    }
 	DBMkDir(dbfile,"gas");
 	DBSetDir(dbfile,"/gas");
-	DBPutPointmesh(dbfile,"gas_pos",th.ndim,pos,th.ngas,DB_FLOAT,NULL);
+	if (positionprecision == 0) {
+	    DBPutPointmesh(dbfile,"gas_pos",th.ndim,posf,th.ngas,DB_FLOAT,NULL);
+	    }
+	else if (positionprecision == 1) {
+	    DBPutPointmesh(dbfile,"gas_pos",th.ndim,(float **)posd,th.ngas,DB_DOUBLE,NULL);
+	    }
 	DBPutPointvar(dbfile,"gas_vel","gas_pos",th.ndim,vel,th.ngas,DB_FLOAT,NULL);
 	DBPutPointvar1(dbfile,"gas_mass","gas_pos",mass,th.ngas,DB_FLOAT,NULL);
 	DBPutPointvar1(dbfile,"gas_hsmooth","gas_pos",eps,th.ngas,DB_FLOAT,NULL);
@@ -185,8 +236,14 @@ int main(int argc, char **argv) {
 	    temp = realloc(rho,0*sizeof(float));
 	    }
 	for (j = 0; j < th.ndim; j++) {
-	    pos[j] = realloc(pos[j],th.ndark*sizeof(float));
-	    assert(pos[j] != NULL);
+	    if (positionprecision == 0) {
+		posf[j] = realloc(posf[j],th.ndark*sizeof(float));
+		assert(posf[j] != NULL);
+		}
+	    else if (positionprecision == 1) {
+		posd[j] = realloc(posd[j],th.ndark*sizeof(double));
+		assert(posd[j] != NULL);
+		}
 	    vel[j] = realloc(vel[j],th.ndark*sizeof(float));
 	    assert(vel[j] != NULL);
 	    }
@@ -197,18 +254,35 @@ int main(int argc, char **argv) {
 	phi = realloc(phi,th.ndark*sizeof(float));
 	assert(phi != NULL);
 	for (i = 0; i < th.ndark; i++) {
-	    read_tipsy_standard_dark(&xdrs,&dp);
-	    for (j = 0; j < th.ndim; j++) {
-		pos[j][i] = dp.pos[j];
-		vel[j][i] = dp.vel[j];
+	    if (positionprecision == 0) {
+		read_tipsy_standard_dark(&xdrs,&dp);
+		for (j = 0; j < th.ndim; j++) {
+		    posf[j][i] = dp.pos[j];
+		    vel[j][i] = dp.vel[j];
+		    }
+		mass[i] = dp.mass;
+		eps[i] = dp.eps;
+		phi[i] = dp.phi;
 		}
-	    mass[i] = dp.mass;
-	    eps[i] = dp.eps;
-	    phi[i] = dp.phi;
+	    else if (positionprecision == 1) {
+		read_tipsy_standard_dark_dpp(&xdrs,&dpdpp);
+		for (j = 0; j < th.ndim; j++) {
+		    posd[j][i] = dpdpp.pos[j];
+		    vel[j][i] = dpdpp.vel[j];
+		    }
+		mass[i] = dpdpp.mass;
+		eps[i] = dpdpp.eps;
+		phi[i] = dpdpp.phi;
+		}
 	    }
 	DBMkDir(dbfile,"dark");
 	DBSetDir(dbfile,"/dark");
-	DBPutPointmesh(dbfile,"dark_pos",th.ndim,pos,th.ndark,DB_FLOAT,NULL);
+	if (positionprecision == 0) {
+	    DBPutPointmesh(dbfile,"dark_pos",th.ndim,posf,th.ndark,DB_FLOAT,NULL);
+	    }
+	else if (positionprecision == 1) {
+	    DBPutPointmesh(dbfile,"dark_pos",th.ndim,(float **)posd,th.ndark,DB_DOUBLE,NULL);
+	    }
 	DBPutPointvar(dbfile,"dark_vel","dark_pos",th.ndim,vel,th.ndark,DB_FLOAT,NULL);
 	DBPutPointvar1(dbfile,"dark_mass","dark_pos",mass,th.ndark,DB_FLOAT,NULL);
 	DBPutPointvar1(dbfile,"dark_eps","dark_pos",eps,th.ndark,DB_FLOAT,NULL);
@@ -221,8 +295,14 @@ int main(int argc, char **argv) {
     */
     if (th.nstar > 0) {
 	for (j = 0; j < th.ndim; j++) {
-	    pos[j] = realloc(pos[j],th.nstar*sizeof(float));
-	    assert(pos[j] != NULL);
+	    if (positionprecision == 0) {
+		posf[j] = realloc(posf[j],th.nstar*sizeof(float));
+		assert(posf[j] != NULL);
+		}
+	    else if (positionprecision == 1) {
+		posd[j] = realloc(posd[j],th.nstar*sizeof(double));
+		assert(posd[j] != NULL);
+		}
 	    vel[j] = realloc(vel[j],th.nstar*sizeof(float));
 	    assert(vel[j] != NULL);
 	    }
@@ -237,20 +317,39 @@ int main(int argc, char **argv) {
 	tform = realloc(tform,th.nstar*sizeof(float));
 	assert(tform != NULL);
 	for (i = 0; i < th.nstar; i++) {
-	    read_tipsy_standard_star(&xdrs,&sp);
-	    for (j = 0; j < th.ndim; j++) {
-		pos[j][i] = sp.pos[j];
-		vel[j][i] = sp.vel[j];
+	    if (positionprecision == 0) {
+		read_tipsy_standard_star(&xdrs,&sp);
+		for (j = 0; j < th.ndim; j++) {
+		    posf[j][i] = sp.pos[j];
+		    vel[j][i] = sp.vel[j];
+		    }
+		mass[i] = sp.mass;
+		eps[i] = sp.eps;
+		phi[i] = sp.phi;
+		metals[i] = sp.phi;
+		tform[i] = sp.tform;
 		}
-	    mass[i] = sp.mass;
-	    eps[i] = sp.eps;
-	    phi[i] = sp.phi;
-	    metals[i] = sp.phi;
-	    tform[i] = sp.tform;
+	    else if (positionprecision == 1) {
+		read_tipsy_standard_star_dpp(&xdrs,&spdpp);
+		for (j = 0; j < th.ndim; j++) {
+		    posd[j][i] = spdpp.pos[j];
+		    vel[j][i] = spdpp.vel[j];
+		    }
+		mass[i] = spdpp.mass;
+		eps[i] = spdpp.eps;
+		phi[i] = spdpp.phi;
+		metals[i] = spdpp.phi;
+		tform[i] = spdpp.tform;
+		}
 	    }
 	DBMkDir(dbfile,"star");
 	DBSetDir(dbfile,"/star");
-	DBPutPointmesh(dbfile,"star_pos",th.ndim,pos,th.nstar,DB_FLOAT,NULL);
+	if (positionprecision == 0) {
+	    DBPutPointmesh(dbfile,"star_pos",th.ndim,posf,th.nstar,DB_FLOAT,NULL);
+	    }
+	else if (positionprecision == 1) {
+	    DBPutPointmesh(dbfile,"star_pos",th.ndim,(float **)posd,th.nstar,DB_DOUBLE,NULL);
+	    }
 	DBPutPointvar(dbfile,"star_vel","star_pos",th.ndim,vel,th.nstar,DB_FLOAT,NULL);
 	DBPutPointvar1(dbfile,"star_mass","star_pos",mass,th.nstar,DB_FLOAT,NULL);
 	DBPutPointvar1(dbfile,"star_eps","star_pos",eps,th.nstar,DB_FLOAT,NULL);
@@ -264,7 +363,8 @@ int main(int argc, char **argv) {
     ** Clean up a bit
     */
     xdr_destroy(&xdrs);
-    free(pos);
+    free(posf);
+    free(posd);
     free(vel);
     free(mass);
     free(eps);
@@ -446,6 +546,8 @@ void usage(void) {
     fprintf(stderr,"\n");
     fprintf(stderr,"Please specify the following parameters:\n");
     fprintf(stderr,"\n");
+    fprintf(stderr,"-spp          : set this flag if input and output file have single precision positions (default)\n");
+    fprintf(stderr,"-dpp          : set this flag if input and output file have double precision positions\n");
     fprintf(stderr,"-o <name>     : output file in silo format\n");
     fprintf(stderr,"-array <name> : array file in array standard binary format\n");
     fprintf(stderr,"< <name>      : input file in tipsy standard binary format\n");
