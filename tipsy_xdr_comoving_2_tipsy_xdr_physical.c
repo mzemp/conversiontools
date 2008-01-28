@@ -17,12 +17,16 @@ void usage(void);
 int main(int argc, char **argv) {
 
     int i, j;
+    int positionprecision;
     double rcen[3], vcen[3];
     double mscale, rscale, vscale, hubble;
     TIPSY_HEADER th;
     GAS_PARTICLE gp;
     DARK_PARTICLE dp;
     STAR_PARTICLE sp;
+    GAS_PARTICLE_DPP gpdpp;
+    DARK_PARTICLE_DPP dpdpp;
+    STAR_PARTICLE_DPP spdpp;
     XDR xdrsin, xdrsout;
 
     for (j = 0; j < 3; j++) {
@@ -33,12 +37,21 @@ int main(int argc, char **argv) {
     rscale = 1;
     vscale = 1;
     hubble = 0;
+    positionprecision = 0;
     /*
     ** Read in arguments
     */
     i = 1;
     while (i < argc) {
-	if (strcmp(argv[i],"-rxcen") == 0) {
+        if (strcmp(argv[i],"-spp") == 0) {
+            positionprecision = 0;
+            i++;
+            }
+        else if (strcmp(argv[i],"-dpp") == 0) {
+            positionprecision = 1;
+            i++;
+            }
+	else if (strcmp(argv[i],"-rxcen") == 0) {
 	    i++;
 	    if (i >= argc) {
 		usage();
@@ -140,42 +153,83 @@ int main(int argc, char **argv) {
     /*
     ** Add shifts to particles and write them out
     */
-    for(i = 0; i < th.ngas; i++) {
-	read_tipsy_standard_gas(&xdrsin,&gp);
-	for(j = 0; j < 3; j++) {
-	    gp.pos[j] = (gp.pos[j]-rcen[j])*rscale;
-	    gp.vel[j] = (gp.vel[j]-vcen[j])*vscale;
-	    gp.vel[j] += hubble*gp.pos[j];
+    if (positionprecision == 0) {
+	for(i = 0; i < th.ngas; i++) {
+	    read_tipsy_standard_gas(&xdrsin,&gp);
+	    for(j = 0; j < 3; j++) {
+		gp.pos[j] = (gp.pos[j]-rcen[j])*rscale;
+		gp.vel[j] = (gp.vel[j]-vcen[j])*vscale;
+		gp.vel[j] += hubble*gp.pos[j];
+		}
+	    gp.mass *= mscale;
+	    gp.rho *= mscale/(rscale*rscale*rscale);
+	    gp.hsmooth *= rscale;
+	    gp.phi *= vscale*vscale;
+	    write_tipsy_standard_gas(&xdrsout,&gp);
 	    }
-	gp.mass *= mscale;
-	gp.rho *= mscale/(rscale*rscale*rscale);
-	gp.hsmooth *= rscale;
-	gp.phi *= vscale*vscale;
-	write_tipsy_standard_gas(&xdrsout,&gp);
+	for(i = 0; i < th.ndark; i++) {
+	    read_tipsy_standard_dark(&xdrsin,&dp);
+	    for(j = 0; j < 3; j++) {
+		dp.pos[j] = (dp.pos[j]-rcen[j])*rscale;
+		dp.vel[j] = (dp.vel[j]-vcen[j])*vscale;
+		dp.vel[j] += hubble*dp.pos[j];
+		}
+	    dp.mass *= mscale;
+	    dp.eps *= rscale;
+	    dp.phi *= vscale*vscale;
+	    write_tipsy_standard_dark(&xdrsout,&dp);
+	    }
+	for(i = 0; i < th.nstar; i++) {
+	    read_tipsy_standard_star(&xdrsin,&sp);
+	    for(j = 0; j < 3; j++) {
+		sp.pos[j] = (sp.pos[j]-rcen[j])*rscale;
+		sp.vel[j] = (sp.vel[j]-vcen[j])*vscale;
+		sp.vel[j] += hubble*sp.pos[j];
+		}
+	    sp.mass *= mscale;
+	    sp.eps *= rscale;
+	    sp.phi *= vscale*vscale;
+	    write_tipsy_standard_star(&xdrsout,&sp);
+	    }
 	}
-    for(i = 0; i < th.ndark; i++) {
-	read_tipsy_standard_dark(&xdrsin,&dp);
-	for(j = 0; j < 3; j++) {
-	    dp.pos[j] = (dp.pos[j]-rcen[j])*rscale;
-	    dp.vel[j] = (dp.vel[j]-vcen[j])*vscale;
-	    dp.vel[j] += hubble*dp.pos[j];
+    else if (positionprecision == 1) {
+	for(i = 0; i < th.ngas; i++) {
+	    read_tipsy_standard_gas_dpp(&xdrsin,&gpdpp);
+	    for(j = 0; j < 3; j++) {
+		gpdpp.pos[j] = (gpdpp.pos[j]-rcen[j])*rscale;
+		gpdpp.vel[j] = (gpdpp.vel[j]-vcen[j])*vscale;
+		gpdpp.vel[j] += hubble*gpdpp.pos[j];
+		}
+	    gpdpp.mass *= mscale;
+	    gpdpp.rho *= mscale/(rscale*rscale*rscale);
+	    gpdpp.hsmooth *= rscale;
+	    gpdpp.phi *= vscale*vscale;
+	    write_tipsy_standard_gas_dpp(&xdrsout,&gpdpp);
 	    }
-	dp.mass *= mscale;
-	dp.eps *= rscale;
-	dp.phi *= vscale*vscale;
-	write_tipsy_standard_dark(&xdrsout,&dp);
-	}
-    for(i = 0; i < th.nstar; i++) {
-	read_tipsy_standard_star(&xdrsin,&sp);
-	for(j = 0; j < 3; j++) {
-	    sp.pos[j] = (sp.pos[j]-rcen[j])*rscale;
-	    sp.vel[j] = (sp.vel[j]-vcen[j])*vscale;
-	    sp.vel[j] += hubble*sp.pos[j];
+	for(i = 0; i < th.ndark; i++) {
+	    read_tipsy_standard_dark_dpp(&xdrsin,&dpdpp);
+	    for(j = 0; j < 3; j++) {
+		dpdpp.pos[j] = (dpdpp.pos[j]-rcen[j])*rscale;
+		dpdpp.vel[j] = (dpdpp.vel[j]-vcen[j])*vscale;
+		dpdpp.vel[j] += hubble*dpdpp.pos[j];
+		}
+	    dpdpp.mass *= mscale;
+	    dpdpp.eps *= rscale;
+	    dpdpp.phi *= vscale*vscale;
+	    write_tipsy_standard_dark_dpp(&xdrsout,&dpdpp);
 	    }
-	sp.mass *= mscale;
-	sp.eps *= rscale;
-	sp.phi *= vscale*vscale;
-	write_tipsy_standard_star(&xdrsout,&sp);
+	for(i = 0; i < th.nstar; i++) {
+	    read_tipsy_standard_star_dpp(&xdrsin,&spdpp);
+	    for(j = 0; j < 3; j++) {
+		spdpp.pos[j] = (spdpp.pos[j]-rcen[j])*rscale;
+		spdpp.vel[j] = (spdpp.vel[j]-vcen[j])*vscale;
+		spdpp.vel[j] += hubble*spdpp.pos[j];
+		}
+	    spdpp.mass *= mscale;
+	    spdpp.eps *= rscale;
+	    spdpp.phi *= vscale*vscale;
+	    write_tipsy_standard_star_dpp(&xdrsout,&spdpp);
+	    }
 	}
     /*
     ** Clean up and write some output
@@ -208,6 +262,8 @@ void usage(void) {
     fprintf(stderr,"\n");
     fprintf(stderr,"Please specify the following parameters:\n");
     fprintf(stderr,"\n");
+    fprintf(stderr,"-spp            : set this flag if input and output file have single precision positions (default)\n");
+    fprintf(stderr,"-dpp            : set this flag if input and output file have double precision positions\n");
     fprintf(stderr,"-rxcen <value>  : x-coordinate of centre [LUold] (default: 0 LUold)\n");
     fprintf(stderr,"-rycen <value>  : y-coordinate of centre [LUold] (default: 0 LUold)\n");
     fprintf(stderr,"-rzcen <value>  : z-coordinate of centre [LUold] (default: 0 LUold)\n");

@@ -15,15 +15,28 @@ void usage(void);
 int main(int argc, char **argv) {
 
     int i;
+    int positionprecision;
     TIPSY_HEADER th;
     GAS_PARTICLE gp;
     DARK_PARTICLE dp;
     STAR_PARTICLE sp;
+    GAS_PARTICLE_DPP gpdpp;
+    DARK_PARTICLE_DPP dpdpp;
+    STAR_PARTICLE_DPP spdpp;
     XDR xdrs;
 
+    positionprecision = 0;
     i = 1;
     while (i < argc) {
-	if ((strcmp(argv[i],"-h") == 0) || (strcmp(argv[i],"-help") == 0)) {
+        if (strcmp(argv[i],"-spp") == 0) {
+            positionprecision = 0;
+            i++;
+            }
+        else if (strcmp(argv[i],"-dpp") == 0) {
+            positionprecision = 1;
+            i++;
+            }
+	else if ((strcmp(argv[i],"-h") == 0) || (strcmp(argv[i],"-help") == 0)) {
             usage();
             }
         else {
@@ -33,17 +46,33 @@ int main(int argc, char **argv) {
     xdrstdio_create(&xdrs,stdout,XDR_DECODE);
     read_tipsy_binary_header(stdin,&th);
     write_tipsy_standard_header(&xdrs,&th);
-    for (i = 0; i < th.ngas; i++) {
-	read_tipsy_binary_gas(stdin,&gp);
-	write_tipsy_standard_gas(&xdrs,&gp);
+    if (positionprecision == 0) {
+	for (i = 0; i < th.ngas; i++) {
+	    read_tipsy_binary_gas(stdin,&gp);
+	    write_tipsy_standard_gas(&xdrs,&gp);
+	    }
+	for (i = 0; i < th.ndark; i++) {
+	    read_tipsy_binary_dark(stdin,&dp);
+	    write_tipsy_standard_dark(&xdrs,&dp);
+	    }
+	for (i = 0; i < th.nstar; i++) {
+	    read_tipsy_binary_star(stdin,&sp);
+	    write_tipsy_standard_star(&xdrs,&sp);
+	    }
 	}
-    for (i = 0; i < th.ndark; i++) {
-	read_tipsy_binary_dark(stdin,&dp);
-	write_tipsy_standard_dark(&xdrs,&dp);
-	}
-    for (i = 0; i < th.nstar; i++) {
-	read_tipsy_binary_star(stdin,&sp);
-	write_tipsy_standard_star(&xdrs,&sp);
+    if (positionprecision == 1) {
+	for (i = 0; i < th.ngas; i++) {
+	    read_tipsy_binary_gas_dpp(stdin,&gpdpp);
+	    write_tipsy_standard_gas_dpp(&xdrs,&gpdpp);
+	    }
+	for (i = 0; i < th.ndark; i++) {
+	    read_tipsy_binary_dark_dpp(stdin,&dpdpp);
+	    write_tipsy_standard_dark_dpp(&xdrs,&dpdpp);
+	    }
+	for (i = 0; i < th.nstar; i++) {
+	    read_tipsy_binary_star_dpp(stdin,&spdpp);
+	    write_tipsy_standard_star_dpp(&xdrs,&spdpp);
+	    }
 	}
     xdr_destroy(&xdrs);
     fprintf(stderr,"Time: %g Ntotal: %d Ngas: %d Ndark: %d Nstar: %d\n",
@@ -58,6 +87,8 @@ void usage(void) {
     fprintf(stderr,"\n");
     fprintf(stderr,"Please specify the following parameters:\n");
     fprintf(stderr,"\n");
+    fprintf(stderr,"-spp     : set this flag if input and output file have single precision positions (default)\n");
+    fprintf(stderr,"-dpp     : set this flag if input and output file have double precision positions\n");
     fprintf(stderr,"< <name> : input file in tipsy binary format\n");
     fprintf(stderr,"> <name> : output file in tipsy standard binary format\n");
     fprintf(stderr,"\n");

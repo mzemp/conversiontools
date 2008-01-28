@@ -31,7 +31,7 @@ int main(int argc, char **argv) {
             usage();
             }
         }
-    xdrstdio_create(&xdrs,stdout,XDR_ENCODE);
+    xdrstdio_create(&xdrs,stdin,XDR_ENCODE);
     read_tipsy_standard_header(&xdrs,&th);
     write_tipsy_binary_header(stdout,&th);
     for (i = 0; i < th.ngas; i++) {
