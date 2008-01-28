@@ -6,24 +6,18 @@ VERSION = 1.1
 EXT	= 64
 BASE01	= ts2ta
 BASE02	= ts2tb
-BASE03	= ta2ts
-BASE04	= tb2ts
-BASE05	= tsdpp2tadpp
-BASE06	= tsdpp2tbdpp
-BASE07	= tadpp2tsdpp
-BASE08	= tbdpp2tsdpp
-BASE09	= ts2tsdpp
-BASE10	= tsdpp2ts
-BASE11	= tscom2tsphy
-BASE12	= tsdppcom2tsdppphy
-BASE13	= ts2gb
-BASE14	= gb2ts
-BASE15	= ts2silo
-BASE16	= tsdpp2silo
-BASE17	= aa2as
-BASE18	= as2aa
-BASE19	= cas
-BASE20	= eas
+BASE03	= ts2gb
+BASE04	= ta2ts
+BASE05	= tb2ts
+BASE06	= gb2ts
+BASE07	= ts2tsdpp
+BASE08	= tsdpp2ts
+BASE09	= tscom2tsphy
+BASE10	= ts2silo
+BASE11	= aa2as
+BASE12	= as2aa
+BASE13	= cas
+BASE14	= eas
 EXE01	= $(BASE01)$(EXT)
 EXE02	= $(BASE02)$(EXT) 
 EXE03	= $(BASE03)$(EXT)
@@ -38,17 +32,10 @@ EXE11	= $(BASE11)$(EXT)
 EXE12	= $(BASE12)$(EXT)
 EXE13	= $(BASE13)$(EXT)
 EXE14	= $(BASE14)$(EXT)
-EXE15	= $(BASE15)$(EXT)
-EXE16	= $(BASE16)$(EXT)
-EXE17	= $(BASE17)$(EXT)
-EXE18	= $(BASE18)$(EXT)
-EXE19	= $(BASE19)$(EXT)
-EXE20	= $(BASE20)$(EXT)
 
 TOOLS	= $(EXE01) $(EXE02) $(EXE03) $(EXE04) $(EXE05) \
 	$(EXE06) $(EXE07) $(EXE08) $(EXE09) $(EXE10) \
-	$(EXE11) $(EXE12) $(EXE13) $(EXE14) $(EXE15) \
-	$(EXE16) $(EXE17) $(EXE18) $(EXE19) $(EXE20)
+	$(EXE11) $(EXE12) $(EXE13) $(EXE14)
 
 # Compiler stuff
 
@@ -72,12 +59,6 @@ OBJ11	= $(BASE11).o
 OBJ12	= $(BASE12).o
 OBJ13	= $(BASE13).o
 OBJ14	= $(BASE14).o
-OBJ15	= $(BASE15).o
-OBJ16	= $(BASE16).o
-OBJ17	= $(BASE17).o
-OBJ18	= $(BASE18).o
-OBJ19	= $(BASE19).o
-OBJ20	= $(BASE20).o
 
 # Rules
 
@@ -124,24 +105,6 @@ $(EXE13): $(OBJ13) Makefile
 
 $(EXE14): $(OBJ14) Makefile
 	$(CC) $(CFLAGS) $(OBJ14) -o $(EXE14) $(LIBS)
-
-$(EXE15): $(OBJ15) Makefile
-	$(CC) $(CFLAGS) $(OBJ15) -o $(EXE15) $(LIBS)
-
-$(EXE16): $(OBJ16) Makefile
-	$(CC) $(CFLAGS) $(OBJ16) -o $(EXE16) $(LIBS)
-
-$(EXE17): $(OBJ17) Makefile
-	$(CC) $(CFLAGS) $(OBJ17) -o $(EXE17) $(LIBS)
-
-$(EXE18): $(OBJ18) Makefile
-	$(CC) $(CFLAGS) $(OBJ18) -o $(EXE18) $(LIBS)
-
-$(EXE19): $(OBJ19) Makefile
-	$(CC) $(CFLAGS) $(OBJ19) -o $(EXE19) $(LIBS)
-
-$(EXE20): $(OBJ20) Makefile
-	$(CC) $(CFLAGS) $(OBJ20) -o $(EXE20) $(LIBS)
 
 clean:
 	-rm -f *.o *~ $(TOOLS)
