@@ -1,5 +1,5 @@
 /* 
-** tsdpp2ts.c
+** tsspp2tsdpp.c
 **
 ** written by Marcel Zemp
 */
@@ -39,19 +39,19 @@ int main(int argc, char **argv) {
     read_tipsy_standard_header(&xdrsin,&th);
     write_tipsy_standard_header(&xdrsout,&th);
     for (i = 0; i < th.ngas; i++) {
-	read_tipsy_standard_gas_dpp(&xdrsin,&gpdpp);
-	copy_gpdpp_to_gp(&gpdpp,&gp);
-	write_tipsy_standard_gas(&xdrsout,&gp);
+	read_tipsy_standard_gas(&xdrsin,&gp);
+	copy_gp_to_gpdpp(&gp,&gpdpp);
+	write_tipsy_standard_gas_dpp(&xdrsout,&gpdpp);
 	}
     for (i = 0; i < th.ndark; i++) {
-	read_tipsy_standard_dark_dpp(&xdrsin,&dpdpp);
-	copy_dpdpp_to_dp(&dpdpp,&dp);
-	write_tipsy_standard_dark(&xdrsout,&dp);
+	read_tipsy_standard_dark(&xdrsin,&dp);
+	copy_dp_to_dpdpp(&dp,&dpdpp);
+	write_tipsy_standard_dark_dpp(&xdrsout,&dpdpp);
 	}
     for (i = 0; i < th.nstar; i++) {
-	read_tipsy_standard_star_dpp(&xdrsin,&spdpp);
-	copy_spdpp_to_sp(&spdpp,&sp);
-	write_tipsy_standard_star(&xdrsout,&sp);
+	read_tipsy_standard_star(&xdrsin,&sp);
+	copy_sp_to_spdpp(&sp,&spdpp);
+	write_tipsy_standard_star_dpp(&xdrsout,&spdpp);
 	}
     xdr_destroy(&xdrsin);
     xdr_destroy(&xdrsout);
@@ -63,13 +63,13 @@ int main(int argc, char **argv) {
 void usage(void) {
  
     fprintf(stderr,"\n");
-    fprintf(stderr,"Program converts tipsy standard binary format with double precision positions\n");
-    fprintf(stderr,"to tipsy standard binary format with single precision positions\n");
+    fprintf(stderr,"Program converts tipsy standard binary format with single precision positions\n");
+    fprintf(stderr,"to tipsy standard binary format with double precision positions\n");
     fprintf(stderr,"\n");
     fprintf(stderr,"Please specify the following parameters:\n");
     fprintf(stderr,"\n");
-    fprintf(stderr,"< <name> : input file in tipsy standard binary format with double precision positions\n");
-    fprintf(stderr,"> <name> : output file in tipsy standard binary format with single precision positions\n");
+    fprintf(stderr,"< <name> : input file in tipsy standard binary format with single precision positions\n");
+    fprintf(stderr,"> <name> : output file in tipsy standard binary format with double precision positions\n");
     fprintf(stderr,"\n");
     exit(1);
     }
