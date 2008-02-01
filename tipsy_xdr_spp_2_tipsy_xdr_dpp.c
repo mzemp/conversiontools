@@ -64,7 +64,7 @@ void usage(void) {
  
     fprintf(stderr,"\n");
     fprintf(stderr,"Program converts tipsy standard binary format with single precision positions\n");
-    fprintf(stderr,"to tipsy standard binary format with double precision positions\n");
+    fprintf(stderr,"to tipsy standard binary format with double precision positions.\n");
     fprintf(stderr,"\n");
     fprintf(stderr,"Please specify the following parameters:\n");
     fprintf(stderr,"\n");

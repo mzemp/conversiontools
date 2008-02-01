@@ -262,8 +262,8 @@ void usage(void) {
     fprintf(stderr,"\n");
     fprintf(stderr,"Please specify the following parameters:\n");
     fprintf(stderr,"\n");
-    fprintf(stderr,"-spp            : set this flag if input and output file have single precision positions (default)\n");
-    fprintf(stderr,"-dpp            : set this flag if input and output file have double precision positions\n");
+    fprintf(stderr,"-spp            : set this flag if input and output files have single precision positions (default)\n");
+    fprintf(stderr,"-dpp            : set this flag if input and output files have double precision positions\n");
     fprintf(stderr,"-rxcen <value>  : x-coordinate of centre [LUold] (default: 0 LUold)\n");
     fprintf(stderr,"-rycen <value>  : y-coordinate of centre [LUold] (default: 0 LUold)\n");
     fprintf(stderr,"-rzcen <value>  : z-coordinate of centre [LUold] (default: 0 LUold)\n");

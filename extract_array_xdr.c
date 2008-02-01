@@ -110,7 +110,7 @@ int main(int argc, char **argv) {
 void usage(void) {
 
     fprintf(stderr,"\n");
-    fprintf(stderr,"Program extracts specific array from array file in standard binary format\n");
+    fprintf(stderr,"Program extracts specific array from array file in standard binary format.\n");
     fprintf(stderr,"\n");
     fprintf(stderr,"Please specify the following parameters:\n");
     fprintf(stderr,"\n");
