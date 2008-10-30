@@ -16,7 +16,7 @@ void usage(void);
 int main(int argc, char **argv) {
 
     int i;
-    int positionprecision;
+    int positionprecision, verboselevel;
     TIPSY_HEADER *th;
     TIPSY_STRUCTURE *ts;
     TIPSY_STRUCTURE_DPP *tsdpp;
@@ -25,6 +25,7 @@ int main(int argc, char **argv) {
     ts = NULL;
     tsdpp = NULL;
     positionprecision = 0;
+    verboselevel = 0;
     i = 1;
     while (i < argc) {
 	if (strcmp(argv[i],"-spp") == 0) {
@@ -35,6 +36,10 @@ int main(int argc, char **argv) {
             positionprecision = 1;
             i++;
             }
+	else if (strcmp(argv[i],"-v") == 0) {
+	    verboselevel = 1;
+	    i++;
+	    }
 	else if ((strcmp(argv[i],"-h") == 0) || (strcmp(argv[i],"-help") == 0)) {
             usage();
             }
@@ -66,8 +71,10 @@ int main(int argc, char **argv) {
 	write_tipsy_ascii_dpp(stdout,tsdpp);
 	th = tsdpp->th;
 	}
-    fprintf(stderr,"Time: %g Ntotal: %d Ngas: %d Ndark: %d Nstar: %d\n",
-	    th->time,th->ntotal,th->ngas,th->ndark,th->nstar);
+    if (verboselevel >= 0) {
+	fprintf(stderr,"Time: %g Ntotal: %d Ngas: %d Ndark: %d Nstar: %d\n",
+		th->time,th->ntotal,th->ngas,th->ndark,th->nstar);
+	}
     exit(0);
     }
 

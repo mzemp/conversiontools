@@ -16,20 +16,26 @@ void usage(void);
 int main(int argc, char **argv) {
 
     int i;
+    int verboselevel;
     ARRAY_HEADER ah;
     ARRAY_PARTICLE ap;
     XDR xdrs;
 
-    xdrstdio_create(&xdrs,stdin,XDR_DECODE);
+    verboselevel = 0;
     i = 1;
     while (i < argc) {
-	if ((strcmp(argv[i],"-h") == 0) || (strcmp(argv[i],"-help") == 0)) {
+	if (strcmp(argv[i],"-v") == 0) {
+	    verboselevel = 1;
+	    i++;
+	    }
+	else if ((strcmp(argv[i],"-h") == 0) || (strcmp(argv[i],"-help") == 0)) {
             usage();
             }
         else {
             usage();
             }
         }
+    xdrstdio_create(&xdrs,stdin,XDR_DECODE);
     read_array_header(&xdrs,&ah);
     allocate_array_particle(&ah,&ap);
     assert(fprintf(stdout,"%d\n",ah.N[0]) > 0);
@@ -58,8 +64,10 @@ int main(int argc, char **argv) {
 	    }
 	}
     xdr_destroy(&xdrs);
-    fprintf(stderr,"Ntotal: %d Ni: %d Nf: %d Nd: %d\n",
-	    ah.N[0],ah.N[1],ah.N[2],ah.N[3]);
+    if (verboselevel >= 0) {
+	fprintf(stderr,"Ntotal: %d Ni: %d Nf: %d Nd: %d\n",
+		ah.N[0],ah.N[1],ah.N[2],ah.N[3]);
+	}
     exit(0);
     }
 

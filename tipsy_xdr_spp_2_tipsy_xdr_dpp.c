@@ -16,6 +16,7 @@ void usage(void);
 int main(int argc, char **argv) {
 
     int i;
+    int verboselevel;
     TIPSY_HEADER th;
     GAS_PARTICLE gp;
     DARK_PARTICLE dp;
@@ -25,9 +26,14 @@ int main(int argc, char **argv) {
     STAR_PARTICLE_DPP spdpp;
     XDR xdrsin, xdrsout;
 
+    verboselevel = 0;
     i = 1;
     while (i < argc) {
-	if ((strcmp(argv[i],"-h") == 0) || (strcmp(argv[i],"-help") == 0)) {
+	if (strcmp(argv[i],"-v") == 0) {
+	    verboselevel = 1;
+	    i++;
+	    }
+	else if ((strcmp(argv[i],"-h") == 0) || (strcmp(argv[i],"-help") == 0)) {
             usage();
             }
         else {
@@ -55,8 +61,10 @@ int main(int argc, char **argv) {
 	}
     xdr_destroy(&xdrsin);
     xdr_destroy(&xdrsout);
-    fprintf(stderr,"Time: %g Ntotal: %d Ngas: %d Ndark: %d Nstar: %d\n",
-	    th.time,th.ntotal,th.ngas,th.ndark,th.nstar);
+    if (verboselevel >= 0) {
+	fprintf(stderr,"Time: %g Ntotal: %d Ngas: %d Ndark: %d Nstar: %d\n",
+		th.time,th.ntotal,th.ngas,th.ndark,th.nstar);
+	}
     exit(0);
     }
 

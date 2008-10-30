@@ -16,13 +16,16 @@ void usage(void);
 int main(int argc, char **argv) {
 
     int i;
-    int iindex = 0;
-    int findex = 0;
-    int dindex = 0;
+    int verboselevel;
+    int iindex, findex, dindex;
     ARRAY_HEADER ah1, ah2;
     ARRAY_PARTICLE ap1, ap2;
     XDR xdrs1, xdrs2;
 
+    iindex = 0;
+    findex = 0;
+    dindex = 0;
+    verboselevel = 0;
     i = 1;
     while (i < argc) {
 	if (strcmp(argv[i],"-i") == 0) {
@@ -47,6 +50,10 @@ int main(int argc, char **argv) {
                 usage();
                 }
 	    dindex = atoi(argv[i]);
+	    i++;
+	    }
+	else if (strcmp(argv[i],"-v") == 0) {
+	    verboselevel = 1;
 	    i++;
 	    }
 	else if ((strcmp(argv[i],"-h") == 0) || (strcmp(argv[i],"-help") == 0)) {
@@ -100,10 +107,12 @@ int main(int argc, char **argv) {
 	}
     xdr_destroy(&xdrs1);
     xdr_destroy(&xdrs2);
-    fprintf(stderr,"Ntotal_in: %d Ni_in: %d Nf_in: %d Nd_in: %d\n",
-	    ah1.N[0],ah1.N[1],ah1.N[2],ah1.N[3]);
-    fprintf(stderr,"Ntotal_out: %d Ni_out: %d Nf_out: %d Nd_out: %d\n",
-	    ah2.N[0],ah2.N[1],ah2.N[2],ah2.N[3]);
+    if (verboselevel >= 0) {
+	fprintf(stderr,"Ntotal_in: %d Ni_in: %d Nf_in: %d Nd_in: %d\n",
+		ah1.N[0],ah1.N[1],ah1.N[2],ah1.N[3]);
+	fprintf(stderr,"Ntotal_out: %d Ni_out: %d Nf_out: %d Nd_out: %d\n",
+		ah2.N[0],ah2.N[1],ah2.N[2],ah2.N[3]);
+	}
     exit(0);
     }
 

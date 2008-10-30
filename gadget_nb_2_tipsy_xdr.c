@@ -16,6 +16,7 @@ void usage(void);
 int main(int argc, char **argv) {
 
     int i;
+    int verboselevel;
     double a, dx, dy, dz, dof, mmw, uvf;
     TIPSY_STRUCTURE *ts;
 
@@ -26,7 +27,7 @@ int main(int argc, char **argv) {
     dof = 3;
     mmw = 1;
     uvf = 977.79219;
-
+    verboselevel = 0;
     i = 1;
     while (i < argc) {
 	if (strcmp(argv[i],"-a") == 0) {
@@ -90,6 +91,10 @@ int main(int argc, char **argv) {
 	    uvf = atof(argv[i]);
 	    i++;
             }
+	else if (strcmp(argv[i],"-v") == 0) {
+	    verboselevel = 1;
+	    i++;
+	    }
 	else if ((strcmp(argv[i],"-h") == 0) || (strcmp(argv[i],"-help") == 0)) {
             usage();
             }
@@ -108,16 +113,20 @@ int main(int argc, char **argv) {
     if (a == -1) {
 	a = ts->th->time;
 	}
-    fprintf(stderr,"Time: %g Ntotal: %d Ngas: %d Ndark: %d Nstar: %d\n",
-	    ts->th->time,ts->th->ntotal,ts->th->ngas,ts->th->ndark,ts->th->nstar);
-    fprintf(stderr,"Used values:\n");
-    fprintf(stderr,"a   = %.6e\n",a);
-    fprintf(stderr,"drx = %.6e LU\n",dx);
-    fprintf(stderr,"dry = %.6e LU\n",dy);
-    fprintf(stderr,"drz = %.6e LU\n",dz);
-    fprintf(stderr,"dof = %.6e\n",dof);
-    fprintf(stderr,"mmw = %.6e mp\n",mmw);
-    fprintf(stderr,"uvf = %.6e m s^-1\n",uvf);
+    if (verboselevel >= 1) {
+	fprintf(stderr,"Used values:\n");
+	fprintf(stderr,"a   : %.6e\n",a);
+	fprintf(stderr,"drx : %.6e LU\n",dx);
+	fprintf(stderr,"dry : %.6e LU\n",dy);
+	fprintf(stderr,"drz : %.6e LU\n",dz);
+	fprintf(stderr,"dof : %.6e\n",dof);
+	fprintf(stderr,"mmw : %.6e mp\n",mmw);
+	fprintf(stderr,"uvf : %.6e m s^-1\n",uvf);
+	}
+    if (verboselevel >= 0) {
+	fprintf(stderr,"Time: %g Ntotal: %d Ngas: %d Ndark: %d Nstar: %d\n",
+		ts->th->time,ts->th->ntotal,ts->th->ngas,ts->th->ndark,ts->th->nstar);
+	}
     exit(0);
     }
 
@@ -135,6 +144,7 @@ void usage(void) {
     fprintf(stderr,"-dof <value> : degrees of freedom of gas (default: 3 => gamma = (dof+2)/dof = 5/3)\n");
     fprintf(stderr,"-mmw <value> : mean molecular weight of gas [mp] (default: 1 mp)\n");
     fprintf(stderr,"-uvf <value> : internal unit of velocity [m s^-1] (default: 977.79219 m s^-1 => 977.79219 m s^-1 = 1 kpc Gyr^-1)\n");
+    fprintf(stderr,"-v           : more informative output to screen\n");
     fprintf(stderr,"< <name>     : input file in gadget binary format\n");
     fprintf(stderr,"> <name>     : output file in tipsy standard binary format\n");
     fprintf(stderr,"\n");

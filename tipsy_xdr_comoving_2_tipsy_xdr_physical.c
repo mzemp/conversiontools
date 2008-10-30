@@ -17,7 +17,7 @@ void usage(void);
 int main(int argc, char **argv) {
 
     int i, j;
-    int positionprecision;
+    int positionprecision, verboselevel;
     double rcen[3], vcen[3];
     double mscale, rscale, vscale, hubble;
     TIPSY_HEADER th;
@@ -38,6 +38,7 @@ int main(int argc, char **argv) {
     vscale = 1;
     hubble = 0;
     positionprecision = 0;
+    verboselevel = 0;
     /*
     ** Read in arguments
     */
@@ -236,15 +237,19 @@ int main(int argc, char **argv) {
     */
     xdr_destroy(&xdrsin);
     xdr_destroy(&xdrsout);
-    fprintf(stderr,"Time: %g Ntotal: %d Ngas: %d Ndark: %d Nstar: %d\n",
-	    th.time,th.ntotal,th.ngas,th.ndark,th.nstar);
-    fprintf(stderr,"Used values:\n");
-    fprintf(stderr,"rcen   = (%+.6e,%+.6e,%+.6e) LUold\n",rcen[0],rcen[1],rcen[2]);
-    fprintf(stderr,"vcen   = (%+.6e,%+.6e,%+.6e) VUold\n",vcen[0],vcen[1],vcen[2]);
-    fprintf(stderr,"mscale = %.6e MUnew/MUold\n",mscale);
-    fprintf(stderr,"rscale = %.6e LUnew/LUold\n",rscale);
-    fprintf(stderr,"vscale = %.6e VUnew/VUold\n",vscale);
-    fprintf(stderr,"Hubble = %.6e VUnew/LUnew\n",hubble);
+    if (verboselevel >= 1) {
+	fprintf(stderr,"Used values:\n");
+	fprintf(stderr,"rcen   : (%+.6e,%+.6e,%+.6e) LUold\n",rcen[0],rcen[1],rcen[2]);
+	fprintf(stderr,"vcen   : (%+.6e,%+.6e,%+.6e) VUold\n",vcen[0],vcen[1],vcen[2]);
+	fprintf(stderr,"mscale : %.6e MUnew/MUold\n",mscale);
+	fprintf(stderr,"rscale : %.6e LUnew/LUold\n",rscale);
+	fprintf(stderr,"vscale : %.6e VUnew/VUold\n",vscale);
+	fprintf(stderr,"Hubble : %.6e VUnew/LUnew\n",hubble);
+	}
+    if (verboselevel >= 0) {
+	fprintf(stderr,"Time: %g Ntotal: %d Ngas: %d Ndark: %d Nstar: %d\n",
+		th.time,th.ntotal,th.ngas,th.ndark,th.nstar);
+	}
     exit(0);
     }
 
@@ -274,6 +279,7 @@ void usage(void) {
     fprintf(stderr,"-rscale <value> : coordinate scale factor [LUnew/LUold] (default: 1 LUnew/LUold)\n");
     fprintf(stderr,"-vscale <value> : velocity scale factor [VUnew/VUold] (default: 1 VUnew/VUold)\n");
     fprintf(stderr,"-Hubble <value> : Hubble parameter [VUnew/LUnew] (default: 0 VUnew/LUnew; special value: sqrt_8pi_3)\n");
+    fprintf(stderr,"-v              : more informative output to screen\n");
     fprintf(stderr,"< <name>        : input file in tipsy standard binary format\n");
     fprintf(stderr,"> <name>        : output file in tipsy standard binary format\n");
     fprintf(stderr,"\n");

@@ -16,6 +16,7 @@ void usage(void);
 int main(int argc, char **argv) {
 
     int i;
+    int verboselevel;
     ARRAY_HEADER ah;
     ARRAY_PARTICLE ap;
     XDR xdrs;
@@ -23,8 +24,7 @@ int main(int argc, char **argv) {
     for (i = 0; i < 4; i++) {
 	ah.N[i] = 0;
 	}
-
-    xdrstdio_create(&xdrs,stdout,XDR_ENCODE);
+    verboselevel = 0;
     i = 1;
     while (i < argc) {
 	if (strcmp(argv[i],"-i") == 0) {
@@ -45,6 +45,10 @@ int main(int argc, char **argv) {
 	    ah.N[3] = 1;
 	    i++;
             }
+	else if (strcmp(argv[i],"-v") == 0) {
+	    verboselevel = 1;
+	    i++;
+	    }
 	else if ((strcmp(argv[i],"-h") == 0) || (strcmp(argv[i],"-help") == 0)) {
             usage();
             }
@@ -56,6 +60,7 @@ int main(int argc, char **argv) {
 	fprintf(stderr,"No array type specified!\n");
 	usage();
 	}
+    xdrstdio_create(&xdrs,stdout,XDR_ENCODE);
     allocate_array_particle(&ah,&ap);
     assert(fscanf(stdin,"%d",&ah.N[0]) == 1);
     write_array_header(&xdrs,&ah);
@@ -78,8 +83,10 @@ int main(int argc, char **argv) {
 	    }
 	}
     xdr_destroy(&xdrs);
-    fprintf(stderr,"Ntotal: %d Ni: %d Nf: %d Nd: %d\n",
-	    ah.N[0],ah.N[1],ah.N[2],ah.N[3]);
+    if (verboselevel >= 0) {
+	fprintf(stderr,"Ntotal: %d Ni: %d Nf: %d Nd: %d\n",
+		ah.N[0],ah.N[1],ah.N[2],ah.N[3]);
+	}
     exit(0);
     }
 

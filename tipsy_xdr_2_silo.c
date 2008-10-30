@@ -21,6 +21,7 @@ int main(int argc, char **argv) {
     int i, j;
     int getmatch = 0;
     int positionprecision = 0;
+    int verboselevel = 0;
     int arrayfile = 0;
     int nvar = 8;
     int types[] = {DB_VARTYPE_SCALAR,DB_VARTYPE_SCALAR,DB_VARTYPE_SCALAR,
@@ -172,7 +173,11 @@ int main(int argc, char **argv) {
 	if (getmatch == 1) {
 	    continue;
 	    }
-	if ((strcmp(argv[i],"-h") == 0) || (strcmp(argv[i],"-help") == 0)) {
+	if (strcmp(argv[i],"-v") == 0) {
+	    verboselevel = 1;
+	    i++;
+	    }
+	else if ((strcmp(argv[i],"-h") == 0) || (strcmp(argv[i],"-help") == 0)) {
             usage();
             }
         else {
@@ -666,11 +671,13 @@ int main(int argc, char **argv) {
     ** Finish up and write some output
     */
     DBClose(dbfile);
-    fprintf(stderr,"Time: %g Ntotal: %d Ngas: %d Ndark: %d Nstar: %d\n",
-	    th.time,th.ntotal,th.ngas,th.ndark,th.nstar);
-    if (arrayfile == 1) {
-	fprintf(stderr,"Ntotal: %d Ni: %d Nf: %d Nd: %d\n",
-		ah.N[0],ah.N[1],ah.N[2],ah.N[3]);
+    if (verboselevel >= 0) {
+	fprintf(stderr,"Time: %g Ntotal: %d Ngas: %d Ndark: %d Nstar: %d\n",
+		th.time,th.ntotal,th.ngas,th.ndark,th.nstar);
+	if (arrayfile == 1) {
+	    fprintf(stderr,"Ntotal: %d Ni: %d Nf: %d Nd: %d\n",
+		    ah.N[0],ah.N[1],ah.N[2],ah.N[3]);
+	    }
 	}
     exit(0);
     }

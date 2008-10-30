@@ -257,31 +257,31 @@ int main(int argc, char **argv) {
 
     if (verboselevel >= 1) {
 	fprintf(stderr,"Paramters from general initial conditions file:\n");
-	fprintf(stderr,"name    = %s\n",name);
-	fprintf(stderr,"OmB     = %.6e\n",OmB);
-	fprintf(stderr,"OmX     = %.6e\n",OmX);
-	fprintf(stderr,"OmL     = %.6e\n",OmL);
-	fprintf(stderr,"OmN     = %.6e\n",OmN);
-	fprintf(stderr,"h100    = %.6e\n",h100);
-	fprintf(stderr,"cell    = %.6e chimp\n",cell);
-	fprintf(stderr,"enn     = %.6e\n",enn);
-	fprintf(stderr,"sigma8  = %.6e\n",sigma8);
-	fprintf(stderr,"akpivot = %.6e\n",akpivot);
-	fprintf(stderr,"aBegin  = %.6e\n",aBegin);
-	fprintf(stderr,"delDC   = %.6e\n",delDC);
-	fprintf(stderr,"NX      = %d\n",NX);
-	fprintf(stderr,"NY      = %d\n",NY);
-	fprintf(stderr,"NZ      = %d\n",NZ);
+	fprintf(stderr,"name    : %s\n",name);
+	fprintf(stderr,"OmB     : %.6e\n",OmB);
+	fprintf(stderr,"OmX     : %.6e\n",OmX);
+	fprintf(stderr,"OmL     : %.6e\n",OmL);
+	fprintf(stderr,"OmN     : %.6e\n",OmN);
+	fprintf(stderr,"h100    : %.6e\n",h100);
+	fprintf(stderr,"cell    : %.6e chimp\n",cell);
+	fprintf(stderr,"enn     : %.6e\n",enn);
+	fprintf(stderr,"sigma8  : %.6e\n",sigma8);
+	fprintf(stderr,"akpivot : %.6e\n",akpivot);
+	fprintf(stderr,"aBegin  : %.6e\n",aBegin);
+	fprintf(stderr,"delDC   : %.6e\n",delDC);
+	fprintf(stderr,"NX      : %d\n",NX);
+	fprintf(stderr,"NY      : %d\n",NY);
+	fprintf(stderr,"NZ      : %d\n",NZ);
 	fprintf(stderr,"Used values:\n");
-	fprintf(stderr,"drx  = %.6e LU\n",dr[0]);
-	fprintf(stderr,"dry  = %.6e LU\n",dr[1]);
-	fprintf(stderr,"drz  = %.6e LU\n",dr[2]);
-	fprintf(stderr,"lbox = %.6e kpc\n",LU_Tipsy);
-	fprintf(stderr,"soft = %.6e LU\n",particlesoftening);
+	fprintf(stderr,"drx  : %.6e LU\n",dr[0]);
+	fprintf(stderr,"dry  : %.6e LU\n",dr[1]);
+	fprintf(stderr,"drz  : %.6e LU\n",dr[2]);
+	fprintf(stderr,"lbox : %.6e kpc\n",LU_Tipsy);
+	fprintf(stderr,"soft : %.6e LU\n",particlesoftening);
 	fprintf(stderr,"Resulting internal tipsy units:\n");
-	fprintf(stderr,"LU  = %.6e kpc\n",LU_Tipsy);
-	fprintf(stderr,"TU  = %.6e Gyr\n",TU_Tipsy/VelConvertFac);
-	fprintf(stderr,"VU  = %.6e km s^-1\n",VU_Tipsy);
+	fprintf(stderr,"LU : %.6e kpc\n",LU_Tipsy);
+	fprintf(stderr,"TU : %.6e Gyr\n",TU_Tipsy/VelConvertFac);
+	fprintf(stderr,"VU : %.6e km s^-1\n",VU_Tipsy);
 	}
     if (verboselevel >= 0) {
 	fprintf(stderr,"Time: %g Ntotal: %d Ngas: %d Ndark: %d Nstar: %d\n",

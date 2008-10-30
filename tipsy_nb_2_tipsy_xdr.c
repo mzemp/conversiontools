@@ -15,7 +15,7 @@ void usage(void);
 int main(int argc, char **argv) {
 
     int i;
-    int positionprecision;
+    int positionprecision, verboselevel;
     TIPSY_HEADER th;
     GAS_PARTICLE gp;
     DARK_PARTICLE dp;
@@ -26,6 +26,7 @@ int main(int argc, char **argv) {
     XDR xdrs;
 
     positionprecision = 0;
+    verboselevel = 0;
     i = 1;
     while (i < argc) {
         if (strcmp(argv[i],"-spp") == 0) {
@@ -36,6 +37,10 @@ int main(int argc, char **argv) {
             positionprecision = 1;
             i++;
             }
+	else if (strcmp(argv[i],"-v") == 0) {
+	    verboselevel = 1;
+	    i++;
+	    }
 	else if ((strcmp(argv[i],"-h") == 0) || (strcmp(argv[i],"-help") == 0)) {
             usage();
             }
@@ -75,8 +80,10 @@ int main(int argc, char **argv) {
 	    }
 	}
     xdr_destroy(&xdrs);
-    fprintf(stderr,"Time: %g Ntotal: %d Ngas: %d Ndark: %d Nstar: %d\n",
-	    th.time,th.ntotal,th.ngas,th.ndark,th.nstar);
+    if (verboselevel >= 0) {
+	fprintf(stderr,"Time: %g Ntotal: %d Ngas: %d Ndark: %d Nstar: %d\n",
+		th.time,th.ntotal,th.ngas,th.ndark,th.nstar);
+	}
     exit(0);
     }
 
