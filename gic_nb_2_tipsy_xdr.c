@@ -36,7 +36,7 @@ int main(int argc, char **argv) {
     dr[0] = -0.5;
     dr[1] = -0.5;
     dr[2] = -0.5;
-    particlesoftening = 0;
+    particlesoftening = -1;
     H_Tipsy = sqrt(8*M_PI/3); /* TU_Tipsy^-1 */
     VelConvertFac = 1.0227121651152353693;
     rhocrit = 277.53662719; /* h^2 Mo kpc^-3 */
@@ -201,7 +201,7 @@ int main(int argc, char **argv) {
     ** Transform coordinates to tipsy unit system and set other properties
     */
 
-    if (particlesoftening == 0) {
+    if (particlesoftening < 0) {
 	particlesoftening = 1/(NX*20);
 	}
     particlemass = (OmB+OmX)/th.ntotal;
@@ -253,7 +253,7 @@ int main(int argc, char **argv) {
     */
 
     if (verboselevel >= 1) {
-	fprintf(stderr,"Paramters from general initial conditions file:\n");
+	fprintf(stderr,"Parameters from general initial conditions file:\n\n");
 	fprintf(stderr,"name    : %s\n",name);
 	fprintf(stderr,"OmB     : %.6e\n",OmB);
 	fprintf(stderr,"OmX     : %.6e\n",OmX);
@@ -268,17 +268,17 @@ int main(int argc, char **argv) {
 	fprintf(stderr,"delDC   : %.6e\n",delDC);
 	fprintf(stderr,"NX      : %d\n",NX);
 	fprintf(stderr,"NY      : %d\n",NY);
-	fprintf(stderr,"NZ      : %d\n",NZ);
-	fprintf(stderr,"Used values:\n");
+	fprintf(stderr,"NZ      : %d\n\n",NZ);
+	fprintf(stderr,"Used values:\n\n");
 	fprintf(stderr,"drx  : %.6e LU\n",dr[0]);
 	fprintf(stderr,"dry  : %.6e LU\n",dr[1]);
 	fprintf(stderr,"drz  : %.6e LU\n",dr[2]);
-	fprintf(stderr,"soft : %.6e LU\n",particlesoftening);
-	fprintf(stderr,"Resulting internal tipsy units:\n");
+	fprintf(stderr,"soft : %.6e LU\n\n",particlesoftening);
+	fprintf(stderr,"Resulting internal tipsy units:\n\n");
 	fprintf(stderr,"LU : %.6e kpc\n",LU_Tipsy);
 	fprintf(stderr,"TU : %.6e Gyr\n",TU_Tipsy/VelConvertFac);
 	fprintf(stderr,"VU : %.6e km s^-1 = %.6e kpc Gyr^-1\n",VU_Tipsy,VU_Tipsy*VelConvertFac);
-	fprintf(stderr,"MU : %.6e Mo\n",MU_Tipsy);
+	fprintf(stderr,"MU : %.6e Mo\n\n",MU_Tipsy);
 	}
     if (verboselevel >= 0) {
 	fprintf(stderr,"Time: %g Ntotal: %d Ngas: %d Ndark: %d Nstar: %d\n",
