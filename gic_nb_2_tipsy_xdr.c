@@ -210,7 +210,7 @@ int main(int argc, char **argv) {
     LU_Tipsy = NX*cell*1000/h100; /* kpc */
     VU_Tipsy = LU_Tipsy/TU_Tipsy; /* km s^-1 */
     velscalefac = 1/(aBegin*VU_Tipsy);
-    MU_Tipsy = rhocrit*h100*100*LU_Tipsy*LU_Tipsy*LU_Tipsy;
+    MU_Tipsy = rhocrit*h100*h100*LU_Tipsy*LU_Tipsy*LU_Tipsy;
 
     if (positionprecision == 0) {
 	for (i = 0; i < th.ndark; i++) {
