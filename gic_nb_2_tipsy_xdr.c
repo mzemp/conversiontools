@@ -23,7 +23,7 @@ int main(int argc, char **argv) {
     float OmB, OmX, OmL, OmN, h100, cell, enn, sigma8, akpivot, aBegin, delDC;
     float tempfloat;
     double posscalefac, velscalefac, particlemass, particlesoftening;
-    double dr[3], H0_Tipsy, TU_Tipsy, LU_Tipsy, VU_Tipsy, VelConvertFac;
+    double dr[3], H_Tipsy, TU_Tipsy, LU_Tipsy, VU_Tipsy, MU_Tipsy, VelConvertFac, rhocrit;
     char name[256];
     TIPSY_HEADER th;
     TIPSY_STRUCTURE *ts;
@@ -37,9 +37,9 @@ int main(int argc, char **argv) {
     dr[1] = -0.5;
     dr[2] = -0.5;
     particlesoftening = 0;
-    H0_Tipsy = sqrt(8*M_PI/3); /* TU_Tipsy^-1 */
-    LU_Tipsy = 100; /* kpc */
+    H_Tipsy = sqrt(8*M_PI/3); /* TU_Tipsy^-1 */
     VelConvertFac = 1.0227121651152353693;
+    rhocrit = 277.53662719; /* h^2 Mo kpc^-3 */
     i = 1;
     while (i < argc) {
         if (strcmp(argv[i],"-spp") == 0) {
@@ -80,14 +80,6 @@ int main(int argc, char **argv) {
                 usage();
                 }
             particlesoftening = atof(argv[i]);
-            i++;
-            }
-	else if (strcmp(argv[i],"-lbox") == 0) {
-            i++;
-            if (i >= argc) {
-                usage();
-                }
-            LU_Tipsy = atof(argv[i]);
             i++;
             }
         else if (strcmp(argv[i],"-v") == 0) {
@@ -209,11 +201,16 @@ int main(int argc, char **argv) {
     ** Transform coordinates to tipsy unit system and set other properties
     */
 
+    if (particlesoftening == 0) {
+	particlesoftening = 1/(NX*20);
+	}
     particlemass = (OmB+OmX)/th.ntotal;
     posscalefac = 1/(NX*cell);
-    TU_Tipsy = (H0_Tipsy*1000)/(h100*100); /* kpc * km^-1 * s */
+    TU_Tipsy = (H_Tipsy*1000)/(h100*100); /* kpc*km^-1*s */
+    LU_Tipsy = NX*cell*1000/h100; /* kpc */
     VU_Tipsy = LU_Tipsy/TU_Tipsy; /* km s^-1 */
     velscalefac = 1/(aBegin*VU_Tipsy);
+    MU_Tipsy = rhocrit*h100*100*LU_Tipsy*LU_Tipsy*LU_Tipsy;
 
     if (positionprecision == 0) {
 	for (i = 0; i < th.ndark; i++) {
@@ -276,12 +273,12 @@ int main(int argc, char **argv) {
 	fprintf(stderr,"drx  : %.6e LU\n",dr[0]);
 	fprintf(stderr,"dry  : %.6e LU\n",dr[1]);
 	fprintf(stderr,"drz  : %.6e LU\n",dr[2]);
-	fprintf(stderr,"lbox : %.6e kpc\n",LU_Tipsy);
 	fprintf(stderr,"soft : %.6e LU\n",particlesoftening);
 	fprintf(stderr,"Resulting internal tipsy units:\n");
 	fprintf(stderr,"LU : %.6e kpc\n",LU_Tipsy);
 	fprintf(stderr,"TU : %.6e Gyr\n",TU_Tipsy/VelConvertFac);
-	fprintf(stderr,"VU : %.6e km s^-1\n",VU_Tipsy);
+	fprintf(stderr,"VU : %.6e km s^-1 = %.6e kpc Gyr^-1\n",VU_Tipsy,VU_Tipsy*VelConvertFac);
+	fprintf(stderr,"MU : %.6e Mo\n",MU_Tipsy);
 	}
     if (verboselevel >= 0) {
 	fprintf(stderr,"Time: %g Ntotal: %d Ngas: %d Ndark: %d Nstar: %d\n",
@@ -302,8 +299,7 @@ void usage(void) {
     fprintf(stderr,"-drx <value>  : shift along x-axis [LU] (default: -0.5 LU)\n");
     fprintf(stderr,"-dry <value>  : shift along y-axis [LU] (default: -0.5 LU)\n");
     fprintf(stderr,"-drz <value>  : shift along z-axis [LU] (default: -0.5 LU)\n");
-    fprintf(stderr,"-soft <value> : softening length of particles [LU] (default: 0 LU)\n");
-    fprintf(stderr,"-lbox <value> : comoving side length of box [kpc] (default: 100 kpc)\n");
+    fprintf(stderr,"-soft <value> : softening length of particles [LU] (default: 1/20 mean particle separation => 1/(N^{-3}*20) LU)\n");
     fprintf(stderr,"-v            : more informative output to screen\n");
     fprintf(stderr,"< <name>      : input file in tipsy binary format\n");
     fprintf(stderr,"> <name>      : output file in tipsy standard binary format\n");
