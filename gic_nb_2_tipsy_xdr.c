@@ -202,7 +202,7 @@ int main(int argc, char **argv) {
     */
 
     if (particlesoftening < 0) {
-	particlesoftening = 1/(NX*20);
+	particlesoftening = 1.0/(NX*20.0);
 	}
     particlemass = (OmB+OmX)/th.ntotal;
     posscalefac = 1/(NX*cell);
