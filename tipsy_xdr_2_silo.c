@@ -45,11 +45,11 @@ int main(int argc, char **argv) {
     char *star_defs[] = {"coord(<star/star_pos>)[0]","coord(<star/star_pos>)[1]","coord(<star/star_pos>)[2]",
 			  "dot(<star/star_vel>,{1,0,0})","dot(<star/star_vel>,{0,1,0})","dot(<star/star_vel>,{0,0,1})",
 			  "polar_radius(<star/star_pos>)","magnitude(<star/star_vel>)"};
-    char outputname[30], arrayfilename[30], arrayname[30];
-    char iname[NARRAYMAX][30];
-    char fname[NARRAYMAX][30];
-    char dname[NARRAYMAX][30];
-    char reservednames[10][30];
+    char outputname[256], arrayfilename[256], arrayname[256];
+    char iname[NARRAYMAX][256];
+    char fname[NARRAYMAX][256];
+    char dname[NARRAYMAX][256];
+    char reservednames[10][256];
     float **posf = NULL;
     double **posd = NULL;;
     float **vel;
