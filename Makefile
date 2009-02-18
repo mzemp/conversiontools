@@ -11,7 +11,7 @@ VERSION = 1.1
 
 CC	= gcc
 CFLAGS	= -O3 -Wall -I$(LOCAL_LIB_PATH)/include
-LIBS	= -L$(LOCAL_LIB_PATH)/lib -lm -liof -lsilo
+LIBS	= -L$(LOCAL_LIB_PATH)/lib -lm -liof -lsilo -lgic_reader
 
 # Rules
 
