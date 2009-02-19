@@ -20,12 +20,14 @@ void usage(void);
 int main(int argc, char **argv) {
 
     int i = 0, j = 0, k = 0;
-    int positionprecision, verboselevel, multires, particletype;
+    int positionprecision, verboselevel, multires, particletype, mrmassfromfile;
     long Ntot, Nlev, index;
     int Nrec, Npage, N1D, Nlow, Lmax;
     GIC_REAL *PosXRec, *PosYRec, *PosZRec;
     GIC_REAL *VelXRec, *VelYRec, *VelZRec;
-    double posscalefac, velscalefac, particlemass, particlesoftening;
+    double posscalefac, velscalefac, massscalefac, refinementstep;
+    double particlemass, particlesoftening;
+    double toplevelmass, toplevelsoftening;
     double dr[3], dx, aBegin, h100, H_Tipsy, TU_Tipsy, LU_Tipsy, VU_Tipsy, MU_Tipsy, VelConvertFac, rhocrit;
     char PosFileName[256], VelFileName[256];
     TIPSY_HEADER th;
@@ -50,12 +52,18 @@ int main(int argc, char **argv) {
     verboselevel = 0;
     multires = 0;
     particletype = 1;
+    mrmassfromfile = 0;
     dr[0] = -0.5;
     dr[1] = -0.5;
     dr[2] = -0.5;
-    particlesoftening = -1;
-    posscalefac = -1;
-    velscalefac = -1;
+    refinementstep = 2;
+    particlesoftening = -2;
+    particlemass = -2;
+    posscalefac = -2;
+    velscalefac = -2;
+    massscalefac = -2;
+    toplevelsoftening = 0;
+    toplevelmass = 0;
     H_Tipsy = sqrt(8*M_PI/3); /* TU_Tipsy^-1 */
     VelConvertFac = 1.0227121651152353693;
     rhocrit = 277.53662719; /* h^2 Mo kpc^-3 */
@@ -150,6 +158,22 @@ int main(int argc, char **argv) {
             velscalefac = atof(argv[i]);
             i++;
             }
+        else if (strcmp(argv[i],"-massfac") == 0) {
+            i++;
+            if (i >= argc) {
+                usage();
+                }
+            massscalefac = atof(argv[i]);
+            i++;
+            }
+        else if (strcmp(argv[i],"-refstep") == 0) {
+            i++;
+            if (i >= argc) {
+                usage();
+                }
+            refinementstep = atof(argv[i]);
+            i++;
+            }
         else if (strcmp(argv[i],"-pos") == 0) {
             i++;
             if (i >= argc) {
@@ -177,6 +201,8 @@ int main(int argc, char **argv) {
             usage();
             }
         }
+
+    if (particlemass == -1.0) mrmassfromfile = 1;
 
     /*
     ** Read in manifests & headers of the two files. 
@@ -283,6 +309,7 @@ int main(int argc, char **argv) {
 
     if (posscalefac < 0) posscalefac = 1/(N1D*dx);
     if (velscalefac < 0) velscalefac = 1/(aBegin*VU_Tipsy);
+    if (massscalefac < 0) massscalefac = 1/MU_Tipsy;
 
     /*
     ** Get output file ready
@@ -319,6 +346,8 @@ int main(int argc, char **argv) {
 
 	if (particlesoftening < 0) particlesoftening = 1.0/(N1D*20.0);
 	if (particlemass < 0) particlemass = (PosManifest.OmegaB+PosManifest.OmegaX)/Ntot;
+	toplevelsoftening = particlesoftening;
+	toplevelmass = particlemass;
 
 	/*
 	** Process the data
@@ -488,12 +517,23 @@ int main(int argc, char **argv) {
 
 	    if (k == 0) { /* top level softening */
 		if (particlesoftening < 0) particlesoftening = 1.0/(N1D*20.0);
+		toplevelsoftening = particlesoftening;
 		}
 	    else {
-		particlesoftening /= 2.0;
+		particlesoftening /= refinementstep;
 		}
-	    assert(PosLevelHeader[k].Mlev == VelLevelHeader[k].Mlev);
-	    particlemass = PosLevelHeader[k].Mlev/MU_Tipsy;
+	    if (k == 0) { /* top level mass */
+		if (particlemass < 0) particlemass = (PosManifest.OmegaB+PosManifest.OmegaX)/Nlow;
+		toplevelmass = particlemass;
+		}
+	    else {
+		particlemass /= pow(refinementstep,3.0);
+		}
+	    if (mrmassfromfile == 1) {
+		assert(PosLevelHeader[k].Mlev == VelLevelHeader[k].Mlev);
+		particlemass = PosLevelHeader[k].Mlev*massscalefac;
+		if (k == 0) toplevelmass = particlemass;
+		}
 
 	    /*
 	    ** Process the data
@@ -618,7 +658,7 @@ int main(int argc, char **argv) {
 	    */
 
 	    if (verboselevel >= 1) {
-		fprintf(stderr,"L %d Lmax %d Nlev %ld soft %g mass %g\n",PosLevelHeader[k].L,PosLevelHeader[k].Lmax,Nlev,particlesoftening,particlemass);
+		fprintf(stderr,"L %d Lmax %d Nlev %ld Softening %.6e LU Mass %.6e MU\n",PosLevelHeader[k].L,PosLevelHeader[k].Lmax,Nlev,particlesoftening,particlemass);
 		if (k == Lmax) fprintf(stderr,"\n");
 		}
 	    }
@@ -652,10 +692,14 @@ int main(int argc, char **argv) {
 	fprintf(stderr,"Ntot     : %ld\n",Ntot);
 	fprintf(stderr,"Lmax     : %d\n\n",Lmax);
 	fprintf(stderr,"Used values:\n\n");
-	fprintf(stderr,"drx  : %.6e LU\n",dr[0]);
-	fprintf(stderr,"dry  : %.6e LU\n",dr[1]);
-	fprintf(stderr,"drz  : %.6e LU\n",dr[2]);
-	fprintf(stderr,"soft : %.6e LU\n\n",particlesoftening*pow(2,k));
+	fprintf(stderr,"drx       : %.6e LU\n",dr[0]);
+	fprintf(stderr,"dry       : %.6e LU\n",dr[1]);
+	fprintf(stderr,"drz       : %.6e LU\n",dr[2]);
+	fprintf(stderr,"fpos      : %.6e\n",posscalefac);
+	fprintf(stderr,"fvel      : %.6e\n",velscalefac);
+	fprintf(stderr,"fmass     : %.6e\n",massscalefac);
+	fprintf(stderr,"Softening : %.6e LU\n",toplevelsoftening);
+	fprintf(stderr,"Mass      : %.6e MU\n\n",toplevelmass);
 	fprintf(stderr,"Resulting internal tipsy units:\n\n");
 	fprintf(stderr,"LU : %.6e kpc\n",LU_Tipsy);
 	fprintf(stderr,"TU : %.6e Gyr\n",TU_Tipsy/VelConvertFac);
@@ -677,24 +721,26 @@ void usage(void) {
     fprintf(stderr,"\n");
     fprintf(stderr,"Please specify the following parameters:\n");
     fprintf(stderr,"\n");
-    fprintf(stderr,"-spp            : set this flag if input and output files have single precision positions (default)\n");
-    fprintf(stderr,"-dpp            : set this flag if input and output files have double precision positions\n");
-    fprintf(stderr,"-sr             : set this flag if input only has single resolution particles (default)\n");
-    fprintf(stderr,"-mr             : set this flag if input has multi resolution particles\n");
-    fprintf(stderr,"-gas            : set this flag if input particles are gas particles\n");
-    fprintf(stderr,"-dark           : set this flag if input particles are dark particles (default)\n");
-    fprintf(stderr,"-star           : set this flag if input particles are star particles\n");
-    fprintf(stderr,"-drx <value>    : shift along x-axis [LU] (default: -0.5 LU)\n");
-    fprintf(stderr,"-dry <value>    : shift along y-axis [LU] (default: -0.5 LU)\n");
-    fprintf(stderr,"-drz <value>    : shift along z-axis [LU] (default: -0.5 LU)\n");
-    fprintf(stderr,"-soft <value>   : softening length of particles [LU] (default: 1/20 mean particle separation => 1/(N^{-3}*20) LU)\n");
-    fprintf(stderr,"-mass <value>   : mass of particles [MU] (default: OmegaM/Ntot [sr] or from file [mr])\n");
-    fprintf(stderr,"-posfac <value> : position scale factor (default: 1/[N1D*dx] where dx is the cell size)\n");
-    fprintf(stderr,"-velfac <value> : velocity scale factor (default: 1/[a*VU_Tipsy] where a is the scale factor)\n");
-    fprintf(stderr,"-v              : more informative output to screen\n");
-    fprintf(stderr,"-pos <name>     : positions input file gic binary format\n");
-    fprintf(stderr,"-vel <name>     : velocities input file gic binary format\n");
-    fprintf(stderr,"> <name>        : output file in tipsy standard binary format\n");
+    fprintf(stderr,"-spp             : set this flag if input and output files have single precision positions (default)\n");
+    fprintf(stderr,"-dpp             : set this flag if input and output files have double precision positions\n");
+    fprintf(stderr,"-sr              : set this flag if input only has single resolution particles (default)\n");
+    fprintf(stderr,"-mr              : set this flag if input has multi resolution particles\n");
+    fprintf(stderr,"-gas              : set this flag if input particles are gas particles\n");
+    fprintf(stderr,"-dark            : set this flag if input particles are dark particles (default)\n");
+    fprintf(stderr,"-star            : set this flag if input particles are star particles\n");
+    fprintf(stderr,"-drx <value>     : shift along x-axis [LU] (default: -0.5 LU)\n");
+    fprintf(stderr,"-dry <value>     : shift along y-axis [LU] (default: -0.5 LU)\n");
+    fprintf(stderr,"-drz <value>     : shift along z-axis [LU] (default: -0.5 LU)\n");
+    fprintf(stderr,"-soft <value>    : softening length of top level particles [LU] (default: 1/20 mean particle separation => 1/[Nlow^{-3}*20] LU)\n");
+    fprintf(stderr,"-mass <value>    : mass of top level particles [MU] (default: OmegaM/Nlow - if you want masses from file in mr case set -1)\n");
+    fprintf(stderr,"-posfac <value>  : position scale factor (default: 1/[Nlow^{-3}*dx] where dx is the cell size)\n");
+    fprintf(stderr,"-velfac <value>  : velocity scale factor (default: 1/[a*VU_Tipsy] where a is the scale factor)\n");
+    fprintf(stderr,"-massfac <value> : mass scale factor (default: 1/MU_Tipsy - only in mr case when read from file)\n");
+    fprintf(stderr,"-refstep <value> : refinement step factor (default: 2)\n");
+    fprintf(stderr,"-v               : more informative output to screen\n");
+    fprintf(stderr,"-pos <name>      : positions input file gic binary format\n");
+    fprintf(stderr,"-vel <name>      : velocities input file gic binary format\n");
+    fprintf(stderr,"> <name>         : output file in tipsy standard binary format\n");
     fprintf(stderr,"\n");
     exit(1);
     }
