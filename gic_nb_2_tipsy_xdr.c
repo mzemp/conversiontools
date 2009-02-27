@@ -22,13 +22,16 @@ int main(int argc, char **argv) {
     int i = 0, j = 0, k = 0;
     int positionprecision, verboselevel, multires, particletype, mrmassfromfile;
     long Ntot, Nlev, index;
-    int Nrec, Npage, N1D, Nlow, Lmax;
+    int Nrec, Npage, N1Dlow, Nlow, Lmax;
     GIC_REAL *PosXRec, *PosYRec, *PosZRec;
     GIC_REAL *VelXRec, *VelYRec, *VelZRec;
     double posscalefac, velscalefac, massscalefac, refinementstep;
     double particlemass, particlesoftening;
     double toplevelmass, toplevelsoftening;
-    double dr[3], dx, aBegin, h100, H_Tipsy, TU_Tipsy, LU_Tipsy, VU_Tipsy, MU_Tipsy, VelConvertFac, rhocrit;
+    double dr[3], dx, aBegin, VelConvertFac, rhocrit, LBox, softfac;
+    double OmegaM0, OmegaDM0, OmegaB0, OmegaL0, OmegaK0, OmegaR0, h100;
+    double H_Tipsy, TU_Tipsy, LU_Tipsy, VU_Tipsy, MU_Tipsy;
+    double TU_GIC, LU_GIC, VU_GIC, MU_GIC;
     char PosFileName[256], VelFileName[256];
     TIPSY_HEADER th;
     GAS_PARTICLE gp;
@@ -62,6 +65,7 @@ int main(int argc, char **argv) {
     posscalefac = -2;
     velscalefac = -2;
     massscalefac = -2;
+    softfac = 20;
     toplevelsoftening = 0;
     toplevelmass = 0;
     H_Tipsy = sqrt(8*M_PI/3); /* TU_Tipsy^-1 */
@@ -166,6 +170,14 @@ int main(int argc, char **argv) {
             massscalefac = atof(argv[i]);
             i++;
             }
+        else if (strcmp(argv[i],"-softfac") == 0) {
+            i++;
+            if (i >= argc) {
+                usage();
+                }
+            softfac = atof(argv[i]);
+            i++;
+            }
         else if (strcmp(argv[i],"-refstep") == 0) {
             i++;
             if (i >= argc) {
@@ -258,11 +270,19 @@ int main(int argc, char **argv) {
     Ntot = PosHeader.Ntot;
     Nlow = PosHeader.dims[0]*PosHeader.dims[1]*PosHeader.dims[2];
     Nrec = PosXFile.Nrec;
-    N1D = PosHeader.dims[0];
+    N1Dlow = PosHeader.dims[0];
     dx = PosManifest.dx;
+    Lmax = PosHeader.Lmax;
+    LBox = N1Dlow*dx;
+
     aBegin = PosHeader.aBegin;
     h100 = PosManifest.h100;
-    Lmax = PosHeader.Lmax;
+    OmegaM0 = PosManifest.OmegaX+PosManifest.OmegaB;;
+    OmegaDM0 = PosManifest.OmegaX;
+    OmegaB0 = PosManifest.OmegaB;
+    OmegaL0 = PosManifest.OmegaL;
+    OmegaK0 = 0;
+    OmegaR0 = PosManifest.OmegaN;
 
     th.time = aBegin;
     th.ntotal = Ntot;
@@ -302,14 +322,19 @@ int main(int argc, char **argv) {
     ** Calculate units and scaling factors
     */
 
-    TU_Tipsy = (H_Tipsy*1000)/(h100*100); /* kpc*km^-1*s */
-    LU_Tipsy = N1D*dx*1000/h100; /* kpc */
+    TU_Tipsy = (H_Tipsy*1000)/(h100*100); /* kpc km^-1 s */
+    LU_Tipsy = LBox*1000/h100; /* kpc */
     VU_Tipsy = LU_Tipsy/TU_Tipsy; /* km s^-1 */
     MU_Tipsy = rhocrit*h100*h100*LU_Tipsy*LU_Tipsy*LU_Tipsy; /* Mo */
 
-    if (posscalefac < 0) posscalefac = 1/(N1D*dx);
-    if (velscalefac < 0) velscalefac = 1/(aBegin*VU_Tipsy);
-    if (massscalefac < 0) massscalefac = 1/MU_Tipsy;
+    LU_GIC = 1000/h100; /* kpc */
+    VU_GIC = 1; /* km s^-1 */
+    MU_GIC = 1; /* Mo */
+    TU_GIC = LU_GIC/VU_GIC; /* kpc km^-1 s */
+
+    if (posscalefac < 0) posscalefac = 1.0/LBox; /* LU_GIC / LU_Tipsy */
+    if (velscalefac < 0) velscalefac = VU_GIC/(aBegin*VU_Tipsy);
+    if (massscalefac < 0) massscalefac = MU_GIC/MU_Tipsy;
 
     /*
     ** Get output file ready
@@ -344,7 +369,7 @@ int main(int argc, char **argv) {
 	** Set particle mass and softening
 	*/
 
-	if (particlesoftening < 0) particlesoftening = 1.0/(N1D*20.0);
+	if (particlesoftening < 0) particlesoftening = 1.0/(N1Dlow*softfac);
 	if (particlemass < 0) particlemass = (PosManifest.OmegaB+PosManifest.OmegaX)/Ntot;
 	toplevelsoftening = particlesoftening;
 	toplevelmass = particlemass;
@@ -516,7 +541,7 @@ int main(int argc, char **argv) {
 	    */
 
 	    if (k == 0) { /* top level softening */
-		if (particlesoftening < 0) particlesoftening = 1.0/(N1D*20.0);
+		if (particlesoftening < 0) particlesoftening = 1.0/(N1Dlow*softfac);
 		toplevelsoftening = particlesoftening;
 		}
 	    else {
@@ -658,7 +683,7 @@ int main(int argc, char **argv) {
 	    */
 
 	    if (verboselevel >= 1) {
-		fprintf(stderr,"L %d Lmax %d Nlev %ld Softening %.6e LU Mass %.6e MU\n",PosLevelHeader[k].L,PosLevelHeader[k].Lmax,Nlev,particlesoftening,particlemass);
+		fprintf(stderr,"L %d Lmax %d Nlev %ld Softening %.6e LU = %.6e kpc Mass %.6e MU = %.6e Mo\n",PosLevelHeader[k].L,PosLevelHeader[k].Lmax,Nlev,particlesoftening,particlesoftening*LU_Tipsy,particlemass,particlemass*MU_Tipsy);
 		if (k == Lmax) fprintf(stderr,"\n");
 		}
 	    }
@@ -671,7 +696,7 @@ int main(int argc, char **argv) {
     */
 
     if (verboselevel >= 1) {
-	fprintf(stderr,"Parameters from general initial conditions file:\n\n");
+	fprintf(stderr,"Parameters from GIC file:\n\n");
 	fprintf(stderr,"Name     : %s\n",PosManifest.name);
 	fprintf(stderr,"OmegaB   : %.6e\n",PosManifest.OmegaB);
 	fprintf(stderr,"OmegaDM  : %.6e\n",PosManifest.OmegaX);
@@ -689,8 +714,16 @@ int main(int argc, char **argv) {
 	fprintf(stderr,"NZ       : %d\n",PosHeader.dims[2]);
 	fprintf(stderr,"Seed     : %d\n",PosHeader.seed);
 	fprintf(stderr,"Nrec     : %d\n",Nrec);
-	fprintf(stderr,"Ntot     : %ld\n",Ntot);
+	fprintf(stderr,"LBox     : %.6e chimp\n",LBox);
 	fprintf(stderr,"Lmax     : %d\n\n",Lmax);
+        fprintf(stderr,"Cosmology:\n\n");
+        fprintf(stderr,"OmegaM0  : %.6e\n",OmegaM0);
+        fprintf(stderr,"OmegaDM0 : %.6e\n",OmegaDM0);
+        fprintf(stderr,"OmegaB0  : %.6e\n",OmegaB0);
+        fprintf(stderr,"OmegaL0  : %.6e\n",OmegaL0);
+        fprintf(stderr,"OmegaK0  : %.6e\n",OmegaK0);
+        fprintf(stderr,"OmegaR0  : %.6e\n",OmegaR0);
+        fprintf(stderr,"h100     : %.6e\n\n",h100);
 	fprintf(stderr,"Used values:\n\n");
 	fprintf(stderr,"drx       : %.6e LU\n",dr[0]);
 	fprintf(stderr,"dry       : %.6e LU\n",dr[1]);
@@ -698,8 +731,13 @@ int main(int argc, char **argv) {
 	fprintf(stderr,"fpos      : %.6e\n",posscalefac);
 	fprintf(stderr,"fvel      : %.6e\n",velscalefac);
 	fprintf(stderr,"fmass     : %.6e\n",massscalefac);
-	fprintf(stderr,"Softening : %.6e LU\n",toplevelsoftening);
-	fprintf(stderr,"Mass      : %.6e MU\n\n",toplevelmass);
+	fprintf(stderr,"Softening : %.6e LU (toplevel)\n",toplevelsoftening);
+	fprintf(stderr,"Mass      : %.6e MU (toplevel)\n\n",toplevelmass);
+	fprintf(stderr,"Resulting internal GIC units:\n\n");
+	fprintf(stderr,"LU : %.6e kpc\n",LU_GIC);
+	fprintf(stderr,"TU : %.6e Gyr\n",TU_GIC/VelConvertFac);
+	fprintf(stderr,"VU : %.6e km s^-1 = %.6e kpc Gyr^-1\n",VU_GIC,VU_GIC*VelConvertFac);
+	fprintf(stderr,"MU : %.6e Mo\n\n",MU_GIC);
 	fprintf(stderr,"Resulting internal tipsy units:\n\n");
 	fprintf(stderr,"LU : %.6e kpc\n",LU_Tipsy);
 	fprintf(stderr,"TU : %.6e Gyr\n",TU_Tipsy/VelConvertFac);

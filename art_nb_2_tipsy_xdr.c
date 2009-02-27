@@ -283,14 +283,14 @@ int main(int argc, char **argv) {
     ** Calculate scaling factors
     */
 
-    TU_Tipsy = (H_Tipsy*1000)/(h100*100); /* kpc*km^-1*s */
+    TU_Tipsy = (H_Tipsy*1000)/(h100*100); /* kpc km^-1 s */
     LU_Tipsy = LBox*1000/h100; /* kpc */
     VU_Tipsy = LU_Tipsy/TU_Tipsy; /* km s^-1 */
     MU_Tipsy = rhocrit*h100*h100*LU_Tipsy*LU_Tipsy*LU_Tipsy; /* Mo */
 
-    TU_ART = 1000*2.0/(100*h100*sqrt(OmegaM0)); /* kpc*km^-1*s */
+    TU_ART = 1000*2.0/(100*h100*sqrt(OmegaM0)); /* kpc km^-1 s */
     LU_ART = LBox*1000/(h100*ah.Ngrid); /* kpc */
-    VU_ART = LU_ART/TU_ART; /* km*s^-1 */
+    VU_ART = LU_ART/TU_ART; /* km s^-1 */
     MU_ART = rhocrit*h100*h100*LU_ART*LU_ART*LU_ART*OmegaM0; /* Mo */
 
     if (posscalefac < 0) posscalefac = 1.0/ah.Ngrid; /* LU_ART / LU_Tipsy */
