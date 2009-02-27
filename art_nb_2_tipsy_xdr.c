@@ -14,54 +14,7 @@
 #include <rpc/xdr.h>
 #include <iof.h>
 
-typedef struct {
-
-    float aexpn;
-    float aexp0;
-    float amplt;
-    float astep;
-    int   istep;
-    float partw;
-    float tintg;
-    float ekin;
-    float ekin1;
-    float ekin2;
-    float au0;
-    float aeu0;
-    int   Nrow;
-    int   Ngrid;
-    int   Nspecies;
-    int   Nseed;
-    float Om0;
-    float Oml0;
-    float hubble;
-    float Wp5;
-    float Ocurv;
-    float Omb0;
-    float mass[10];
-    int   num[10];
-    float fill[80];
-    } ART_HEADER;
-
 void usage(void);
-
-void flip_4byte(void *ptr, size_t size, size_t nmemb){
-    
-    unsigned char *current;
-    int j, num;
-    
-    current = ptr;
-    num = nmemb*size/sizeof(unsigned char);
-    
-    for(j=0;j<num;j=j+4){
-	current[j] = current[j]^current[j+3];
-	current[j+3] = current[j]^current[j+3];
-	current[j] = current[j]^current[j+3];
-	current[j+1] = current[j+1]^current[j+2];
-	current[j+2] = current[j+1]^current[j+2];
-	current[j+1] = current[j+1]^current[j+2];
-	}
-    }
 
 int main(int argc, char **argv) {
 
