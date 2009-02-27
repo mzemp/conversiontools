@@ -456,7 +456,7 @@ int main(int argc, char **argv) {
 void usage(void) {
 
     fprintf(stderr,"\n");
-    fprintf(stderr,"Program converts ART format to tipsy standard binary format.\n");
+    fprintf(stderr,"Program converts ART binary format to tipsy standard binary format.\n");
     fprintf(stderr,"\n");
     fprintf(stderr,"Please specify the following parameters:\n");
     fprintf(stderr,"\n");
@@ -467,7 +467,7 @@ void usage(void) {
     fprintf(stderr,"-drz <value>     : shift along z-axis [LU] (default: -0.5 LU)\n");
     fprintf(stderr,"-soft <value>    : softening length of top level particles [LU] (default: 1/softfac mean particle separation => 1/[Nlow^{-3}*softfac] LU)\n");
     fprintf(stderr,"-mass <value>    : mass of top level particles [MU] (default: OmegaM0/Nlow - if you want masses from file in mr case set -1)\n");
-    fprintf(stderr,"-posfac <value>  : position scale factor (default: 1/[Nlow^{-3}])\n");
+    fprintf(stderr,"-posfac <value>  : position scale factor (default: LU_ART/LU_Tipsy)\n");
     fprintf(stderr,"-velfac <value>  : velocity scale factor (default: VU_ART/[a*VU_Tipsy] where a is the scale factor)\n");
     fprintf(stderr,"-massfac <value> : mass scale factor (default: MU_ART/MU_Tipsy)\n");
     fprintf(stderr,"-softfac <value> : softening factor (default: 20)\n");
