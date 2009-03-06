@@ -65,7 +65,7 @@ int main(int argc, char **argv) {
     posscalefac = -2;
     velscalefac = -2;
     massscalefac = -2;
-    softfac = 20;
+    softfac = 50;
     toplevelsoftening = 0;
     toplevelmass = 0;
     H_Tipsy = sqrt(8*M_PI/3); /* TU_Tipsy^-1 */
@@ -775,7 +775,7 @@ void usage(void) {
     fprintf(stderr,"-posfac <value>  : position scale factor (default: LU_GIC/LU_Tipsy)\n");
     fprintf(stderr,"-velfac <value>  : velocity scale factor (default: VU_GIC/[a*VU_Tipsy] where a is the scale factor)\n");
     fprintf(stderr,"-massfac <value> : mass scale factor (default: MU_GIC/MU_Tipsy - only in mr case when read from file)\n");
-    fprintf(stderr,"-softfac <value> : softening factor (default: 20)\n");
+    fprintf(stderr,"-softfac <value> : softening factor (default: 50)\n");
     fprintf(stderr,"-refstep <value> : refinement step factor (default: 2)\n");
     fprintf(stderr,"-v               : more informative output to screen\n");
     fprintf(stderr,"-pos <name>      : positions input file GIC binary format\n");

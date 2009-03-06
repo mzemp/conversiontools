@@ -60,7 +60,7 @@ int main(int argc, char **argv) {
     posscalefac = -2;
     velscalefac = -2;
     massscalefac = -2;
-    softfac = 20;
+    softfac = 50;
     toplevelsoftening = 0;
     toplevelmass = 0;
     Nrec = 1024*1024;
@@ -470,7 +470,7 @@ void usage(void) {
     fprintf(stderr,"-posfac <value>  : position scale factor (default: LU_ART/LU_Tipsy)\n");
     fprintf(stderr,"-velfac <value>  : velocity scale factor (default: VU_ART/[a*VU_Tipsy] where a is the scale factor)\n");
     fprintf(stderr,"-massfac <value> : mass scale factor (default: MU_ART/MU_Tipsy)\n");
-    fprintf(stderr,"-softfac <value> : softening factor (default: 20)\n");
+    fprintf(stderr,"-softfac <value> : softening factor (default: 50)\n");
     fprintf(stderr,"-refstep <value> : refinement step factor (default: 2)\n");
     fprintf(stderr,"-v               : more informative output to screen\n");
     fprintf(stderr,"-header <name>   : header input file in ART binary format\n");
