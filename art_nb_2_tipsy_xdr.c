@@ -247,7 +247,7 @@ int main(int argc, char **argv) {
     MU_ART = rhocrit*h100*h100*LU_ART*LU_ART*LU_ART*OmegaM0; /* Mo */
 
     if (posscalefac < 0) posscalefac = 1.0/ah.Ngrid; /* LU_ART / LU_Tipsy */
-    if (velscalefac < 0) velscalefac = VU_ART/(aBegin*VU_Tipsy);
+    if (velscalefac < 0) velscalefac = VU_ART/(aBegin*aBegin*VU_Tipsy);
     if (massscalefac < 0) massscalefac = MU_ART/MU_Tipsy;
     
     if (particlesoftening < 0) particlesoftening = 1.0/(N1Dlow*softfac);
@@ -468,7 +468,7 @@ void usage(void) {
     fprintf(stderr,"-soft <value>    : softening length of top level particles [LU] (default: 1/softfac mean particle separation => 1/[Nlow^{-3}*softfac] LU)\n");
     fprintf(stderr,"-mass <value>    : mass of top level particles [MU] (default: OmegaM0/Nlow - if you want masses from file in mr case set -1)\n");
     fprintf(stderr,"-posfac <value>  : position scale factor (default: LU_ART/LU_Tipsy)\n");
-    fprintf(stderr,"-velfac <value>  : velocity scale factor (default: VU_ART/[a*VU_Tipsy] where a is the scale factor)\n");
+    fprintf(stderr,"-velfac <value>  : velocity scale factor (default: VU_ART/[a^2*VU_Tipsy] where a is the scale factor)\n");
     fprintf(stderr,"-massfac <value> : mass scale factor (default: MU_ART/MU_Tipsy)\n");
     fprintf(stderr,"-softfac <value> : softening factor (default: 50)\n");
     fprintf(stderr,"-refstep <value> : refinement step factor (default: 2)\n");
