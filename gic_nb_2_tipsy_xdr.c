@@ -28,7 +28,7 @@ int main(int argc, char **argv) {
     double posscalefac, velscalefac, massscalefac, refinementstep;
     double particlemass, particlesoftening;
     double toplevelmass, toplevelsoftening;
-    double dr[3], dx, aBegin, VelConvertFac, rhocrit, LBox, softfac;
+    double dr[3], dx, acurrent, VelConvertFac, rhocrit, LBox, softfac;
     double OmegaM0, OmegaDM0, OmegaB0, OmegaL0, OmegaK0, OmegaR0, h100;
     double H_Tipsy, TU_Tipsy, LU_Tipsy, VU_Tipsy, MU_Tipsy;
     double TU_GIC, LU_GIC, VU_GIC, MU_GIC;
@@ -275,7 +275,7 @@ int main(int argc, char **argv) {
     Lmax = PosHeader.Lmax;
     LBox = N1Dlow*dx;
 
-    aBegin = PosHeader.aBegin;
+    acurrent = PosHeader.aBegin;
     h100 = PosManifest.h100;
     OmegaM0 = PosManifest.OmegaX+PosManifest.OmegaB;;
     OmegaDM0 = PosManifest.OmegaX;
@@ -284,7 +284,7 @@ int main(int argc, char **argv) {
     OmegaK0 = 0;
     OmegaR0 = PosManifest.OmegaN;
 
-    th.time = aBegin;
+    th.time = acurrent;
     th.ntotal = Ntot;
     th.ndim = 3;
     if (particletype == 0) {
@@ -333,7 +333,7 @@ int main(int argc, char **argv) {
     TU_GIC = LU_GIC/VU_GIC; /* kpc km^-1 s */
 
     if (posscalefac < 0) posscalefac = 1.0/LBox; /* LU_GIC / LU_Tipsy */
-    if (velscalefac < 0) velscalefac = VU_GIC/(aBegin*VU_Tipsy);
+    if (velscalefac < 0) velscalefac = VU_GIC/(acurrent*VU_Tipsy);
     if (massscalefac < 0) massscalefac = MU_GIC/MU_Tipsy;
 
     /*
@@ -683,7 +683,7 @@ int main(int argc, char **argv) {
 	    */
 
 	    if (verboselevel >= 1) {
-		fprintf(stderr,"L %d Lmax %d Nlev %ld Softening %.6e LU = %.6e kpc Mass %.6e MU = %.6e Mo\n",PosLevelHeader[k].L,PosLevelHeader[k].Lmax,Nlev,particlesoftening,particlesoftening*LU_Tipsy,particlemass,particlemass*MU_Tipsy);
+		fprintf(stderr,"L %d Lmax %d Nlev %ld Softening %.6e LU_TIPSY = %.6e kpc Mass %.6e MU_TIPSY = %.6e Mo\n",PosLevelHeader[k].L,PosLevelHeader[k].Lmax,Nlev,particlesoftening,particlesoftening*LU_Tipsy,particlemass,particlemass*MU_Tipsy);
 		if (k == Lmax) fprintf(stderr,"\n");
 		}
 	    }
@@ -707,7 +707,7 @@ int main(int argc, char **argv) {
 	fprintf(stderr,"ns      : %.6e\n",PosManifest.ns);
 	fprintf(stderr,"sigma8  : %.6e\n",PosManifest.s8);
 	fprintf(stderr,"kp      : %.6e\n",PosManifest.kp);
-	fprintf(stderr,"aBegin  : %.6e\n",aBegin);
+	fprintf(stderr,"aBegin  : %.6e\n",PosHeader.aBegin);
 	fprintf(stderr,"DeltaDC : %.6e\n",PosHeader.DeltaDC);
 	fprintf(stderr,"NX      : %d\n",PosHeader.dims[0]);
 	fprintf(stderr,"NY      : %d\n",PosHeader.dims[1]);
@@ -725,25 +725,25 @@ int main(int argc, char **argv) {
         fprintf(stderr,"OmegaR0  : %.6e\n",OmegaR0);
         fprintf(stderr,"h100     : %.6e\n\n",h100);
 	fprintf(stderr,"Used values:\n\n");
-	fprintf(stderr,"drx       : %.6e LU\n",dr[0]);
-	fprintf(stderr,"dry       : %.6e LU\n",dr[1]);
-	fprintf(stderr,"drz       : %.6e LU\n",dr[2]);
+	fprintf(stderr,"drx       : %.6e LU_TIPSY\n",dr[0]);
+	fprintf(stderr,"dry       : %.6e LU_TIPSY\n",dr[1]);
+	fprintf(stderr,"drz       : %.6e LU_TIPSY\n",dr[2]);
 	fprintf(stderr,"posfac    : %.6e\n",posscalefac);
 	fprintf(stderr,"velfac    : %.6e\n",velscalefac);
 	fprintf(stderr,"massfac   : %.6e\n",massscalefac);
 	fprintf(stderr,"softfac   : %.6e\n",softfac);
-	fprintf(stderr,"Softening : %.6e LU (toplevel)\n",toplevelsoftening);
-	fprintf(stderr,"Mass      : %.6e MU (toplevel)\n\n",toplevelmass);
+	fprintf(stderr,"Softening : %.6e LU_TIPSY (toplevel)\n",toplevelsoftening);
+	fprintf(stderr,"Mass      : %.6e MU_TIPSY (toplevel)\n\n",toplevelmass);
 	fprintf(stderr,"Resulting internal GIC units:\n\n");
-	fprintf(stderr,"LU : %.6e kpc\n",LU_GIC);
-	fprintf(stderr,"TU : %.6e Gyr\n",TU_GIC/VelConvertFac);
-	fprintf(stderr,"VU : %.6e km s^-1 = %.6e kpc Gyr^-1\n",VU_GIC,VU_GIC*VelConvertFac);
-	fprintf(stderr,"MU : %.6e Mo\n\n",MU_GIC);
+	fprintf(stderr,"LU_GIC : %.6e kpc\n",LU_GIC);
+	fprintf(stderr,"TU_GIC : %.6e Gyr\n",TU_GIC/VelConvertFac);
+	fprintf(stderr,"VU_GIC : %.6e km s^-1 = %.6e kpc Gyr^-1\n",VU_GIC,VU_GIC*VelConvertFac);
+	fprintf(stderr,"MU_GIC : %.6e Mo\n\n",MU_GIC);
 	fprintf(stderr,"Resulting internal tipsy units:\n\n");
-	fprintf(stderr,"LU : %.6e kpc\n",LU_Tipsy);
-	fprintf(stderr,"TU : %.6e Gyr\n",TU_Tipsy/VelConvertFac);
-	fprintf(stderr,"VU : %.6e km s^-1 = %.6e kpc Gyr^-1\n",VU_Tipsy,VU_Tipsy*VelConvertFac);
-	fprintf(stderr,"MU : %.6e Mo\n\n",MU_Tipsy);
+	fprintf(stderr,"LU_TIPSY : %.6e kpc\n",LU_Tipsy);
+	fprintf(stderr,"TU_TIPSY : %.6e Gyr\n",TU_Tipsy/VelConvertFac);
+	fprintf(stderr,"VU_TIPSY : %.6e km s^-1 = %.6e kpc Gyr^-1\n",VU_Tipsy,VU_Tipsy*VelConvertFac);
+	fprintf(stderr,"MU_TIPSY : %.6e Mo\n\n",MU_Tipsy);
 	}
     if (verboselevel >= 0) {
 	fprintf(stderr,"Time: %g Ntotal: %d Ngas: %d Ndark: %d Nstar: %d\n",
@@ -767,14 +767,14 @@ void usage(void) {
     fprintf(stderr,"-gas             : set this flag if input particles are gas particles\n");
     fprintf(stderr,"-dark            : set this flag if input particles are dark particles (default)\n");
     fprintf(stderr,"-star            : set this flag if input particles are star particles\n");
-    fprintf(stderr,"-drx <value>     : shift along x-axis [LU] (default: -0.5 LU)\n");
-    fprintf(stderr,"-dry <value>     : shift along y-axis [LU] (default: -0.5 LU)\n");
-    fprintf(stderr,"-drz <value>     : shift along z-axis [LU] (default: -0.5 LU)\n");
-    fprintf(stderr,"-soft <value>    : softening length of top level particles [LU] (default: 1/softfac mean particle separation => 1/[Nlow^{-3}*softfac] LU)\n");
-    fprintf(stderr,"-mass <value>    : mass of top level particles [MU] (default: OmegaM0/Nlow - if you want masses from file in mr case set -1)\n");
-    fprintf(stderr,"-posfac <value>  : position scale factor (default: LU_GIC/LU_Tipsy)\n");
-    fprintf(stderr,"-velfac <value>  : velocity scale factor (default: VU_GIC/[a*VU_Tipsy] where a is the scale factor)\n");
-    fprintf(stderr,"-massfac <value> : mass scale factor (default: MU_GIC/MU_Tipsy - only in mr case when read from file)\n");
+    fprintf(stderr,"-drx <value>     : shift along x-axis [LU_TIPSY] (default: -0.5 LU_TIPSY)\n");
+    fprintf(stderr,"-dry <value>     : shift along y-axis [LU_TIPSY] (default: -0.5 LU_TIPSY)\n");
+    fprintf(stderr,"-drz <value>     : shift along z-axis [LU_TIPSY] (default: -0.5 LU_TIPSY)\n");
+    fprintf(stderr,"-soft <value>    : softening length of top level particles [LU_TIPSY] (default: 1/softfac mean particle separation => 1/[Nlow^{-3}*softfac] LU_TIPSY)\n");
+    fprintf(stderr,"-mass <value>    : mass of top level particles [MU_TIPSY] (default: OmegaM0/Nlow - if you want masses from file in mr case set -1)\n");
+    fprintf(stderr,"-posfac <value>  : position scale factor (default: LU_GIC/LU_TIPSY)\n");
+    fprintf(stderr,"-velfac <value>  : velocity scale factor (default: VU_GIC/[a*VU_TIPSY] where a is the scale factor)\n");
+    fprintf(stderr,"-massfac <value> : mass scale factor (default: MU_GIC/MU_TIPSY - only in mr case when read from file)\n");
     fprintf(stderr,"-softfac <value> : softening factor (default: 50)\n");
     fprintf(stderr,"-refstep <value> : refinement step factor (default: 2)\n");
     fprintf(stderr,"-v               : more informative output to screen\n");
