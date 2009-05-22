@@ -24,9 +24,8 @@ int main(int argc, char **argv) {
     long Ntot, index, N[10];
     int Nrec, Npage, N1Dlow, Nlow, L, Lmax;
     double posscalefac, velscalefac, massscalefac, refinementstep;
-    double particlemass, particlesoftening;
     double toplevelmass, toplevelsoftening;
-    double dr[3], aBegin, VelConvertFac, rhocrit, LBox, softfac;
+    double dr[3], acurrent, VelConvertFac, rhocrit, LBox, softfac, shift;
     double OmegaM0, OmegaDM0, OmegaB0, OmegaL0, OmegaK0, OmegaR0, h100;
     double H_Tipsy, TU_Tipsy, LU_Tipsy, VU_Tipsy, MU_Tipsy;
     double TU_ART, LU_ART, VU_ART, MU_ART;
@@ -54,15 +53,16 @@ int main(int argc, char **argv) {
     dr[0] = -0.5;
     dr[1] = -0.5;
     dr[2] = -0.5;
+    LBox = 1;
+    shift = 0;
+    L = 0;
     refinementstep = 2;
-    particlesoftening = -2;
-    particlemass = -2;
+    toplevelsoftening = -2;
+    toplevelmass = -2;
     posscalefac = -2;
     velscalefac = -2;
     massscalefac = -2;
     softfac = 50;
-    toplevelsoftening = 0;
-    toplevelmass = 0;
     Nrec = 1024*1024;
     H_Tipsy = sqrt(8*M_PI/3); /* TU_Tipsy^-1 */
     VelConvertFac = 1.0227121651152353693;
@@ -116,7 +116,7 @@ int main(int argc, char **argv) {
             if (i >= argc) {
                 usage();
                 }
-            particlesoftening = atof(argv[i]);
+            toplevelsoftening = atof(argv[i]);
             i++;
             }
         else if (strcmp(argv[i],"-mass") == 0) {
@@ -124,7 +124,7 @@ int main(int argc, char **argv) {
             if (i >= argc) {
                 usage();
                 }
-            particlemass = atof(argv[i]);
+            toplevelmass = atof(argv[i]);
             i++;
             }
         else if (strcmp(argv[i],"-posfac") == 0) {
@@ -167,6 +167,22 @@ int main(int argc, char **argv) {
             refinementstep = atof(argv[i]);
             i++;
             }
+        else if (strcmp(argv[i],"-LBox") == 0) {
+            i++;
+            if (i >= argc) {
+                usage();
+                }
+            LBox = atof(argv[i]);
+            i++;
+            }
+        else if (strcmp(argv[i],"-shift") == 0) {
+            i++;
+            if (i >= argc) {
+                usage();
+                }
+            shift = atof(argv[i]);
+            i++;
+            }
         else if (strcmp(argv[i],"-header") == 0) {
             i++;
             if (i >= argc) {
@@ -195,8 +211,6 @@ int main(int argc, char **argv) {
             }
         }
 
-    if (particlemass == -1.0) mrmassfromfile = 1;
-
     /*
     ** Read heder file
     */
@@ -216,24 +230,27 @@ int main(int argc, char **argv) {
     if (doswap) flip_4byte(&trailer,sizeof(int),1);
     fclose(HeaderFile);
 
-    LBox = ah.fill[79];
+    /*
+    ** Set some parameters
+    */
+
     Lmax = ah.Nspecies-1;
     Ntot = ah.num[Lmax];
     Npage = (Ntot+Nrec-1)/Nrec;
     N1Dlow = ah.Ngrid;
     Nlow = N1Dlow*N1Dlow*N1Dlow;
 
-    aBegin = ah.aexpn;
-    h100 = ah.hubble;
-    OmegaM0 = ah.Om0;
-    OmegaDM0 = ah.Om0-ah.Omb0;
-    OmegaB0 = ah.Omb0;
-    OmegaL0 = ah.Oml0;
-    OmegaK0 = ah.Ocurv;
+    acurrent = ah.aunin;
+    h100 = ah.h100;
+    OmegaM0 = ah.OmM0;
+    OmegaDM0 = ah.OmM0-ah.OmB0;
+    OmegaB0 = ah.OmB0;
+    OmegaL0 = ah.OmL0;
+    OmegaK0 = ah.OmK0;
     OmegaR0 = 0;
 
     /*
-    ** Calculate scaling factors
+    ** Calculate scaling factors and set masses and softenings
     */
 
     TU_Tipsy = (H_Tipsy*1000)/(h100*100); /* kpc km^-1 s */
@@ -247,14 +264,36 @@ int main(int argc, char **argv) {
     MU_ART = rhocrit*h100*h100*LU_ART*LU_ART*LU_ART*OmegaM0; /* Mo */
 
     if (posscalefac < 0) posscalefac = 1.0/ah.Ngrid; /* LU_ART / LU_Tipsy */
-    if (velscalefac < 0) velscalefac = VU_ART/(aBegin*aBegin*VU_Tipsy);
+    if (velscalefac < 0) velscalefac = VU_ART/(acurrent*acurrent*VU_Tipsy);
     if (massscalefac < 0) massscalefac = MU_ART/MU_Tipsy;
     
-    if (particlesoftening < 0) particlesoftening = 1.0/(N1Dlow*softfac);
-    toplevelsoftening = particlesoftening;
-    if (particlemass < 0) particlemass = OmegaM0/Nlow;
-    if (mrmassfromfile == 1) particlemass = ah.mass[Lmax]*(OmegaM0/OmegaDM0)*massscalefac;
-    toplevelmass = particlemass;
+    if (toplevelsoftening < 0) toplevelsoftening = 1.0/(N1Dlow*softfac);
+    if (toplevelmass < 0) {
+	if (toplevelmass == -1) {
+	    mrmassfromfile = 1;
+	    toplevelmass = ah.mass[Lmax]*(OmegaM0/OmegaDM0)*massscalefac;
+	    }
+	else {
+	    toplevelmass = OmegaM0/Nlow;
+	    }
+	}
+
+    for (k = 0; k <= Lmax; k++) {
+	L = Lmax-k;
+	if (k == 0) {
+	    N[L] = ah.num[k];
+	    }
+	else {
+	    N[L] = ah.num[k]-ah.num[k-1];
+	    }
+	soft[L] = toplevelsoftening/pow(refinementstep,L);
+	if (mrmassfromfile == 1) {
+	    mass[L] = ah.mass[k]*(OmegaM0/OmegaDM0)*massscalefac;
+	    }
+	else {
+	    mass[L] = toplevelmass/pow(refinementstep,3.0*L);
+	    }
+	}
 
     /*
     ** Get data files ready
@@ -277,7 +316,7 @@ int main(int argc, char **argv) {
     ** Get output file ready
     */
 
-    th.time = aBegin;
+    th.time = acurrent;
     th.ntotal = Ntot;
     th.ndim = 3;
     th.ngas = 0; 
@@ -288,7 +327,7 @@ int main(int argc, char **argv) {
     write_tipsy_standard_header(&xdrs,&th);
 
     /*
-    ** Read an process data
+    ** Read and process data
     */
 
     index = 0;
@@ -324,42 +363,39 @@ int main(int argc, char **argv) {
 	    if (doswap) flip_4byte(&vy,sizeof(float),1);
 	    if (doswap) flip_4byte(&vz,sizeof(float),1);
 
+	    /*
+	    ** Determine current level
+	    */
+
+	    for (k = Lmax; k >=0; k--) {
+		if (ah.num[k] > index) L = Lmax-k;
+		}
+
             /*
 	    ** Set particle properties
             */
 
-	    for (k = Lmax; k >=0; k--) {
-		L = Lmax-k;
-		if (ah.num[k] > index) {
-		    particlesoftening = toplevelsoftening/pow(refinementstep,L);
-		    particlemass = toplevelmass/pow(refinementstep,3.0*L);
-		    if (mrmassfromfile == 1) particlemass = ah.mass[k]*(OmegaM0/OmegaDM0)*massscalefac;
-		    if (N[L] == 0) N[L] = ah.num[k];
-		    if (mass[L] == 0) mass[L] = particlemass;
-		    if (soft[L] == 0) soft[L] = particlesoftening;
-		    }
-		}
 	    if (positionprecision == 0) {
-		dp.pos[0] = (rx-1.0)*posscalefac + dr[0];
-		dp.pos[1] = (ry-1.0)*posscalefac + dr[1];
-		dp.pos[2] = (rz-1.0)*posscalefac + dr[2];
+		dp.pos[0] = (rx+shift)*posscalefac + dr[0];
+		dp.pos[1] = (ry+shift)*posscalefac + dr[1];
+		dp.pos[2] = (rz+shift)*posscalefac + dr[2];
 		dp.vel[0] = vx*velscalefac;
 		dp.vel[1] = vy*velscalefac;
 		dp.vel[2] = vz*velscalefac;
-		dp.mass = particlemass;
-		dp.eps = particlesoftening;
+		dp.mass = mass[L];
+		dp.eps = soft[L];
 		dp.phi = 0;
 		if (index < Ntot) write_tipsy_standard_dark(&xdrs,&dp);
 		}
 	    else {
-		dpdpp.pos[0] = (rx-1.0)*posscalefac + dr[0];
-		dpdpp.pos[1] = (ry-1.0)*posscalefac + dr[1];
-		dpdpp.pos[2] = (rz-1.0)*posscalefac + dr[2];
+		dpdpp.pos[0] = (rx+shift)*posscalefac + dr[0];
+		dpdpp.pos[1] = (ry+shift)*posscalefac + dr[1];
+		dpdpp.pos[2] = (rz+shift)*posscalefac + dr[2];
 		dpdpp.vel[0] = vx*velscalefac;
 		dpdpp.vel[1] = vy*velscalefac;
 		dpdpp.vel[2] = vz*velscalefac;
-		dpdpp.mass = particlemass;
-		dpdpp.eps = particlesoftening;
+		dpdpp.mass = mass[L];
+		dpdpp.eps = soft[L];
 		dpdpp.phi = 0;
 		if (index < Ntot) write_tipsy_standard_dark_dpp(&xdrs,&dpdpp);
 		}
@@ -386,12 +422,12 @@ int main(int argc, char **argv) {
     if (verboselevel >= 1) {
 	fprintf(stderr,"There are %d refinement levels:\n\n",Lmax+1);
 	for (L = 0; L <= Lmax; L++) {
-	    fprintf(stderr,"L %d Lmax %d Nlev %ld Softening %.6e LU = %.6e kpc Mass %.6e MU = %.6e Mo\n",L,Lmax,N[L],soft[L],soft[L]*LU_Tipsy,mass[L],mass[L]*MU_Tipsy);
+	    fprintf(stderr,"L %d Lmax %d Nlev %ld Softening %.6e LU_TIPSY = %.6e kpc Mass %.6e MU_TIPSY = %.6e Mo\n",L,Lmax,N[L],soft[L],soft[L]*LU_Tipsy,mass[L],mass[L]*MU_Tipsy);
 	    if (L == Lmax) fprintf(stderr,"\n");
 	    }
 	fprintf(stderr,"Parameters from ART file:\n\n");
-        fprintf(stderr,"aexpn    : %.6e\n",ah.aexpn);
-        fprintf(stderr,"aexp0    : %.6e\n",ah.aexp0);
+        fprintf(stderr,"aunin    : %.6e\n",ah.aunin);
+        fprintf(stderr,"auni0    : %.6e\n",ah.auni0);
         fprintf(stderr,"amplt    : %.6e\n",ah.amplt);
         fprintf(stderr,"astep    : %.6e\n",ah.astep);
         fprintf(stderr,"istep    : %d\n",ah.istep);
@@ -406,12 +442,12 @@ int main(int argc, char **argv) {
         fprintf(stderr,"Ngrid    : %d\n",ah.Ngrid);
         fprintf(stderr,"Nspecies : %d\n",ah.Nspecies);
         fprintf(stderr,"Nseed    : %d\n",ah.Nseed);
-        fprintf(stderr,"Om0      : %.6e\n",ah.Om0);
-        fprintf(stderr,"Oml0     : %.6e\n",ah.Oml0);
-        fprintf(stderr,"hubble   : %.6e\n",ah.hubble);
+        fprintf(stderr,"OmM0     : %.6e\n",ah.OmM0);
+        fprintf(stderr,"OmL0     : %.6e\n",ah.OmL0);
+        fprintf(stderr,"h100     : %.6e\n",ah.h100);
         fprintf(stderr,"Wp5      : %.6e\n",ah.Wp5);
-        fprintf(stderr,"Ocurv    : %.6e\n",ah.Ocurv);
-        fprintf(stderr,"Omb0     : %.6e\n",ah.Omb0);
+        fprintf(stderr,"OmK0     : %.6e\n",ah.OmK0);
+        fprintf(stderr,"OmB0     : %.6e\n",ah.OmB0);
         fprintf(stderr,"Banner   : %s\n",banner);
         fprintf(stderr,"Nrec     : %d\n",Nrec);
         fprintf(stderr,"LBox     : %.6e chimp\n",LBox);
@@ -425,25 +461,26 @@ int main(int argc, char **argv) {
         fprintf(stderr,"OmegaR0  : %.6e\n",OmegaR0);
         fprintf(stderr,"h100     : %.6e\n\n",h100);
 	fprintf(stderr,"Used values:\n\n");
-        fprintf(stderr,"drx       : %.6e LU\n",dr[0]);
-        fprintf(stderr,"dry       : %.6e LU\n",dr[1]);
-        fprintf(stderr,"drz       : %.6e LU\n",dr[2]);
+        fprintf(stderr,"shift     : %.6e LU_ART\n",shift);
+        fprintf(stderr,"drx       : %.6e LU_TIPSY\n",dr[0]);
+        fprintf(stderr,"dry       : %.6e LU_TIPSY\n",dr[1]);
+        fprintf(stderr,"drz       : %.6e LU_TIPSY\n",dr[2]);
         fprintf(stderr,"posfac    : %.6e\n",posscalefac);
         fprintf(stderr,"velfac    : %.6e\n",velscalefac);
         fprintf(stderr,"massfac   : %.6e\n",massscalefac);
         fprintf(stderr,"softfac   : %.6e\n",softfac);
-        fprintf(stderr,"Softening : %.6e LU (toplevel)\n",toplevelsoftening);
-        fprintf(stderr,"Mass      : %.6e MU (toplevel)\n\n",toplevelmass);
+        fprintf(stderr,"Softening : %.6e LU_TIPSY (toplevel)\n",toplevelsoftening);
+        fprintf(stderr,"Mass      : %.6e MU_TIPSY (toplevel)\n\n",toplevelmass);
         fprintf(stderr,"Resulting internal ART units:\n\n");
-        fprintf(stderr,"LU : %.6e kpc\n",LU_ART);
-        fprintf(stderr,"TU : %.6e Gyr\n",TU_ART/VelConvertFac);
-        fprintf(stderr,"VU : %.6e km s^-1 = %.6e kpc Gyr^-1\n",VU_ART,VU_ART*VelConvertFac);
-        fprintf(stderr,"MU : %.6e Mo\n\n",MU_ART);
+        fprintf(stderr,"LU_ART : %.6e kpc\n",LU_ART);
+        fprintf(stderr,"TU_ART : %.6e Gyr\n",TU_ART/VelConvertFac);
+        fprintf(stderr,"VU_ART : %.6e km s^-1 = %.6e kpc Gyr^-1\n",VU_ART,VU_ART*VelConvertFac);
+        fprintf(stderr,"MU_ART : %.6e Mo\n\n",MU_ART);
         fprintf(stderr,"Resulting internal tipsy units:\n\n");
-        fprintf(stderr,"LU : %.6e kpc\n",LU_Tipsy);
-        fprintf(stderr,"TU : %.6e Gyr\n",TU_Tipsy/VelConvertFac);
-        fprintf(stderr,"VU : %.6e km s^-1 = %.6e kpc Gyr^-1\n",VU_Tipsy,VU_Tipsy*VelConvertFac);
-        fprintf(stderr,"MU : %.6e Mo\n\n",MU_Tipsy);
+        fprintf(stderr,"LU_TIPSY : %.6e kpc\n",LU_Tipsy);
+        fprintf(stderr,"TU_TIPSY : %.6e Gyr\n",TU_Tipsy/VelConvertFac);
+        fprintf(stderr,"VU_TIPSY : %.6e km s^-1 = %.6e kpc Gyr^-1\n",VU_Tipsy,VU_Tipsy*VelConvertFac);
+        fprintf(stderr,"MU_TIPSY : %.6e Mo\n\n",MU_Tipsy);
 	}
     if (verboselevel >= 0) {
         fprintf(stderr,"Time: %g Ntotal: %d Ngas: %d Ndark: %d Nstar: %d\n",
@@ -462,16 +499,18 @@ void usage(void) {
     fprintf(stderr,"\n");
     fprintf(stderr,"-spp             : set this flag if output file has single precision positions (default)\n");
     fprintf(stderr,"-dpp             : set this flag if output file has double precision positions\n");
-    fprintf(stderr,"-drx <value>     : shift along x-axis [LU] (default: -0.5 LU)\n");
-    fprintf(stderr,"-dry <value>     : shift along y-axis [LU] (default: -0.5 LU)\n");
-    fprintf(stderr,"-drz <value>     : shift along z-axis [LU] (default: -0.5 LU)\n");
-    fprintf(stderr,"-soft <value>    : softening length of top level particles [LU] (default: 1/softfac mean particle separation => 1/[Nlow^{-3}*softfac] LU)\n");
-    fprintf(stderr,"-mass <value>    : mass of top level particles [MU] (default: OmegaM0/Nlow - if you want masses from file in mr case set -1)\n");
-    fprintf(stderr,"-posfac <value>  : position scale factor (default: LU_ART/LU_Tipsy)\n");
-    fprintf(stderr,"-velfac <value>  : velocity scale factor (default: VU_ART/[a^2*VU_Tipsy] where a is the scale factor)\n");
-    fprintf(stderr,"-massfac <value> : mass scale factor (default: MU_ART/MU_Tipsy)\n");
+    fprintf(stderr,"-drx <value>     : shift along x-axis [LU_TIPSY] (default: -0.5 LU_TIPSY)\n");
+    fprintf(stderr,"-dry <value>     : shift along y-axis [LU_TIPSY] (default: -0.5 LU_TIPSY)\n");
+    fprintf(stderr,"-drz <value>     : shift along z-axis [LU_TIPSY] (default: -0.5 LU_TIPSY)\n");
+    fprintf(stderr,"-soft <value>    : softening length of top level particles [LU_TIPSY] (default: 1/softfac mean particle separation => 1/[Nlow^{-3}*softfac] LU_TIPSY)\n");
+    fprintf(stderr,"-mass <value>    : mass of top level particles [MU_TIPSY] (default: OmegaM0/Nlow - if you want masses from file in mr case set -1)\n");
+    fprintf(stderr,"-posfac <value>  : position scale factor (default: LU_ART/LU_TIPSY)\n");
+    fprintf(stderr,"-velfac <value>  : velocity scale factor (default: VU_ART/[a^2*VU_TIPSY] where a is the scale factor)\n");
+    fprintf(stderr,"-massfac <value> : mass scale factor (default: MU_ART/MU_TIPSY)\n");
     fprintf(stderr,"-softfac <value> : softening factor (default: 50)\n");
     fprintf(stderr,"-refstep <value> : refinement step factor (default: 2)\n");
+    fprintf(stderr,"-LBox <value>    : side length of box [chimp] (default: 1 chimp)\n");
+    fprintf(stderr,"-shift <value>   : internal shift before scaling [LU_ART] (default: 0 LU_ART)\n");
     fprintf(stderr,"-v               : more informative output to screen\n");
     fprintf(stderr,"-header <name>   : header input file in ART binary format\n");
     fprintf(stderr,"-data <name>     : data input file in ART binary format\n");
