@@ -98,8 +98,8 @@ void usage(void) {
     fprintf(stderr,"Please specify the following parameters:\n");
     fprintf(stderr,"\n");
     fprintf(stderr,"-i       : set this flag if it is an integer array\n");
-    fprintf(stderr,"-f       : set this flag if it is an float array\n");
-    fprintf(stderr,"-d       : set this flag if it is an double array\n");
+    fprintf(stderr,"-f       : set this flag if it is a float array\n");
+    fprintf(stderr,"-d       : set this flag if it is a double array\n");
     fprintf(stderr,"< <name> : input file in ascii format\n");
     fprintf(stderr,"> <name> : output file in standard binary format\n");
     fprintf(stderr,"\n");
