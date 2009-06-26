@@ -20,10 +20,10 @@ int main(int argc, char **argv) {
 
     int i = 0, j = 0, k = 0;
     int header, trailer;
-    int positionprecision, verboselevel, doswap, mrmassfromfile;
+    int positionprecision, verboselevel, doswap, massfromfile;
     long Ntot, index, N[10];
     int Nrec, Npage, N1Dlow, Nlow, L, Lmax;
-    double posscalefac, velscalefac, massscalefac, refinementstep;
+    double posscalefac, velscalefac, massscalefac, b2dmscalefac, refinementstep;
     double toplevelmass, toplevelsoftening;
     double dr[3], acurrent, VelConvertFac, rhocrit, LBox, softfac, shift;
     double OmegaM0, OmegaDM0, OmegaB0, OmegaL0, OmegaK0, OmegaR0, h100;
@@ -49,7 +49,7 @@ int main(int argc, char **argv) {
     positionprecision = 0;
     verboselevel = 0;
     doswap = 0;
-    mrmassfromfile = 0;
+    massfromfile = 0;
     dr[0] = -0.5;
     dr[1] = -0.5;
     dr[2] = -0.5;
@@ -62,6 +62,7 @@ int main(int argc, char **argv) {
     posscalefac = -2;
     velscalefac = -2;
     massscalefac = -2;
+    b2dmscalefac = -2;
     softfac = 50;
     Nrec = 1024*1024;
     H_Tipsy = sqrt(8*M_PI/3); /* TU_Tipsy^-1 */
@@ -266,12 +267,13 @@ int main(int argc, char **argv) {
     if (posscalefac < 0) posscalefac = 1.0/ah.Ngrid; /* LU_ART / LU_Tipsy */
     if (velscalefac < 0) velscalefac = VU_ART/(acurrent*acurrent*VU_Tipsy);
     if (massscalefac < 0) massscalefac = MU_ART/MU_Tipsy;
+    if (b2dmscalefac < 0) b2dmscalefac = OmegaM0/OmegaDM0;
     
     if (toplevelsoftening < 0) toplevelsoftening = 1.0/(N1Dlow*softfac);
     if (toplevelmass < 0) {
 	if (toplevelmass == -1) {
-	    mrmassfromfile = 1;
-	    toplevelmass = ah.mass[Lmax]*(OmegaM0/OmegaDM0)*massscalefac;
+	    massfromfile = 1;
+	    toplevelmass = ah.mass[Lmax]*b2dmscalefac*massscalefac;
 	    }
 	else {
 	    toplevelmass = OmegaM0/Nlow;
@@ -287,8 +289,8 @@ int main(int argc, char **argv) {
 	    N[L] = ah.num[k]-ah.num[k-1];
 	    }
 	soft[L] = toplevelsoftening/pow(refinementstep,L);
-	if (mrmassfromfile == 1) {
-	    mass[L] = ah.mass[k]*(OmegaM0/OmegaDM0)*massscalefac;
+	if (massfromfile == 1) {
+	    mass[L] = ah.mass[k]*b2dmscalefac*massscalefac;
 	    }
 	else {
 	    mass[L] = toplevelmass/pow(refinementstep,3.0*L);
@@ -468,6 +470,7 @@ int main(int argc, char **argv) {
         fprintf(stderr,"posfac    : %.6e\n",posscalefac);
         fprintf(stderr,"velfac    : %.6e\n",velscalefac);
         fprintf(stderr,"massfac   : %.6e\n",massscalefac);
+        fprintf(stderr,"b2dmfac   : %.6e\n",b2dmscalefac);
         fprintf(stderr,"softfac   : %.6e\n",softfac);
         fprintf(stderr,"Softening : %.6e LU_TIPSY (toplevel)\n",toplevelsoftening);
         fprintf(stderr,"Mass      : %.6e MU_TIPSY (toplevel)\n\n",toplevelmass);
@@ -503,10 +506,11 @@ void usage(void) {
     fprintf(stderr,"-dry <value>     : shift along y-axis [LU_TIPSY] (default: -0.5 LU_TIPSY)\n");
     fprintf(stderr,"-drz <value>     : shift along z-axis [LU_TIPSY] (default: -0.5 LU_TIPSY)\n");
     fprintf(stderr,"-soft <value>    : softening length of top level particles [LU_TIPSY] (default: 1/softfac mean particle separation => 1/[Nlow^{-3}*softfac] LU_TIPSY)\n");
-    fprintf(stderr,"-mass <value>    : mass of top level particles [MU_TIPSY] (default: OmegaM0/Nlow - if you want masses from file in mr case set -1)\n");
+    fprintf(stderr,"-mass <value>    : mass of top level particles [MU_TIPSY] (default: OmegaM0/Nlow - if you want masses from file set -1)\n");
     fprintf(stderr,"-posfac <value>  : position scale factor (default: LU_ART/LU_TIPSY)\n");
     fprintf(stderr,"-velfac <value>  : velocity scale factor (default: VU_ART/[a^2*VU_TIPSY] where a is the scale factor)\n");
     fprintf(stderr,"-massfac <value> : mass scale factor (default: MU_ART/MU_TIPSY)\n");
+    fprintf(stderr,"-b2dmfac <value> : baryon to dark matter scale factor (default: OmegaM0/OmegaDM0)\n");
     fprintf(stderr,"-softfac <value> : softening factor (default: 50)\n");
     fprintf(stderr,"-refstep <value> : refinement step factor (default: 2)\n");
     fprintf(stderr,"-LBox <value>    : side length of box [chimp] (default: 1 chimp)\n");
