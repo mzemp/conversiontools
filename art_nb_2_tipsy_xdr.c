@@ -152,6 +152,14 @@ int main(int argc, char **argv) {
             massscalefac = atof(argv[i]);
             i++;
             }
+        else if (strcmp(argv[i],"-b2dmfac") == 0) {
+            i++;
+            if (i >= argc) {
+                usage();
+                }
+            b2dmscalefac = atof(argv[i]);
+            i++;
+            }
         else if (strcmp(argv[i],"-softfac") == 0) {
             i++;
             if (i >= argc) {
