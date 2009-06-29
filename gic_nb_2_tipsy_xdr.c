@@ -25,12 +25,14 @@ int main(int argc, char **argv) {
     int Nrec, Npage, N1Dlow, Nlow, Lmax;
     GIC_REAL *PosXRec, *PosYRec, *PosZRec;
     GIC_REAL *VelXRec, *VelYRec, *VelZRec;
-    double posscalefac, velscalefac, massscalefac, refinementstep;
+    double LUsf, VUsf, MUsf;
+    double b2dmscalefac, csvelscalefac, refinementstep;
     double particlemass, particlesoftening;
     double toplevelmass, toplevelsoftening;
     double dr[3], dx, acurrent, VelConvertFac, rhocrit, LBox, softfac;
     double OmegaM0, OmegaDM0, OmegaB0, OmegaL0, OmegaK0, OmegaR0, h100;
-    double H_Tipsy, TU_Tipsy, LU_Tipsy, VU_Tipsy, MU_Tipsy;
+    double H_TIPSY_DEFAULT, TU_TIPSY_DEFAULT, LU_TIPSY_DEFAULT, VU_TIPSY_DEFAULT, MU_TIPSY_DEFAULT;
+    double TU_TIPSY, LU_TIPSY, VU_TIPSY, MU_TIPSY;
     double TU_GIC, LU_GIC, VU_GIC, MU_GIC;
     char PosFileName[256], VelFileName[256];
     TIPSY_HEADER th;
@@ -62,13 +64,13 @@ int main(int argc, char **argv) {
     refinementstep = 2;
     particlesoftening = -2;
     particlemass = -2;
-    posscalefac = -2;
-    velscalefac = -2;
-    massscalefac = -2;
+    LUsf = -2;
+    VUsf = -2;
+    MUsf = -2;
     softfac = 50;
     toplevelsoftening = 0;
     toplevelmass = 0;
-    H_Tipsy = sqrt(8*M_PI/3); /* TU_Tipsy^-1 */
+    H_TIPSY_DEFAULT = sqrt(8*M_PI/3); /* TU_TIPSY^-1 */
     VelConvertFac = 1.0227121651152353693;
     rhocrit = 277.53662719; /* h^2 Mo kpc^-3 */
 
@@ -146,28 +148,36 @@ int main(int argc, char **argv) {
             particlemass = atof(argv[i]);
             i++;
             }
-        else if (strcmp(argv[i],"-posfac") == 0) {
+        else if (strcmp(argv[i],"-LUsf") == 0) {
             i++;
             if (i >= argc) {
                 usage();
                 }
-            posscalefac = atof(argv[i]);
+            LUsf = atof(argv[i]);
             i++;
             }
-        else if (strcmp(argv[i],"-velfac") == 0) {
+        else if (strcmp(argv[i],"-VUsf") == 0) {
             i++;
             if (i >= argc) {
                 usage();
                 }
-            velscalefac = atof(argv[i]);
+            VUsf = atof(argv[i]);
             i++;
             }
-        else if (strcmp(argv[i],"-massfac") == 0) {
+        else if (strcmp(argv[i],"-MUsf") == 0) {
             i++;
             if (i >= argc) {
                 usage();
                 }
-            massscalefac = atof(argv[i]);
+            MUsf = atof(argv[i]);
+            i++;
+            }
+        else if (strcmp(argv[i],"-b2dmfac") == 0) {
+            i++;
+            if (i >= argc) {
+                usage();
+                }
+            b2dmscalefac = atof(argv[i]);
             i++;
             }
         else if (strcmp(argv[i],"-softfac") == 0) {
@@ -277,7 +287,7 @@ int main(int argc, char **argv) {
 
     acurrent = PosHeader.aBegin;
     h100 = PosManifest.h100;
-    OmegaM0 = PosManifest.OmegaX+PosManifest.OmegaB;;
+    OmegaM0 = PosManifest.OmegaX+PosManifest.OmegaB;
     OmegaDM0 = PosManifest.OmegaX;
     OmegaB0 = PosManifest.OmegaB;
     OmegaL0 = PosManifest.OmegaL;
@@ -322,19 +332,26 @@ int main(int argc, char **argv) {
     ** Calculate units and scaling factors
     */
 
-    TU_Tipsy = (H_Tipsy*1000)/(h100*100); /* kpc km^-1 s */
-    LU_Tipsy = LBox*1000/h100; /* kpc */
-    VU_Tipsy = LU_Tipsy/TU_Tipsy; /* km s^-1 */
-    MU_Tipsy = rhocrit*h100*h100*LU_Tipsy*LU_Tipsy*LU_Tipsy; /* Mo */
+    TU_TIPSY_DEFAULT = (H_TIPSY_DEFAULT*1000)/(h100*100); /* kpc km^-1 s */
+    LU_TIPSY_DEFAULT = LBox*1000/h100; /* kpc */
+    VU_TIPSY_DEFAULT = LU_TIPSY_DEFAULT/TU_TIPSY_DEFAULT; /* km s^-1 */
+    MU_TIPSY_DEFAULT = rhocrit*h100*h100*LU_TIPSY_DEFAULT*LU_TIPSY_DEFAULT*LU_TIPSY_DEFAULT; /* Mo */
 
     LU_GIC = 1000/h100; /* kpc */
     VU_GIC = 1; /* km s^-1 */
     MU_GIC = 1; /* Mo */
     TU_GIC = LU_GIC/VU_GIC; /* kpc km^-1 s */
 
-    if (posscalefac < 0) posscalefac = 1.0/LBox; /* LU_GIC / LU_Tipsy */
-    if (velscalefac < 0) velscalefac = VU_GIC/(acurrent*VU_Tipsy);
-    if (massscalefac < 0) massscalefac = MU_GIC/MU_Tipsy;
+    if (LUsf < 0) LUsf = 1.0/LBox; /* LU_GIC / LU_TIPSY_DEFAULT */
+    if (VUsf < 0) VUsf = VU_GIC/VU_TIPSY_DEFAULT;
+    if (MUsf < 0) MUsf = MU_GIC/MU_TIPSY_DEFAULT;
+    if (b2dmscalefac < 0) b2dmscalefac = OmegaM0/OmegaDM0;
+    csvelscalefac = 1/acurrent;
+
+    LU_TIPSY = LU_GIC/LUsf; /* kpc */
+    VU_TIPSY = VU_GIC/VUsf; /* km s^-1 */
+    MU_TIPSY = MU_GIC/MUsf; /* Mo */
+    TU_TIPSY = LU_TIPSY/VU_TIPSY; /* kpc km^-1 s */
 
     /*
     ** Get output file ready
@@ -369,8 +386,8 @@ int main(int argc, char **argv) {
 	** Set particle mass and softening
 	*/
 
-	if (particlesoftening < 0) particlesoftening = 1.0/(N1Dlow*softfac);
-	if (particlemass < 0) particlemass = (PosManifest.OmegaB+PosManifest.OmegaX)/Ntot;
+	if (particlesoftening < 0) particlesoftening = (LBox/(N1Dlow*softfac))*(1000/(h100*LU_TIPSY));
+	if (particlemass < 0) particlemass = OmegaM0/Ntot;
 	toplevelsoftening = particlesoftening;
 	toplevelmass = particlemass;
 
@@ -389,12 +406,12 @@ int main(int argc, char **argv) {
 	    for (j = 0; j < Nrec; j++) {
 		if (positionprecision == 0) {
 		    if (particletype == 0) {
-			gp.pos[0] = PosXRec[j]*posscalefac + dr[0];
-			gp.pos[1] = PosYRec[j]*posscalefac + dr[1];
-			gp.pos[2] = PosZRec[j]*posscalefac + dr[2];
-			gp.vel[0] = VelXRec[j]*velscalefac;
-			gp.vel[1] = VelYRec[j]*velscalefac;
-			gp.vel[2] = VelZRec[j]*velscalefac;
+			gp.pos[0] = PosXRec[j]*LUsf + dr[0];
+			gp.pos[1] = PosYRec[j]*LUsf + dr[1];
+			gp.pos[2] = PosZRec[j]*LUsf + dr[2];
+			gp.vel[0] = VelXRec[j]*csvelscalefac*VUsf;
+			gp.vel[1] = VelYRec[j]*csvelscalefac*VUsf;
+			gp.vel[2] = VelZRec[j]*csvelscalefac*VUsf;
 			gp.mass = particlemass;
 			gp.rho = 0;
 			gp.temp = 0;
@@ -404,24 +421,24 @@ int main(int argc, char **argv) {
 			if (index < Ntot) write_tipsy_standard_gas(&xdrs,&gp);
 			}
 		    else if (particletype == 1) {
-			dp.pos[0] = PosXRec[j]*posscalefac + dr[0];
-			dp.pos[1] = PosYRec[j]*posscalefac + dr[1];
-			dp.pos[2] = PosZRec[j]*posscalefac + dr[2];
-			dp.vel[0] = VelXRec[j]*velscalefac;
-			dp.vel[1] = VelYRec[j]*velscalefac;
-			dp.vel[2] = VelZRec[j]*velscalefac;
+			dp.pos[0] = PosXRec[j]*LUsf + dr[0];
+			dp.pos[1] = PosYRec[j]*LUsf + dr[1];
+			dp.pos[2] = PosZRec[j]*LUsf + dr[2];
+			dp.vel[0] = VelXRec[j]*csvelscalefac*VUsf;
+			dp.vel[1] = VelYRec[j]*csvelscalefac*VUsf;
+			dp.vel[2] = VelZRec[j]*csvelscalefac*VUsf;
 			dp.mass = particlemass;
 			dp.eps = particlesoftening;
 			dp.phi = 0;
 			if (index < Ntot) write_tipsy_standard_dark(&xdrs,&dp);
 			}
 		    else {
-			sp.pos[0] = PosXRec[j]*posscalefac + dr[0];
-			sp.pos[1] = PosYRec[j]*posscalefac + dr[1];
-			sp.pos[2] = PosZRec[j]*posscalefac + dr[2];
-			sp.vel[0] = VelXRec[j]*velscalefac;
-			sp.vel[1] = VelYRec[j]*velscalefac;
-			sp.vel[2] = VelZRec[j]*velscalefac;
+			sp.pos[0] = PosXRec[j]*LUsf + dr[0];
+			sp.pos[1] = PosYRec[j]*LUsf + dr[1];
+			sp.pos[2] = PosZRec[j]*LUsf + dr[2];
+			sp.vel[0] = VelXRec[j]*csvelscalefac*VUsf;
+			sp.vel[1] = VelYRec[j]*csvelscalefac*VUsf;
+			sp.vel[2] = VelZRec[j]*csvelscalefac*VUsf;
 			sp.mass = particlemass;
 			sp.metals = 0;
 			sp.tform = 0;
@@ -432,12 +449,12 @@ int main(int argc, char **argv) {
 		    }
 		else {
 		    if (particletype == 0) {
-			gpdpp.pos[0] = PosXRec[j]*posscalefac + dr[0];
-			gpdpp.pos[1] = PosYRec[j]*posscalefac + dr[1];
-			gpdpp.pos[2] = PosZRec[j]*posscalefac + dr[2];
-			gpdpp.vel[0] = VelXRec[j]*velscalefac;
-			gpdpp.vel[1] = VelYRec[j]*velscalefac;
-			gpdpp.vel[2] = VelZRec[j]*velscalefac;
+			gpdpp.pos[0] = PosXRec[j]*LUsf + dr[0];
+			gpdpp.pos[1] = PosYRec[j]*LUsf + dr[1];
+			gpdpp.pos[2] = PosZRec[j]*LUsf + dr[2];
+			gpdpp.vel[0] = VelXRec[j]*csvelscalefac*VUsf;
+			gpdpp.vel[1] = VelYRec[j]*csvelscalefac*VUsf;
+			gpdpp.vel[2] = VelZRec[j]*csvelscalefac*VUsf;
 			gpdpp.mass = particlemass;
 			gpdpp.rho = 0;
 			gpdpp.temp = 0;
@@ -447,24 +464,24 @@ int main(int argc, char **argv) {
 			if (index < Ntot) write_tipsy_standard_gas_dpp(&xdrs,&gpdpp);
 			}
 		    else if (particletype == 1) {
-			dpdpp.pos[0] = PosXRec[j]*posscalefac + dr[0];
-			dpdpp.pos[1] = PosYRec[j]*posscalefac + dr[1];
-			dpdpp.pos[2] = PosZRec[j]*posscalefac + dr[2];
-			dpdpp.vel[0] = VelXRec[j]*velscalefac;
-			dpdpp.vel[1] = VelYRec[j]*velscalefac;
-			dpdpp.vel[2] = VelZRec[j]*velscalefac;
+			dpdpp.pos[0] = PosXRec[j]*LUsf + dr[0];
+			dpdpp.pos[1] = PosYRec[j]*LUsf + dr[1];
+			dpdpp.pos[2] = PosZRec[j]*LUsf + dr[2];
+			dpdpp.vel[0] = VelXRec[j]*csvelscalefac*VUsf;
+			dpdpp.vel[1] = VelYRec[j]*csvelscalefac*VUsf;
+			dpdpp.vel[2] = VelZRec[j]*csvelscalefac*VUsf;
 			dpdpp.mass = particlemass;
 			dpdpp.eps = particlesoftening;
 			dpdpp.phi = 0;
 			if (index < Ntot) write_tipsy_standard_dark_dpp(&xdrs,&dpdpp);
 			}
 		    else {
-			spdpp.pos[0] = PosXRec[j]*posscalefac + dr[0];
-			spdpp.pos[1] = PosYRec[j]*posscalefac + dr[1];
-			spdpp.pos[2] = PosZRec[j]*posscalefac + dr[2];
-			spdpp.vel[0] = VelXRec[j]*velscalefac;
-			spdpp.vel[1] = VelYRec[j]*velscalefac;
-			spdpp.vel[2] = VelZRec[j]*velscalefac;
+			spdpp.pos[0] = PosXRec[j]*LUsf + dr[0];
+			spdpp.pos[1] = PosYRec[j]*LUsf + dr[1];
+			spdpp.pos[2] = PosZRec[j]*LUsf + dr[2];
+			spdpp.vel[0] = VelXRec[j]*csvelscalefac*VUsf;
+			spdpp.vel[1] = VelYRec[j]*csvelscalefac*VUsf;
+			spdpp.vel[2] = VelZRec[j]*csvelscalefac*VUsf;
 			spdpp.mass = particlemass;
 			spdpp.metals = 0;
 			spdpp.tform = 0;
@@ -541,14 +558,14 @@ int main(int argc, char **argv) {
 	    */
 
 	    if (k == 0) { /* top level softening */
-		if (particlesoftening < 0) particlesoftening = 1.0/(N1Dlow*softfac);
+		if (particlesoftening < 0) particlesoftening = (LBox/(N1Dlow*softfac))*(1000/(h100*LU_TIPSY));
 		toplevelsoftening = particlesoftening;
 		}
 	    else {
 		particlesoftening /= refinementstep;
 		}
 	    if (k == 0) { /* top level mass */
-		if (particlemass < 0) particlemass = (PosManifest.OmegaB+PosManifest.OmegaX)/Nlow;
+		if (particlemass < 0) particlemass = OmegaM0/Nlow;
 		toplevelmass = particlemass;
 		}
 	    else {
@@ -556,7 +573,7 @@ int main(int argc, char **argv) {
 		}
 	    if (mrmassfromfile == 1) {
 		assert(PosLevelHeader[k].Mlev == VelLevelHeader[k].Mlev);
-		particlemass = PosLevelHeader[k].Mlev*massscalefac;
+		particlemass = PosLevelHeader[k].Mlev*b2dmscalefac*MUsf;
 		if (k == 0) toplevelmass = particlemass;
 		}
 
@@ -575,12 +592,12 @@ int main(int argc, char **argv) {
 		for (j = 0; j < Nrec; j++) {
 		    if (positionprecision == 0) {
 			if (particletype == 0) {
-			    gp.pos[0] = PosXRec[j]*posscalefac + dr[0];
-			    gp.pos[1] = PosYRec[j]*posscalefac + dr[1];
-			    gp.pos[2] = PosZRec[j]*posscalefac + dr[2];
-			    gp.vel[0] = VelXRec[j]*velscalefac;
-			    gp.vel[1] = VelYRec[j]*velscalefac;
-			    gp.vel[2] = VelZRec[j]*velscalefac;
+			    gp.pos[0] = PosXRec[j]*LUsf + dr[0];
+			    gp.pos[1] = PosYRec[j]*LUsf + dr[1];
+			    gp.pos[2] = PosZRec[j]*LUsf + dr[2];
+			    gp.vel[0] = VelXRec[j]*csvelscalefac*VUsf;
+			    gp.vel[1] = VelYRec[j]*csvelscalefac*VUsf;
+			    gp.vel[2] = VelZRec[j]*csvelscalefac*VUsf;
 			    gp.mass = particlemass;
 			    gp.rho = 0;
 			    gp.temp = 0;
@@ -590,24 +607,24 @@ int main(int argc, char **argv) {
 			    if (index < Nlev) write_tipsy_standard_gas(&xdrs,&gp);
 			    }
 			else if (particletype == 1) {
-			    dp.pos[0] = PosXRec[j]*posscalefac + dr[0];
-			    dp.pos[1] = PosYRec[j]*posscalefac + dr[1];
-			    dp.pos[2] = PosZRec[j]*posscalefac + dr[2];
-			    dp.vel[0] = VelXRec[j]*velscalefac;
-			    dp.vel[1] = VelYRec[j]*velscalefac;
-			    dp.vel[2] = VelZRec[j]*velscalefac;
+			    dp.pos[0] = PosXRec[j]*LUsf + dr[0];
+			    dp.pos[1] = PosYRec[j]*LUsf + dr[1];
+			    dp.pos[2] = PosZRec[j]*LUsf + dr[2];
+			    dp.vel[0] = VelXRec[j]*csvelscalefac*VUsf;
+			    dp.vel[1] = VelYRec[j]*csvelscalefac*VUsf;
+			    dp.vel[2] = VelZRec[j]*csvelscalefac*VUsf;
 			    dp.mass = particlemass;
 			    dp.eps = particlesoftening;
 			    dp.phi = 0;
 			    if (index < Nlev) write_tipsy_standard_dark(&xdrs,&dp);
 			    }
 			else {
-			    sp.pos[0] = PosXRec[j]*posscalefac + dr[0];
-			    sp.pos[1] = PosYRec[j]*posscalefac + dr[1];
-			    sp.pos[2] = PosZRec[j]*posscalefac + dr[2];
-			    sp.vel[0] = VelXRec[j]*velscalefac;
-			    sp.vel[1] = VelYRec[j]*velscalefac;
-			    sp.vel[2] = VelZRec[j]*velscalefac;
+			    sp.pos[0] = PosXRec[j]*LUsf + dr[0];
+			    sp.pos[1] = PosYRec[j]*LUsf + dr[1];
+			    sp.pos[2] = PosZRec[j]*LUsf + dr[2];
+			    sp.vel[0] = VelXRec[j]*csvelscalefac*VUsf;
+			    sp.vel[1] = VelYRec[j]*csvelscalefac*VUsf;
+			    sp.vel[2] = VelZRec[j]*csvelscalefac*VUsf;
 			    sp.mass = particlemass;
 			    sp.metals = 0;
 			    sp.tform = 0;
@@ -618,12 +635,12 @@ int main(int argc, char **argv) {
 			}
 		    else {
 			if (particletype == 0) {
-			    gpdpp.pos[0] = PosXRec[j]*posscalefac + dr[0];
-			    gpdpp.pos[1] = PosYRec[j]*posscalefac + dr[1];
-			    gpdpp.pos[2] = PosZRec[j]*posscalefac + dr[2];
-			    gpdpp.vel[0] = VelXRec[j]*velscalefac;
-			    gpdpp.vel[1] = VelYRec[j]*velscalefac;
-			    gpdpp.vel[2] = VelZRec[j]*velscalefac;
+			    gpdpp.pos[0] = PosXRec[j]*LUsf + dr[0];
+			    gpdpp.pos[1] = PosYRec[j]*LUsf + dr[1];
+			    gpdpp.pos[2] = PosZRec[j]*LUsf + dr[2];
+			    gpdpp.vel[0] = VelXRec[j]*csvelscalefac*VUsf;
+			    gpdpp.vel[1] = VelYRec[j]*csvelscalefac*VUsf;
+			    gpdpp.vel[2] = VelZRec[j]*csvelscalefac*VUsf;
 			    gpdpp.mass = particlemass;
 			    gpdpp.rho = 0;
 			    gpdpp.temp = 0;
@@ -633,24 +650,24 @@ int main(int argc, char **argv) {
 			    if (index < Nlev) write_tipsy_standard_gas_dpp(&xdrs,&gpdpp);
 			    }
 			else if (particletype == 1) {
-			    dpdpp.pos[0] = PosXRec[j]*posscalefac + dr[0];
-			    dpdpp.pos[1] = PosYRec[j]*posscalefac + dr[1];
-			    dpdpp.pos[2] = PosZRec[j]*posscalefac + dr[2];
-			    dpdpp.vel[0] = VelXRec[j]*velscalefac;
-			    dpdpp.vel[1] = VelYRec[j]*velscalefac;
-			    dpdpp.vel[2] = VelZRec[j]*velscalefac;
+			    dpdpp.pos[0] = PosXRec[j]*LUsf + dr[0];
+			    dpdpp.pos[1] = PosYRec[j]*LUsf + dr[1];
+			    dpdpp.pos[2] = PosZRec[j]*LUsf + dr[2];
+			    dpdpp.vel[0] = VelXRec[j]*csvelscalefac*VUsf;
+			    dpdpp.vel[1] = VelYRec[j]*csvelscalefac*VUsf;
+			    dpdpp.vel[2] = VelZRec[j]*csvelscalefac*VUsf;
 			    dpdpp.mass = particlemass;
 			    dpdpp.eps = particlesoftening;
 			    dpdpp.phi = 0;
 			    if (index < Nlev) write_tipsy_standard_dark_dpp(&xdrs,&dpdpp);
 			    }
 			else {
-			    spdpp.pos[0] = PosXRec[j]*posscalefac + dr[0];
-			    spdpp.pos[1] = PosYRec[j]*posscalefac + dr[1];
-			    spdpp.pos[2] = PosZRec[j]*posscalefac + dr[2];
-			    spdpp.vel[0] = VelXRec[j]*velscalefac;
-			    spdpp.vel[1] = VelYRec[j]*velscalefac;
-			    spdpp.vel[2] = VelZRec[j]*velscalefac;
+			    spdpp.pos[0] = PosXRec[j]*LUsf + dr[0];
+			    spdpp.pos[1] = PosYRec[j]*LUsf + dr[1];
+			    spdpp.pos[2] = PosZRec[j]*LUsf + dr[2];
+			    spdpp.vel[0] = VelXRec[j]*csvelscalefac*VUsf;
+			    spdpp.vel[1] = VelYRec[j]*csvelscalefac*VUsf;
+			    spdpp.vel[2] = VelZRec[j]*csvelscalefac*VUsf;
 			    spdpp.mass = particlemass;
 			    spdpp.metals = 0;
 			    spdpp.tform = 0;
@@ -683,7 +700,7 @@ int main(int argc, char **argv) {
 	    */
 
 	    if (verboselevel >= 1) {
-		fprintf(stderr,"L %d Lmax %d Nlev %ld Softening %.6e LU_TIPSY = %.6e kpc Mass %.6e MU_TIPSY = %.6e Mo\n",PosLevelHeader[k].L,PosLevelHeader[k].Lmax,Nlev,particlesoftening,particlesoftening*LU_Tipsy,particlemass,particlemass*MU_Tipsy);
+		fprintf(stderr,"L %d Lmax %d Nlev %ld Softening %.6e LU_TIPSY = %.6e kpc Mass %.6e MU_TIPSY = %.6e Mo\n",PosLevelHeader[k].L,PosLevelHeader[k].Lmax,Nlev,particlesoftening,particlesoftening*LU_TIPSY,particlemass,particlemass*MU_TIPSY);
 		if (k == Lmax) fprintf(stderr,"\n");
 		}
 	    }
@@ -728,9 +745,9 @@ int main(int argc, char **argv) {
 	fprintf(stderr,"drx       : %.6e LU_TIPSY\n",dr[0]);
 	fprintf(stderr,"dry       : %.6e LU_TIPSY\n",dr[1]);
 	fprintf(stderr,"drz       : %.6e LU_TIPSY\n",dr[2]);
-	fprintf(stderr,"posfac    : %.6e\n",posscalefac);
-	fprintf(stderr,"velfac    : %.6e\n",velscalefac);
-	fprintf(stderr,"massfac   : %.6e\n",massscalefac);
+	fprintf(stderr,"LUsf      : %.6e\n",LUsf);
+	fprintf(stderr,"VUsf      : %.6e\n",VUsf);
+	fprintf(stderr,"MUsf      : %.6e\n",MUsf);
 	fprintf(stderr,"softfac   : %.6e\n",softfac);
 	fprintf(stderr,"Softening : %.6e LU_TIPSY (toplevel)\n",toplevelsoftening);
 	fprintf(stderr,"Mass      : %.6e MU_TIPSY (toplevel)\n\n",toplevelmass);
@@ -740,10 +757,10 @@ int main(int argc, char **argv) {
 	fprintf(stderr,"VU_GIC : %.6e km s^-1 = %.6e kpc Gyr^-1\n",VU_GIC,VU_GIC*VelConvertFac);
 	fprintf(stderr,"MU_GIC : %.6e Mo\n\n",MU_GIC);
 	fprintf(stderr,"Resulting internal tipsy units:\n\n");
-	fprintf(stderr,"LU_TIPSY : %.6e kpc\n",LU_Tipsy);
-	fprintf(stderr,"TU_TIPSY : %.6e Gyr\n",TU_Tipsy/VelConvertFac);
-	fprintf(stderr,"VU_TIPSY : %.6e km s^-1 = %.6e kpc Gyr^-1\n",VU_Tipsy,VU_Tipsy*VelConvertFac);
-	fprintf(stderr,"MU_TIPSY : %.6e Mo\n\n",MU_Tipsy);
+	fprintf(stderr,"LU_TIPSY : %.6e kpc\n",LU_TIPSY);
+	fprintf(stderr,"TU_TIPSY : %.6e Gyr\n",TU_TIPSY/VelConvertFac);
+	fprintf(stderr,"VU_TIPSY : %.6e km s^-1 = %.6e kpc Gyr^-1\n",VU_TIPSY,VU_TIPSY*VelConvertFac);
+	fprintf(stderr,"MU_TIPSY : %.6e Mo\n\n",MU_TIPSY);
 	}
     if (verboselevel >= 0) {
 	fprintf(stderr,"Time: %g Ntotal: %d Ngas: %d Ndark: %d Nstar: %d\n",
@@ -770,11 +787,12 @@ void usage(void) {
     fprintf(stderr,"-drx <value>     : shift along x-axis [LU_TIPSY] (default: -0.5 LU_TIPSY)\n");
     fprintf(stderr,"-dry <value>     : shift along y-axis [LU_TIPSY] (default: -0.5 LU_TIPSY)\n");
     fprintf(stderr,"-drz <value>     : shift along z-axis [LU_TIPSY] (default: -0.5 LU_TIPSY)\n");
-    fprintf(stderr,"-soft <value>    : softening length of top level particles [LU_TIPSY] (default: 1/softfac mean particle separation => 1/[Nlow^{-3}*softfac] LU_TIPSY)\n");
+    fprintf(stderr,"-soft <value>    : softening length of top level particles [LU_TIPSY] (default: 1/softfac mean particle separation => LBox/(N1Dlow*softfac) LU_TIPSY)\n");
     fprintf(stderr,"-mass <value>    : mass of top level particles [MU_TIPSY] (default: OmegaM0/Nlow - if you want masses from file in mr case set -1)\n");
-    fprintf(stderr,"-posfac <value>  : position scale factor (default: LU_GIC/LU_TIPSY)\n");
-    fprintf(stderr,"-velfac <value>  : velocity scale factor (default: VU_GIC/[a*VU_TIPSY] where a is the scale factor)\n");
-    fprintf(stderr,"-massfac <value> : mass scale factor (default: MU_GIC/MU_TIPSY - only in mr case when read from file)\n");
+    fprintf(stderr,"-LUsf <value>    : length unit scale factor (default: LU_GIC/LU_TIPSY_DEFAULT)\n");
+    fprintf(stderr,"-VUsf <value>    : velocity unit scale factor (default: VU_GIC/VU_TIPSY_DEFAULT)\n");
+    fprintf(stderr,"-MUsf <value>    : mass unit scale factor (default: MU_GIC/MU_TIPSY_DEFAULT - only in mr case when read from file)\n");
+    fprintf(stderr,"-b2dmfac <value> : baryon to dark matter scale factor (default: OmegaM0/OmegaDM0)\n");
     fprintf(stderr,"-softfac <value> : softening factor (default: 50)\n");
     fprintf(stderr,"-refstep <value> : refinement step factor (default: 2)\n");
     fprintf(stderr,"-v               : more informative output to screen\n");
