@@ -3,7 +3,8 @@
 NAME	= conversiontools
 TOOLS	= ts2ta ts2tb ts2gb ta2ts tb2ts gb2ts\
 	tsspp2tsdpp tsdpp2tsspp tscom2tsphy ts2silo\
-	aa2as as2aa cas eas gicb2ts artb2ts
+	aa2as as2aa cas eas gicb2ts artb2ts\
+	aa2ahf
 EXT	= 64
 VERSION = 1.1
 
