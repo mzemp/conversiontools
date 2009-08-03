@@ -90,6 +90,14 @@ int main(int argc, char **argv) {
             positionprecision = 1;
             i++;
             }
+        else if (strcmp(argv[i],"-LBox") == 0) {
+            i++;
+            if (i >= argc) {
+                usage();
+                }
+            LBox = atof(argv[i]);
+            i++;
+            }
         else if (strcmp(argv[i],"-drx") == 0) {
             i++;
             if (i >= argc) {
@@ -112,6 +120,14 @@ int main(int argc, char **argv) {
                 usage();
                 }
             dr[2] = atof(argv[i]);
+            i++;
+            }
+        else if (strcmp(argv[i],"-shift") == 0) {
+            i++;
+            if (i >= argc) {
+                usage();
+                }
+            shift = atof(argv[i]);
             i++;
             }
         else if (strcmp(argv[i],"-soft") == 0) {
@@ -162,6 +178,19 @@ int main(int argc, char **argv) {
             b2dmscalefac = atof(argv[i]);
             i++;
             }
+	else if (strcmp(argv[i],"-noscaling") == 0) {
+	    dr[0] = 0;
+	    dr[1] = 0;
+	    dr[2] = 0;
+	    shift = 0;
+	    LUsf = 1;
+	    VUsf = 1;
+	    MUsf = 1;
+	    b2dmscalefac = 1;
+	    toplevelmass = -1;
+	    toplevelsoftening = -2;
+	    i++;
+	    }
         else if (strcmp(argv[i],"-softfac") == 0) {
             i++;
             if (i >= argc) {
@@ -176,22 +205,6 @@ int main(int argc, char **argv) {
                 usage();
                 }
             refinementstep = atof(argv[i]);
-            i++;
-            }
-        else if (strcmp(argv[i],"-LBox") == 0) {
-            i++;
-            if (i >= argc) {
-                usage();
-                }
-            LBox = atof(argv[i]);
-            i++;
-            }
-        else if (strcmp(argv[i],"-shift") == 0) {
-            i++;
-            if (i >= argc) {
-                usage();
-                }
-            shift = atof(argv[i]);
             i++;
             }
         else if (strcmp(argv[i],"-header") == 0) {
@@ -518,9 +531,11 @@ void usage(void) {
     fprintf(stderr,"\n");
     fprintf(stderr,"-spp             : set this flag if output file has single precision positions (default)\n");
     fprintf(stderr,"-dpp             : set this flag if output file has double precision positions\n");
+    fprintf(stderr,"-LBox <value>    : side length of box [chimp] (default: 1 chimp)\n");
     fprintf(stderr,"-drx <value>     : shift along x-axis [LU_TIPSY] (default: -0.5 LU_TIPSY)\n");
     fprintf(stderr,"-dry <value>     : shift along y-axis [LU_TIPSY] (default: -0.5 LU_TIPSY)\n");
     fprintf(stderr,"-drz <value>     : shift along z-axis [LU_TIPSY] (default: -0.5 LU_TIPSY)\n");
+    fprintf(stderr,"-shift <value>   : internal shift before scaling [LU_ART] (default: 0 LU_ART)\n");
     fprintf(stderr,"-soft <value>    : softening length of top level particles [LU_TIPSY] (default: 1/softfac mean particle separation => LBox/(N1Dlow*softfac) LU_TIPSY)\n");
     fprintf(stderr,"-mass <value>    : mass of top level particles [MU_TIPSY] (default: OmegaM0/Nlow - if you want masses from file set -1)\n");
     fprintf(stderr,"-LUsf <value>    : length unit scale factor (default: LU_ART/LU_TIPSY_DEFAULT)\n");
@@ -529,8 +544,7 @@ void usage(void) {
     fprintf(stderr,"-b2dmfac <value> : baryon to dark matter scale factor (default: OmegaM0/OmegaDM0)\n");
     fprintf(stderr,"-softfac <value> : softening factor (default: 50)\n");
     fprintf(stderr,"-refstep <value> : refinement step factor (default: 2)\n");
-    fprintf(stderr,"-LBox <value>    : side length of box [chimp] (default: 1 chimp)\n");
-    fprintf(stderr,"-shift <value>   : internal shift before scaling [LU_ART] (default: 0 LU_ART)\n");
+    fprintf(stderr,"-noscaling       : no scaling of data\n");
     fprintf(stderr,"-v               : more informative output to screen\n");
     fprintf(stderr,"-header <name>   : header input file in ART binary format\n");
     fprintf(stderr,"-data <name>     : data input file in ART binary format\n");

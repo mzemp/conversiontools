@@ -27,8 +27,8 @@ int main(int argc, char **argv) {
     GIC_REAL *VelXRec, *VelYRec, *VelZRec;
     double LUsf, VUsf, MUsf;
     double b2dmscalefac, csvelscalefac, refinementstep;
-    double particlemass, particlesoftening;
     double toplevelmass, toplevelsoftening;
+    double mass, soft;
     double dr[3], dx, acurrent, VelConvertFac, rhocrit, LBox, softfac;
     double OmegaM0, OmegaDM0, OmegaB0, OmegaL0, OmegaK0, OmegaR0, h100;
     double H_TIPSY_DEFAULT, TU_TIPSY_DEFAULT, LU_TIPSY_DEFAULT, VU_TIPSY_DEFAULT, MU_TIPSY_DEFAULT;
@@ -62,14 +62,12 @@ int main(int argc, char **argv) {
     dr[1] = -0.5;
     dr[2] = -0.5;
     refinementstep = 2;
-    particlesoftening = -2;
-    particlemass = -2;
+    toplevelsoftening = -2;
+    toplevelmass = -2;
     LUsf = -2;
     VUsf = -2;
     MUsf = -2;
     softfac = 50;
-    toplevelsoftening = 0;
-    toplevelmass = 0;
     H_TIPSY_DEFAULT = sqrt(8*M_PI/3); /* TU_TIPSY^-1 */
     VelConvertFac = 1.0227121651152353693;
     rhocrit = 277.53662719; /* h^2 Mo kpc^-3 */
@@ -137,7 +135,7 @@ int main(int argc, char **argv) {
             if (i >= argc) {
                 usage();
                 }
-            particlesoftening = atof(argv[i]);
+            toplevelsoftening = atof(argv[i]);
             i++;
             }
         else if (strcmp(argv[i],"-mass") == 0) {
@@ -145,7 +143,7 @@ int main(int argc, char **argv) {
             if (i >= argc) {
                 usage();
                 }
-            particlemass = atof(argv[i]);
+            toplevelmass = atof(argv[i]);
             i++;
             }
         else if (strcmp(argv[i],"-LUsf") == 0) {
@@ -180,6 +178,18 @@ int main(int argc, char **argv) {
             b2dmscalefac = atof(argv[i]);
             i++;
             }
+	else if (strcmp(argv[i],"-noscaling") == 0) {
+	    dr[0] = 0;
+	    dr[1] = 0;
+	    dr[2] = 0;
+	    LUsf = 1;
+	    VUsf = 1;
+	    MUsf = 1;
+	    b2dmscalefac = 1;
+	    toplevelmass = -1;
+	    toplevelsoftening = -2;
+	    i++;
+	    }
         else if (strcmp(argv[i],"-softfac") == 0) {
             i++;
             if (i >= argc) {
@@ -224,7 +234,7 @@ int main(int argc, char **argv) {
             }
         }
 
-    if (particlemass == -1.0) mrmassfromfile = 1;
+    if (toplevelmass == -1.0) mrmassfromfile = 1;
 
     /*
     ** Read in manifests & headers of the two files. 
@@ -386,10 +396,10 @@ int main(int argc, char **argv) {
 	** Set particle mass and softening
 	*/
 
-	if (particlesoftening < 0) particlesoftening = (LBox/(N1Dlow*softfac))*(1000/(h100*LU_TIPSY));
-	if (particlemass < 0) particlemass = OmegaM0/Ntot;
-	toplevelsoftening = particlesoftening;
-	toplevelmass = particlemass;
+	if (toplevelsoftening < 0) toplevelsoftening = (LBox/(N1Dlow*softfac))*(1000/(h100*LU_TIPSY));
+	if (toplevelmass < 0) toplevelmass = OmegaM0/Ntot;
+	soft = toplevelsoftening;
+	mass = toplevelmass;
 
 	/*
 	** Process the data
@@ -412,10 +422,10 @@ int main(int argc, char **argv) {
 			gp.vel[0] = VelXRec[j]*csvelscalefac*VUsf;
 			gp.vel[1] = VelYRec[j]*csvelscalefac*VUsf;
 			gp.vel[2] = VelZRec[j]*csvelscalefac*VUsf;
-			gp.mass = particlemass;
+			gp.mass = mass;
 			gp.rho = 0;
 			gp.temp = 0;
-			gp.hsmooth = particlesoftening;
+			gp.hsmooth = soft;
 			gp.metals = 0;
 			gp.phi = 0;
 			if (index < Ntot) write_tipsy_standard_gas(&xdrs,&gp);
@@ -427,8 +437,8 @@ int main(int argc, char **argv) {
 			dp.vel[0] = VelXRec[j]*csvelscalefac*VUsf;
 			dp.vel[1] = VelYRec[j]*csvelscalefac*VUsf;
 			dp.vel[2] = VelZRec[j]*csvelscalefac*VUsf;
-			dp.mass = particlemass;
-			dp.eps = particlesoftening;
+			dp.mass = mass;
+			dp.eps = soft;
 			dp.phi = 0;
 			if (index < Ntot) write_tipsy_standard_dark(&xdrs,&dp);
 			}
@@ -439,10 +449,10 @@ int main(int argc, char **argv) {
 			sp.vel[0] = VelXRec[j]*csvelscalefac*VUsf;
 			sp.vel[1] = VelYRec[j]*csvelscalefac*VUsf;
 			sp.vel[2] = VelZRec[j]*csvelscalefac*VUsf;
-			sp.mass = particlemass;
+			sp.mass = mass;
 			sp.metals = 0;
 			sp.tform = 0;
-			sp.eps = particlesoftening;
+			sp.eps = soft;
 			sp.phi = 0;
 			if (index < Ntot) write_tipsy_standard_star(&xdrs,&sp);
 			}
@@ -455,10 +465,10 @@ int main(int argc, char **argv) {
 			gpdpp.vel[0] = VelXRec[j]*csvelscalefac*VUsf;
 			gpdpp.vel[1] = VelYRec[j]*csvelscalefac*VUsf;
 			gpdpp.vel[2] = VelZRec[j]*csvelscalefac*VUsf;
-			gpdpp.mass = particlemass;
+			gpdpp.mass = mass;
 			gpdpp.rho = 0;
 			gpdpp.temp = 0;
-			gpdpp.hsmooth = particlesoftening;
+			gpdpp.hsmooth = soft;
 			gpdpp.metals = 0;
 			gpdpp.phi = 0;
 			if (index < Ntot) write_tipsy_standard_gas_dpp(&xdrs,&gpdpp);
@@ -470,8 +480,8 @@ int main(int argc, char **argv) {
 			dpdpp.vel[0] = VelXRec[j]*csvelscalefac*VUsf;
 			dpdpp.vel[1] = VelYRec[j]*csvelscalefac*VUsf;
 			dpdpp.vel[2] = VelZRec[j]*csvelscalefac*VUsf;
-			dpdpp.mass = particlemass;
-			dpdpp.eps = particlesoftening;
+			dpdpp.mass = mass;
+			dpdpp.eps = soft;
 			dpdpp.phi = 0;
 			if (index < Ntot) write_tipsy_standard_dark_dpp(&xdrs,&dpdpp);
 			}
@@ -482,10 +492,10 @@ int main(int argc, char **argv) {
 			spdpp.vel[0] = VelXRec[j]*csvelscalefac*VUsf;
 			spdpp.vel[1] = VelYRec[j]*csvelscalefac*VUsf;
 			spdpp.vel[2] = VelZRec[j]*csvelscalefac*VUsf;
-			spdpp.mass = particlemass;
+			spdpp.mass = mass;
 			spdpp.metals = 0;
 			spdpp.tform = 0;
-			spdpp.eps = particlesoftening;
+			spdpp.eps = soft;
 			spdpp.phi = 0;
 			if (index < Ntot) write_tipsy_standard_star_dpp(&xdrs,&spdpp);
 			}
@@ -558,23 +568,23 @@ int main(int argc, char **argv) {
 	    */
 
 	    if (k == 0) { /* top level softening */
-		if (particlesoftening < 0) particlesoftening = (LBox/(N1Dlow*softfac))*(1000/(h100*LU_TIPSY));
-		toplevelsoftening = particlesoftening;
+		if (toplevelsoftening < 0) toplevelsoftening = (LBox/(N1Dlow*softfac))*(1000/(h100*LU_TIPSY));
+		soft = toplevelsoftening;
 		}
 	    else {
-		particlesoftening /= refinementstep;
+		soft = toplevelsoftening/refinementstep;
 		}
 	    if (k == 0) { /* top level mass */
-		if (particlemass < 0) particlemass = OmegaM0/Nlow;
-		toplevelmass = particlemass;
+		if (toplevelmass < 0) toplevelmass = OmegaM0/Nlow;
+		mass = toplevelmass;
 		}
 	    else {
-		particlemass /= pow(refinementstep,3.0);
+		mass = toplevelmass/pow(refinementstep,3.0);
 		}
 	    if (mrmassfromfile == 1) {
 		assert(PosLevelHeader[k].Mlev == VelLevelHeader[k].Mlev);
-		particlemass = PosLevelHeader[k].Mlev*b2dmscalefac*MUsf;
-		if (k == 0) toplevelmass = particlemass;
+		mass = PosLevelHeader[k].Mlev*b2dmscalefac*MUsf;
+		if (k == 0) toplevelmass = mass;
 		}
 
 	    /*
@@ -598,10 +608,10 @@ int main(int argc, char **argv) {
 			    gp.vel[0] = VelXRec[j]*csvelscalefac*VUsf;
 			    gp.vel[1] = VelYRec[j]*csvelscalefac*VUsf;
 			    gp.vel[2] = VelZRec[j]*csvelscalefac*VUsf;
-			    gp.mass = particlemass;
+			    gp.mass = mass;
 			    gp.rho = 0;
 			    gp.temp = 0;
-			    gp.hsmooth = particlesoftening;
+			    gp.hsmooth = soft;
 			    gp.metals = 0;
 			    gp.phi = 0;
 			    if (index < Nlev) write_tipsy_standard_gas(&xdrs,&gp);
@@ -613,8 +623,8 @@ int main(int argc, char **argv) {
 			    dp.vel[0] = VelXRec[j]*csvelscalefac*VUsf;
 			    dp.vel[1] = VelYRec[j]*csvelscalefac*VUsf;
 			    dp.vel[2] = VelZRec[j]*csvelscalefac*VUsf;
-			    dp.mass = particlemass;
-			    dp.eps = particlesoftening;
+			    dp.mass = mass;
+			    dp.eps = soft;
 			    dp.phi = 0;
 			    if (index < Nlev) write_tipsy_standard_dark(&xdrs,&dp);
 			    }
@@ -625,10 +635,10 @@ int main(int argc, char **argv) {
 			    sp.vel[0] = VelXRec[j]*csvelscalefac*VUsf;
 			    sp.vel[1] = VelYRec[j]*csvelscalefac*VUsf;
 			    sp.vel[2] = VelZRec[j]*csvelscalefac*VUsf;
-			    sp.mass = particlemass;
+			    sp.mass = mass;
 			    sp.metals = 0;
 			    sp.tform = 0;
-			    sp.eps = particlesoftening;
+			    sp.eps = soft;
 			    sp.phi = 0;
 			    if (index < Nlev) write_tipsy_standard_star(&xdrs,&sp);
 			    }
@@ -641,10 +651,10 @@ int main(int argc, char **argv) {
 			    gpdpp.vel[0] = VelXRec[j]*csvelscalefac*VUsf;
 			    gpdpp.vel[1] = VelYRec[j]*csvelscalefac*VUsf;
 			    gpdpp.vel[2] = VelZRec[j]*csvelscalefac*VUsf;
-			    gpdpp.mass = particlemass;
+			    gpdpp.mass = mass;
 			    gpdpp.rho = 0;
 			    gpdpp.temp = 0;
-			    gpdpp.hsmooth = particlesoftening;
+			    gpdpp.hsmooth = soft;
 			    gpdpp.metals = 0;
 			    gpdpp.phi = 0;
 			    if (index < Nlev) write_tipsy_standard_gas_dpp(&xdrs,&gpdpp);
@@ -656,8 +666,8 @@ int main(int argc, char **argv) {
 			    dpdpp.vel[0] = VelXRec[j]*csvelscalefac*VUsf;
 			    dpdpp.vel[1] = VelYRec[j]*csvelscalefac*VUsf;
 			    dpdpp.vel[2] = VelZRec[j]*csvelscalefac*VUsf;
-			    dpdpp.mass = particlemass;
-			    dpdpp.eps = particlesoftening;
+			    dpdpp.mass = mass;
+			    dpdpp.eps = soft;
 			    dpdpp.phi = 0;
 			    if (index < Nlev) write_tipsy_standard_dark_dpp(&xdrs,&dpdpp);
 			    }
@@ -668,10 +678,10 @@ int main(int argc, char **argv) {
 			    spdpp.vel[0] = VelXRec[j]*csvelscalefac*VUsf;
 			    spdpp.vel[1] = VelYRec[j]*csvelscalefac*VUsf;
 			    spdpp.vel[2] = VelZRec[j]*csvelscalefac*VUsf;
-			    spdpp.mass = particlemass;
+			    spdpp.mass = mass;
 			    spdpp.metals = 0;
 			    spdpp.tform = 0;
-			    spdpp.eps = particlesoftening;
+			    spdpp.eps = soft;
 			    spdpp.phi = 0;
 			    if (index < Nlev) write_tipsy_standard_star_dpp(&xdrs,&spdpp);
 			    }
@@ -700,7 +710,7 @@ int main(int argc, char **argv) {
 	    */
 
 	    if (verboselevel >= 1) {
-		fprintf(stderr,"L %d Lmax %d Nlev %ld Softening %.6e LU_TIPSY = %.6e kpc Mass %.6e MU_TIPSY = %.6e Mo\n",PosLevelHeader[k].L,PosLevelHeader[k].Lmax,Nlev,particlesoftening,particlesoftening*LU_TIPSY,particlemass,particlemass*MU_TIPSY);
+		fprintf(stderr,"L %d Lmax %d Nlev %ld Softening %.6e LU_TIPSY = %.6e kpc Mass %.6e MU_TIPSY = %.6e Mo\n",PosLevelHeader[k].L,PosLevelHeader[k].Lmax,Nlev,soft,soft*LU_TIPSY,mass,mass*MU_TIPSY);
 		if (k == Lmax) fprintf(stderr,"\n");
 		}
 	    }
@@ -795,6 +805,7 @@ void usage(void) {
     fprintf(stderr,"-b2dmfac <value> : baryon to dark matter scale factor (default: OmegaM0/OmegaDM0)\n");
     fprintf(stderr,"-softfac <value> : softening factor (default: 50)\n");
     fprintf(stderr,"-refstep <value> : refinement step factor (default: 2)\n");
+    fprintf(stderr,"-noscaling       : no scaling of data\n");
     fprintf(stderr,"-v               : more informative output to screen\n");
     fprintf(stderr,"-pos <name>      : positions input file GIC binary format\n");
     fprintf(stderr,"-vel <name>      : velocities input file GIC binary format\n");
