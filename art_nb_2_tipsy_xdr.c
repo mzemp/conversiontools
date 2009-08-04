@@ -66,7 +66,6 @@ int main(int argc, char **argv) {
     MUsf = -2;
     b2dmscalefac = -2;
     softfac = 50;
-    Nrec = 1024*1024;
     H_TIPSY_DEFAULT = sqrt(8*M_PI/3); /* TU_TIPSY_DEFAULT^-1 */
     VelConvertFac = 1.0227121651152353693;
     rhocrit = 277.53662719; /* h^2 Mo kpc^-3 */
@@ -258,6 +257,7 @@ int main(int argc, char **argv) {
     ** Set some parameters
     */
 
+    Nrec = ah.Nrow*ah.Nrow;
     Lmax = ah.Nspecies-1;
     Ntot = ah.num[Lmax];
     Npage = (Ntot+Nrec-1)/Nrec;
