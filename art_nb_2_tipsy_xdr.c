@@ -20,7 +20,7 @@ int main(int argc, char **argv) {
 
     int i = 0, j = 0, k = 0;
     int header, trailer;
-    int positionprecision, verboselevel, doswap, massfromfile;
+    int positionprecision, verboselevel, doswap, massfromfile, headerincludesstars;
     long Ntot, index, N[10];
     int Nrec, Npage, N1Dlow, Nlow, L, Lmax;
     double LUsf, VUsf, MUsf;
@@ -52,6 +52,7 @@ int main(int argc, char **argv) {
     verboselevel = 0;
     doswap = 0;
     massfromfile = 0;
+    headerincludesstars = 0;
     dr[0] = -0.5;
     dr[1] = -0.5;
     dr[2] = -0.5;
@@ -206,6 +207,10 @@ int main(int argc, char **argv) {
             refinementstep = atof(argv[i]);
             i++;
             }
+	else if (strcmp(argv[i],"-stars") == 0) {
+            headerincludesstars = 1;
+            i++;
+            }
         else if (strcmp(argv[i],"-header") == 0) {
             i++;
             if (i >= argc) {
@@ -258,7 +263,12 @@ int main(int argc, char **argv) {
     */
 
     Nrec = ah.Nrow*ah.Nrow;
-    Lmax = ah.Nspecies-1;
+    if (headerincludesstars == 1) {
+	Lmax = ah.Nspecies-2;
+	}
+    else {
+	Lmax = ah.Nspecies-1;
+	}
     Ntot = ah.num[Lmax];
     Npage = (Ntot+Nrec-1)/Nrec;
     N1Dlow = ah.Ngrid;
