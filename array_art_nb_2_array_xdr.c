@@ -1,7 +1,7 @@
 /* 
 ** aartb2as.c
 **
-** written by Marcel Zemp
+** Written by Marcel Zemp
 */
 
 #include <stdio.h>
@@ -67,24 +67,24 @@ int main(int argc, char **argv) {
     assert(fread(&ah.N[0],sizeof(int),1,stdin) == 1);
     assert(fread(&trailer,sizeof(int),1,stdin) == 1);
     assert(header == trailer);
-    write_array_header(&xdrs,&ah);
+    write_array_xdr_header(&xdrs,&ah);
     assert(fread(&header,sizeof(int),1,stdin) == 1);
     if (ah.N[1] == 1) {
 	for (i = 0; i < ah.N[0]; i++) {
 	    assert(fread(&ap.ia[0],sizeof(int),1,stdin) == 1);
-	    write_array_particle(&xdrs,&ah,&ap);
+	    write_array_xdr_particle(&xdrs,&ah,&ap);
 	    }
 	}
     else if (ah.N[2] == 1) {
 	for (i = 0; i < ah.N[0]; i++) {
 	    assert(fread(&ap.fa[0],sizeof(float),1,stdin) == 1);
-	    write_array_particle(&xdrs,&ah,&ap);
+	    write_array_xdr_particle(&xdrs,&ah,&ap);
 	    }
 	}
     else if (ah.N[3] == 1) {
 	for (i = 0; i < ah.N[0]; i++) {
 	    assert(fread(&ap.da[0],sizeof(double),1,stdin) == 1);
-	    write_array_particle(&xdrs,&ah,&ap);
+	    write_array_xdr_particle(&xdrs,&ah,&ap);
 	    }
 	}
     assert(fread(&trailer,sizeof(int),1,stdin) == 1);
@@ -100,15 +100,15 @@ int main(int argc, char **argv) {
 void usage(void) {
 
     fprintf(stderr,"\n");
-    fprintf(stderr,"Program converts array in ART binary format to array in standard binary format.\n");
+    fprintf(stderr,"Program converts array in ART native binary format to array in XDR format.\n");
     fprintf(stderr,"\n");
     fprintf(stderr,"Please specify the following parameters:\n");
     fprintf(stderr,"\n");
     fprintf(stderr,"-i       : set this flag if it is an integer array\n");
     fprintf(stderr,"-f       : set this flag if it is an float array\n");
     fprintf(stderr,"-d       : set this flag if it is an double array\n");
-    fprintf(stderr,"< <name> : input file in ART binary format\n");
-    fprintf(stderr,"> <name> : output file in standard binary format\n");
+    fprintf(stderr,"< <name> : input file in ART native binary format\n");
+    fprintf(stderr,"> <name> : output file in XDR format\n");
     fprintf(stderr,"\n");
     exit(1);
     }

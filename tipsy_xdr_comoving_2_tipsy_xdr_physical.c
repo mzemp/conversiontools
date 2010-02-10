@@ -1,7 +1,7 @@
 /* 
 ** tscom2tsphy.c
 **
-** written by Marcel Zemp
+** Written by Marcel Zemp
 */
 
 #include <stdio.h>
@@ -21,12 +21,12 @@ int main(int argc, char **argv) {
     double rcen[3], vcen[3];
     double mscale, rscale, vscale, hubble;
     TIPSY_HEADER th;
-    GAS_PARTICLE gp;
-    DARK_PARTICLE dp;
-    STAR_PARTICLE sp;
-    GAS_PARTICLE_DPP gpdpp;
-    DARK_PARTICLE_DPP dpdpp;
-    STAR_PARTICLE_DPP spdpp;
+    TIPSY_GAS_PARTICLE tgp;
+    TIPSY_DARK_PARTICLE tdp;
+    TIPSY_STAR_PARTICLE tsp;
+    TIPSY_GAS_PARTICLE_DPP tgpdpp;
+    TIPSY_DARK_PARTICLE_DPP tdpdpp;
+    TIPSY_STAR_PARTICLE_DPP tspdpp;
     XDR xdrsin, xdrsout;
 
     for (j = 0; j < 3; j++) {
@@ -149,87 +149,87 @@ int main(int argc, char **argv) {
     */
     xdrstdio_create(&xdrsin,stdin,XDR_DECODE);
     xdrstdio_create(&xdrsout,stdout,XDR_ENCODE);
-    read_tipsy_standard_header(&xdrsin,&th);
-    write_tipsy_standard_header(&xdrsout,&th);
+    read_tipsy_xdr_header(&xdrsin,&th);
+    write_tipsy_xdr_header(&xdrsout,&th);
     /*
     ** Add shifts to particles and write them out
     */
     if (positionprecision == 0) {
 	for(i = 0; i < th.ngas; i++) {
-	    read_tipsy_standard_gas(&xdrsin,&gp);
+	    read_tipsy_xdr_gas(&xdrsin,&tgp);
 	    for(j = 0; j < 3; j++) {
-		gp.pos[j] = (gp.pos[j]-rcen[j])*rscale;
-		gp.vel[j] = (gp.vel[j]-vcen[j])*vscale;
-		gp.vel[j] += hubble*gp.pos[j];
+		tgp.pos[j] = (tgp.pos[j]-rcen[j])*rscale;
+		tgp.vel[j] = (tgp.vel[j]-vcen[j])*vscale;
+		tgp.vel[j] += hubble*tgp.pos[j];
 		}
-	    gp.mass *= mscale;
-	    gp.rho *= mscale/(rscale*rscale*rscale);
-	    gp.hsmooth *= rscale;
-	    gp.phi *= vscale*vscale;
-	    write_tipsy_standard_gas(&xdrsout,&gp);
+	    tgp.mass *= mscale;
+	    tgp.rho *= mscale/(rscale*rscale*rscale);
+	    tgp.hsmooth *= rscale;
+	    tgp.phi *= vscale*vscale;
+	    write_tipsy_xdr_gas(&xdrsout,&tgp);
 	    }
 	for(i = 0; i < th.ndark; i++) {
-	    read_tipsy_standard_dark(&xdrsin,&dp);
+	    read_tipsy_xdr_dark(&xdrsin,&tdp);
 	    for(j = 0; j < 3; j++) {
-		dp.pos[j] = (dp.pos[j]-rcen[j])*rscale;
-		dp.vel[j] = (dp.vel[j]-vcen[j])*vscale;
-		dp.vel[j] += hubble*dp.pos[j];
+		tdp.pos[j] = (tdp.pos[j]-rcen[j])*rscale;
+		tdp.vel[j] = (tdp.vel[j]-vcen[j])*vscale;
+		tdp.vel[j] += hubble*tdp.pos[j];
 		}
-	    dp.mass *= mscale;
-	    dp.eps *= rscale;
-	    dp.phi *= vscale*vscale;
-	    write_tipsy_standard_dark(&xdrsout,&dp);
+	    tdp.mass *= mscale;
+	    tdp.eps *= rscale;
+	    tdp.phi *= vscale*vscale;
+	    write_tipsy_xdr_dark(&xdrsout,&tdp);
 	    }
 	for(i = 0; i < th.nstar; i++) {
-	    read_tipsy_standard_star(&xdrsin,&sp);
+	    read_tipsy_xdr_star(&xdrsin,&tsp);
 	    for(j = 0; j < 3; j++) {
-		sp.pos[j] = (sp.pos[j]-rcen[j])*rscale;
-		sp.vel[j] = (sp.vel[j]-vcen[j])*vscale;
-		sp.vel[j] += hubble*sp.pos[j];
+		tsp.pos[j] = (tsp.pos[j]-rcen[j])*rscale;
+		tsp.vel[j] = (tsp.vel[j]-vcen[j])*vscale;
+		tsp.vel[j] += hubble*tsp.pos[j];
 		}
-	    sp.mass *= mscale;
-	    sp.eps *= rscale;
-	    sp.phi *= vscale*vscale;
-	    write_tipsy_standard_star(&xdrsout,&sp);
+	    tsp.mass *= mscale;
+	    tsp.eps *= rscale;
+	    tsp.phi *= vscale*vscale;
+	    write_tipsy_xdr_star(&xdrsout,&tsp);
 	    }
 	}
     else if (positionprecision == 1) {
 	for(i = 0; i < th.ngas; i++) {
-	    read_tipsy_standard_gas_dpp(&xdrsin,&gpdpp);
+	    read_tipsy_xdr_gas_dpp(&xdrsin,&tgpdpp);
 	    for(j = 0; j < 3; j++) {
-		gpdpp.pos[j] = (gpdpp.pos[j]-rcen[j])*rscale;
-		gpdpp.vel[j] = (gpdpp.vel[j]-vcen[j])*vscale;
-		gpdpp.vel[j] += hubble*gpdpp.pos[j];
+		tgpdpp.pos[j] = (tgpdpp.pos[j]-rcen[j])*rscale;
+		tgpdpp.vel[j] = (tgpdpp.vel[j]-vcen[j])*vscale;
+		tgpdpp.vel[j] += hubble*tgpdpp.pos[j];
 		}
-	    gpdpp.mass *= mscale;
-	    gpdpp.rho *= mscale/(rscale*rscale*rscale);
-	    gpdpp.hsmooth *= rscale;
-	    gpdpp.phi *= vscale*vscale;
-	    write_tipsy_standard_gas_dpp(&xdrsout,&gpdpp);
+	    tgpdpp.mass *= mscale;
+	    tgpdpp.rho *= mscale/(rscale*rscale*rscale);
+	    tgpdpp.hsmooth *= rscale;
+	    tgpdpp.phi *= vscale*vscale;
+	    write_tipsy_xdr_gas_dpp(&xdrsout,&tgpdpp);
 	    }
 	for(i = 0; i < th.ndark; i++) {
-	    read_tipsy_standard_dark_dpp(&xdrsin,&dpdpp);
+	    read_tipsy_xdr_dark_dpp(&xdrsin,&tdpdpp);
 	    for(j = 0; j < 3; j++) {
-		dpdpp.pos[j] = (dpdpp.pos[j]-rcen[j])*rscale;
-		dpdpp.vel[j] = (dpdpp.vel[j]-vcen[j])*vscale;
-		dpdpp.vel[j] += hubble*dpdpp.pos[j];
+		tdpdpp.pos[j] = (tdpdpp.pos[j]-rcen[j])*rscale;
+		tdpdpp.vel[j] = (tdpdpp.vel[j]-vcen[j])*vscale;
+		tdpdpp.vel[j] += hubble*tdpdpp.pos[j];
 		}
-	    dpdpp.mass *= mscale;
-	    dpdpp.eps *= rscale;
-	    dpdpp.phi *= vscale*vscale;
-	    write_tipsy_standard_dark_dpp(&xdrsout,&dpdpp);
+	    tdpdpp.mass *= mscale;
+	    tdpdpp.eps *= rscale;
+	    tdpdpp.phi *= vscale*vscale;
+	    write_tipsy_xdr_dark_dpp(&xdrsout,&tdpdpp);
 	    }
 	for(i = 0; i < th.nstar; i++) {
-	    read_tipsy_standard_star_dpp(&xdrsin,&spdpp);
+	    read_tipsy_xdr_star_dpp(&xdrsin,&tspdpp);
 	    for(j = 0; j < 3; j++) {
-		spdpp.pos[j] = (spdpp.pos[j]-rcen[j])*rscale;
-		spdpp.vel[j] = (spdpp.vel[j]-vcen[j])*vscale;
-		spdpp.vel[j] += hubble*spdpp.pos[j];
+		tspdpp.pos[j] = (tspdpp.pos[j]-rcen[j])*rscale;
+		tspdpp.vel[j] = (tspdpp.vel[j]-vcen[j])*vscale;
+		tspdpp.vel[j] += hubble*tspdpp.pos[j];
 		}
-	    spdpp.mass *= mscale;
-	    spdpp.eps *= rscale;
-	    spdpp.phi *= vscale*vscale;
-	    write_tipsy_standard_star_dpp(&xdrsout,&spdpp);
+	    tspdpp.mass *= mscale;
+	    tspdpp.eps *= rscale;
+	    tspdpp.phi *= vscale*vscale;
+	    write_tipsy_xdr_star_dpp(&xdrsout,&tspdpp);
 	    }
 	}
     /*
@@ -278,10 +278,10 @@ void usage(void) {
     fprintf(stderr,"-mscale <value> : mass scale factor [MUnew/MUold] (default: 1 MUnew/MUold)\n");
     fprintf(stderr,"-rscale <value> : coordinate scale factor [LUnew/LUold] (default: 1 LUnew/LUold)\n");
     fprintf(stderr,"-vscale <value> : velocity scale factor [VUnew/VUold] (default: 1 VUnew/VUold)\n");
-    fprintf(stderr,"-Hubble <value> : Hubble parameter [VUnew/LUnew] (default: 0 VUnew/LUnew; special value: sqrt_8pi_3)\n");
+    fprintf(stderr,"-Hubble <value> : Hubble parameter [1/TUnew] (default: 0 1/TUnew; special value: sqrt_8pi_3)\n");
     fprintf(stderr,"-v              : more informative output to screen\n");
-    fprintf(stderr,"< <name>        : input file in tipsy standard binary format\n");
-    fprintf(stderr,"> <name>        : output file in tipsy standard binary format\n");
+    fprintf(stderr,"< <name>        : input file in tipsy XDR format\n");
+    fprintf(stderr,"> <name>        : output file in tipsy XDR format\n");
     fprintf(stderr,"\n");
     exit(1);
     }

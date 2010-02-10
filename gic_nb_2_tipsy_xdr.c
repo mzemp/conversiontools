@@ -1,7 +1,7 @@
 /* 
 ** gicb2ts.c
 **
-** written by Marcel Zemp
+** Written by Marcel Zemp
 */
 
 #include <stdio.h>
@@ -36,12 +36,12 @@ int main(int argc, char **argv) {
     double TU_GIC, LU_GIC, VU_GIC, MU_GIC;
     char PosFileName[256], VelFileName[256];
     TIPSY_HEADER th;
-    GAS_PARTICLE gp;
-    DARK_PARTICLE dp;
-    STAR_PARTICLE sp;
-    GAS_PARTICLE_DPP gpdpp;
-    DARK_PARTICLE_DPP dpdpp;
-    STAR_PARTICLE_DPP spdpp;
+    TIPSY_GAS_PARTICLE tgp;
+    TIPSY_DARK_PARTICLE tdp;
+    TIPSY_STAR_PARTICLE tsp;
+    TIPSY_GAS_PARTICLE_DPP tgpdpp;
+    TIPSY_DARK_PARTICLE_DPP tdpdpp;
+    TIPSY_STAR_PARTICLE_DPP tspdpp;
     struct gicFile PosXFile, PosYFile, PosZFile;
     struct gicFile VelXFile, VelYFile, VelZFile;
     struct gicManifest PosManifest, VelManifest;
@@ -368,7 +368,7 @@ int main(int argc, char **argv) {
     */
 
     xdrstdio_create(&xdrs,stdout,XDR_ENCODE);
-    write_tipsy_standard_header(&xdrs,&th);
+    write_tipsy_xdr_header(&xdrs,&th);
 
     /*
     ** Read in data
@@ -416,88 +416,88 @@ int main(int argc, char **argv) {
 	    for (j = 0; j < Nrec; j++) {
 		if (positionprecision == 0) {
 		    if (particletype == 0) {
-			gp.pos[0] = PosXRec[j]*LUsf + dr[0];
-			gp.pos[1] = PosYRec[j]*LUsf + dr[1];
-			gp.pos[2] = PosZRec[j]*LUsf + dr[2];
-			gp.vel[0] = VelXRec[j]*csvelscalefac*VUsf;
-			gp.vel[1] = VelYRec[j]*csvelscalefac*VUsf;
-			gp.vel[2] = VelZRec[j]*csvelscalefac*VUsf;
-			gp.mass = mass;
-			gp.rho = 0;
-			gp.temp = 0;
-			gp.hsmooth = soft;
-			gp.metals = 0;
-			gp.phi = 0;
-			if (index < Ntot) write_tipsy_standard_gas(&xdrs,&gp);
+			tgp.pos[0] = PosXRec[j]*LUsf + dr[0];
+			tgp.pos[1] = PosYRec[j]*LUsf + dr[1];
+			tgp.pos[2] = PosZRec[j]*LUsf + dr[2];
+			tgp.vel[0] = VelXRec[j]*csvelscalefac*VUsf;
+			tgp.vel[1] = VelYRec[j]*csvelscalefac*VUsf;
+			tgp.vel[2] = VelZRec[j]*csvelscalefac*VUsf;
+			tgp.mass = mass;
+			tgp.rho = 0;
+			tgp.temp = 0;
+			tgp.hsmooth = soft;
+			tgp.metals = 0;
+			tgp.phi = 0;
+			if (index < Ntot) write_tipsy_xdr_gas(&xdrs,&tgp);
 			}
 		    else if (particletype == 1) {
-			dp.pos[0] = PosXRec[j]*LUsf + dr[0];
-			dp.pos[1] = PosYRec[j]*LUsf + dr[1];
-			dp.pos[2] = PosZRec[j]*LUsf + dr[2];
-			dp.vel[0] = VelXRec[j]*csvelscalefac*VUsf;
-			dp.vel[1] = VelYRec[j]*csvelscalefac*VUsf;
-			dp.vel[2] = VelZRec[j]*csvelscalefac*VUsf;
-			dp.mass = mass;
-			dp.eps = soft;
-			dp.phi = 0;
-			if (index < Ntot) write_tipsy_standard_dark(&xdrs,&dp);
+			tdp.pos[0] = PosXRec[j]*LUsf + dr[0];
+			tdp.pos[1] = PosYRec[j]*LUsf + dr[1];
+			tdp.pos[2] = PosZRec[j]*LUsf + dr[2];
+			tdp.vel[0] = VelXRec[j]*csvelscalefac*VUsf;
+			tdp.vel[1] = VelYRec[j]*csvelscalefac*VUsf;
+			tdp.vel[2] = VelZRec[j]*csvelscalefac*VUsf;
+			tdp.mass = mass;
+			tdp.eps = soft;
+			tdp.phi = 0;
+			if (index < Ntot) write_tipsy_xdr_dark(&xdrs,&tdp);
 			}
 		    else {
-			sp.pos[0] = PosXRec[j]*LUsf + dr[0];
-			sp.pos[1] = PosYRec[j]*LUsf + dr[1];
-			sp.pos[2] = PosZRec[j]*LUsf + dr[2];
-			sp.vel[0] = VelXRec[j]*csvelscalefac*VUsf;
-			sp.vel[1] = VelYRec[j]*csvelscalefac*VUsf;
-			sp.vel[2] = VelZRec[j]*csvelscalefac*VUsf;
-			sp.mass = mass;
-			sp.metals = 0;
-			sp.tform = 0;
-			sp.eps = soft;
-			sp.phi = 0;
-			if (index < Ntot) write_tipsy_standard_star(&xdrs,&sp);
+			tsp.pos[0] = PosXRec[j]*LUsf + dr[0];
+			tsp.pos[1] = PosYRec[j]*LUsf + dr[1];
+			tsp.pos[2] = PosZRec[j]*LUsf + dr[2];
+			tsp.vel[0] = VelXRec[j]*csvelscalefac*VUsf;
+			tsp.vel[1] = VelYRec[j]*csvelscalefac*VUsf;
+			tsp.vel[2] = VelZRec[j]*csvelscalefac*VUsf;
+			tsp.mass = mass;
+			tsp.metals = 0;
+			tsp.tform = 0;
+			tsp.eps = soft;
+			tsp.phi = 0;
+			if (index < Ntot) write_tipsy_xdr_star(&xdrs,&tsp);
 			}
 		    }
 		else {
 		    if (particletype == 0) {
-			gpdpp.pos[0] = PosXRec[j]*LUsf + dr[0];
-			gpdpp.pos[1] = PosYRec[j]*LUsf + dr[1];
-			gpdpp.pos[2] = PosZRec[j]*LUsf + dr[2];
-			gpdpp.vel[0] = VelXRec[j]*csvelscalefac*VUsf;
-			gpdpp.vel[1] = VelYRec[j]*csvelscalefac*VUsf;
-			gpdpp.vel[2] = VelZRec[j]*csvelscalefac*VUsf;
-			gpdpp.mass = mass;
-			gpdpp.rho = 0;
-			gpdpp.temp = 0;
-			gpdpp.hsmooth = soft;
-			gpdpp.metals = 0;
-			gpdpp.phi = 0;
-			if (index < Ntot) write_tipsy_standard_gas_dpp(&xdrs,&gpdpp);
+			tgpdpp.pos[0] = PosXRec[j]*LUsf + dr[0];
+			tgpdpp.pos[1] = PosYRec[j]*LUsf + dr[1];
+			tgpdpp.pos[2] = PosZRec[j]*LUsf + dr[2];
+			tgpdpp.vel[0] = VelXRec[j]*csvelscalefac*VUsf;
+			tgpdpp.vel[1] = VelYRec[j]*csvelscalefac*VUsf;
+			tgpdpp.vel[2] = VelZRec[j]*csvelscalefac*VUsf;
+			tgpdpp.mass = mass;
+			tgpdpp.rho = 0;
+			tgpdpp.temp = 0;
+			tgpdpp.hsmooth = soft;
+			tgpdpp.metals = 0;
+			tgpdpp.phi = 0;
+			if (index < Ntot) write_tipsy_xdr_gas_dpp(&xdrs,&tgpdpp);
 			}
 		    else if (particletype == 1) {
-			dpdpp.pos[0] = PosXRec[j]*LUsf + dr[0];
-			dpdpp.pos[1] = PosYRec[j]*LUsf + dr[1];
-			dpdpp.pos[2] = PosZRec[j]*LUsf + dr[2];
-			dpdpp.vel[0] = VelXRec[j]*csvelscalefac*VUsf;
-			dpdpp.vel[1] = VelYRec[j]*csvelscalefac*VUsf;
-			dpdpp.vel[2] = VelZRec[j]*csvelscalefac*VUsf;
-			dpdpp.mass = mass;
-			dpdpp.eps = soft;
-			dpdpp.phi = 0;
-			if (index < Ntot) write_tipsy_standard_dark_dpp(&xdrs,&dpdpp);
+			tdpdpp.pos[0] = PosXRec[j]*LUsf + dr[0];
+			tdpdpp.pos[1] = PosYRec[j]*LUsf + dr[1];
+			tdpdpp.pos[2] = PosZRec[j]*LUsf + dr[2];
+			tdpdpp.vel[0] = VelXRec[j]*csvelscalefac*VUsf;
+			tdpdpp.vel[1] = VelYRec[j]*csvelscalefac*VUsf;
+			tdpdpp.vel[2] = VelZRec[j]*csvelscalefac*VUsf;
+			tdpdpp.mass = mass;
+			tdpdpp.eps = soft;
+			tdpdpp.phi = 0;
+			if (index < Ntot) write_tipsy_xdr_dark_dpp(&xdrs,&tdpdpp);
 			}
 		    else {
-			spdpp.pos[0] = PosXRec[j]*LUsf + dr[0];
-			spdpp.pos[1] = PosYRec[j]*LUsf + dr[1];
-			spdpp.pos[2] = PosZRec[j]*LUsf + dr[2];
-			spdpp.vel[0] = VelXRec[j]*csvelscalefac*VUsf;
-			spdpp.vel[1] = VelYRec[j]*csvelscalefac*VUsf;
-			spdpp.vel[2] = VelZRec[j]*csvelscalefac*VUsf;
-			spdpp.mass = mass;
-			spdpp.metals = 0;
-			spdpp.tform = 0;
-			spdpp.eps = soft;
-			spdpp.phi = 0;
-			if (index < Ntot) write_tipsy_standard_star_dpp(&xdrs,&spdpp);
+			tspdpp.pos[0] = PosXRec[j]*LUsf + dr[0];
+			tspdpp.pos[1] = PosYRec[j]*LUsf + dr[1];
+			tspdpp.pos[2] = PosZRec[j]*LUsf + dr[2];
+			tspdpp.vel[0] = VelXRec[j]*csvelscalefac*VUsf;
+			tspdpp.vel[1] = VelYRec[j]*csvelscalefac*VUsf;
+			tspdpp.vel[2] = VelZRec[j]*csvelscalefac*VUsf;
+			tspdpp.mass = mass;
+			tspdpp.metals = 0;
+			tspdpp.tform = 0;
+			tspdpp.eps = soft;
+			tspdpp.phi = 0;
+			if (index < Ntot) write_tipsy_xdr_star_dpp(&xdrs,&tspdpp);
 			}
 		    }
 		index++;
@@ -602,88 +602,88 @@ int main(int argc, char **argv) {
 		for (j = 0; j < Nrec; j++) {
 		    if (positionprecision == 0) {
 			if (particletype == 0) {
-			    gp.pos[0] = PosXRec[j]*LUsf + dr[0];
-			    gp.pos[1] = PosYRec[j]*LUsf + dr[1];
-			    gp.pos[2] = PosZRec[j]*LUsf + dr[2];
-			    gp.vel[0] = VelXRec[j]*csvelscalefac*VUsf;
-			    gp.vel[1] = VelYRec[j]*csvelscalefac*VUsf;
-			    gp.vel[2] = VelZRec[j]*csvelscalefac*VUsf;
-			    gp.mass = mass;
-			    gp.rho = 0;
-			    gp.temp = 0;
-			    gp.hsmooth = soft;
-			    gp.metals = 0;
-			    gp.phi = 0;
-			    if (index < Nlev) write_tipsy_standard_gas(&xdrs,&gp);
+			    tgp.pos[0] = PosXRec[j]*LUsf + dr[0];
+			    tgp.pos[1] = PosYRec[j]*LUsf + dr[1];
+			    tgp.pos[2] = PosZRec[j]*LUsf + dr[2];
+			    tgp.vel[0] = VelXRec[j]*csvelscalefac*VUsf;
+			    tgp.vel[1] = VelYRec[j]*csvelscalefac*VUsf;
+			    tgp.vel[2] = VelZRec[j]*csvelscalefac*VUsf;
+			    tgp.mass = mass;
+			    tgp.rho = 0;
+			    tgp.temp = 0;
+			    tgp.hsmooth = soft;
+			    tgp.metals = 0;
+			    tgp.phi = 0;
+			    if (index < Nlev) write_tipsy_xdr_gas(&xdrs,&tgp);
 			    }
 			else if (particletype == 1) {
-			    dp.pos[0] = PosXRec[j]*LUsf + dr[0];
-			    dp.pos[1] = PosYRec[j]*LUsf + dr[1];
-			    dp.pos[2] = PosZRec[j]*LUsf + dr[2];
-			    dp.vel[0] = VelXRec[j]*csvelscalefac*VUsf;
-			    dp.vel[1] = VelYRec[j]*csvelscalefac*VUsf;
-			    dp.vel[2] = VelZRec[j]*csvelscalefac*VUsf;
-			    dp.mass = mass;
-			    dp.eps = soft;
-			    dp.phi = 0;
-			    if (index < Nlev) write_tipsy_standard_dark(&xdrs,&dp);
+			    tdp.pos[0] = PosXRec[j]*LUsf + dr[0];
+			    tdp.pos[1] = PosYRec[j]*LUsf + dr[1];
+			    tdp.pos[2] = PosZRec[j]*LUsf + dr[2];
+			    tdp.vel[0] = VelXRec[j]*csvelscalefac*VUsf;
+			    tdp.vel[1] = VelYRec[j]*csvelscalefac*VUsf;
+			    tdp.vel[2] = VelZRec[j]*csvelscalefac*VUsf;
+			    tdp.mass = mass;
+			    tdp.eps = soft;
+			    tdp.phi = 0;
+			    if (index < Nlev) write_tipsy_xdr_dark(&xdrs,&tdp);
 			    }
 			else {
-			    sp.pos[0] = PosXRec[j]*LUsf + dr[0];
-			    sp.pos[1] = PosYRec[j]*LUsf + dr[1];
-			    sp.pos[2] = PosZRec[j]*LUsf + dr[2];
-			    sp.vel[0] = VelXRec[j]*csvelscalefac*VUsf;
-			    sp.vel[1] = VelYRec[j]*csvelscalefac*VUsf;
-			    sp.vel[2] = VelZRec[j]*csvelscalefac*VUsf;
-			    sp.mass = mass;
-			    sp.metals = 0;
-			    sp.tform = 0;
-			    sp.eps = soft;
-			    sp.phi = 0;
-			    if (index < Nlev) write_tipsy_standard_star(&xdrs,&sp);
+			    tsp.pos[0] = PosXRec[j]*LUsf + dr[0];
+			    tsp.pos[1] = PosYRec[j]*LUsf + dr[1];
+			    tsp.pos[2] = PosZRec[j]*LUsf + dr[2];
+			    tsp.vel[0] = VelXRec[j]*csvelscalefac*VUsf;
+			    tsp.vel[1] = VelYRec[j]*csvelscalefac*VUsf;
+			    tsp.vel[2] = VelZRec[j]*csvelscalefac*VUsf;
+			    tsp.mass = mass;
+			    tsp.metals = 0;
+			    tsp.tform = 0;
+			    tsp.eps = soft;
+			    tsp.phi = 0;
+			    if (index < Nlev) write_tipsy_xdr_star(&xdrs,&tsp);
 			    }
 			}
 		    else {
 			if (particletype == 0) {
-			    gpdpp.pos[0] = PosXRec[j]*LUsf + dr[0];
-			    gpdpp.pos[1] = PosYRec[j]*LUsf + dr[1];
-			    gpdpp.pos[2] = PosZRec[j]*LUsf + dr[2];
-			    gpdpp.vel[0] = VelXRec[j]*csvelscalefac*VUsf;
-			    gpdpp.vel[1] = VelYRec[j]*csvelscalefac*VUsf;
-			    gpdpp.vel[2] = VelZRec[j]*csvelscalefac*VUsf;
-			    gpdpp.mass = mass;
-			    gpdpp.rho = 0;
-			    gpdpp.temp = 0;
-			    gpdpp.hsmooth = soft;
-			    gpdpp.metals = 0;
-			    gpdpp.phi = 0;
-			    if (index < Nlev) write_tipsy_standard_gas_dpp(&xdrs,&gpdpp);
+			    tgpdpp.pos[0] = PosXRec[j]*LUsf + dr[0];
+			    tgpdpp.pos[1] = PosYRec[j]*LUsf + dr[1];
+			    tgpdpp.pos[2] = PosZRec[j]*LUsf + dr[2];
+			    tgpdpp.vel[0] = VelXRec[j]*csvelscalefac*VUsf;
+			    tgpdpp.vel[1] = VelYRec[j]*csvelscalefac*VUsf;
+			    tgpdpp.vel[2] = VelZRec[j]*csvelscalefac*VUsf;
+			    tgpdpp.mass = mass;
+			    tgpdpp.rho = 0;
+			    tgpdpp.temp = 0;
+			    tgpdpp.hsmooth = soft;
+			    tgpdpp.metals = 0;
+			    tgpdpp.phi = 0;
+			    if (index < Nlev) write_tipsy_xdr_gas_dpp(&xdrs,&tgpdpp);
 			    }
 			else if (particletype == 1) {
-			    dpdpp.pos[0] = PosXRec[j]*LUsf + dr[0];
-			    dpdpp.pos[1] = PosYRec[j]*LUsf + dr[1];
-			    dpdpp.pos[2] = PosZRec[j]*LUsf + dr[2];
-			    dpdpp.vel[0] = VelXRec[j]*csvelscalefac*VUsf;
-			    dpdpp.vel[1] = VelYRec[j]*csvelscalefac*VUsf;
-			    dpdpp.vel[2] = VelZRec[j]*csvelscalefac*VUsf;
-			    dpdpp.mass = mass;
-			    dpdpp.eps = soft;
-			    dpdpp.phi = 0;
-			    if (index < Nlev) write_tipsy_standard_dark_dpp(&xdrs,&dpdpp);
+			    tdpdpp.pos[0] = PosXRec[j]*LUsf + dr[0];
+			    tdpdpp.pos[1] = PosYRec[j]*LUsf + dr[1];
+			    tdpdpp.pos[2] = PosZRec[j]*LUsf + dr[2];
+			    tdpdpp.vel[0] = VelXRec[j]*csvelscalefac*VUsf;
+			    tdpdpp.vel[1] = VelYRec[j]*csvelscalefac*VUsf;
+			    tdpdpp.vel[2] = VelZRec[j]*csvelscalefac*VUsf;
+			    tdpdpp.mass = mass;
+			    tdpdpp.eps = soft;
+			    tdpdpp.phi = 0;
+			    if (index < Nlev) write_tipsy_xdr_dark_dpp(&xdrs,&tdpdpp);
 			    }
 			else {
-			    spdpp.pos[0] = PosXRec[j]*LUsf + dr[0];
-			    spdpp.pos[1] = PosYRec[j]*LUsf + dr[1];
-			    spdpp.pos[2] = PosZRec[j]*LUsf + dr[2];
-			    spdpp.vel[0] = VelXRec[j]*csvelscalefac*VUsf;
-			    spdpp.vel[1] = VelYRec[j]*csvelscalefac*VUsf;
-			    spdpp.vel[2] = VelZRec[j]*csvelscalefac*VUsf;
-			    spdpp.mass = mass;
-			    spdpp.metals = 0;
-			    spdpp.tform = 0;
-			    spdpp.eps = soft;
-			    spdpp.phi = 0;
-			    if (index < Nlev) write_tipsy_standard_star_dpp(&xdrs,&spdpp);
+			    tspdpp.pos[0] = PosXRec[j]*LUsf + dr[0];
+			    tspdpp.pos[1] = PosYRec[j]*LUsf + dr[1];
+			    tspdpp.pos[2] = PosZRec[j]*LUsf + dr[2];
+			    tspdpp.vel[0] = VelXRec[j]*csvelscalefac*VUsf;
+			    tspdpp.vel[1] = VelYRec[j]*csvelscalefac*VUsf;
+			    tspdpp.vel[2] = VelZRec[j]*csvelscalefac*VUsf;
+			    tspdpp.mass = mass;
+			    tspdpp.metals = 0;
+			    tspdpp.tform = 0;
+			    tspdpp.eps = soft;
+			    tspdpp.phi = 0;
+			    if (index < Nlev) write_tipsy_xdr_star_dpp(&xdrs,&tspdpp);
 			    }
 			}
 		    index++;
@@ -783,7 +783,7 @@ int main(int argc, char **argv) {
 void usage(void) {
 
     fprintf(stderr,"\n");
-    fprintf(stderr,"Program converts GIC binary format to tipsy standard binary format.\n");
+    fprintf(stderr,"Program converts GIC native binary format to tipsy XDR format.\n");
     fprintf(stderr,"\n");
     fprintf(stderr,"Please specify the following parameters:\n");
     fprintf(stderr,"\n");
@@ -807,9 +807,9 @@ void usage(void) {
     fprintf(stderr,"-refstep <value> : refinement step factor (default: 2)\n");
     fprintf(stderr,"-noscaling       : no scaling of data\n");
     fprintf(stderr,"-v               : more informative output to screen\n");
-    fprintf(stderr,"-pos <name>      : positions input file GIC binary format\n");
-    fprintf(stderr,"-vel <name>      : velocities input file GIC binary format\n");
-    fprintf(stderr,"> <name>         : output file in tipsy standard binary format\n");
+    fprintf(stderr,"-pos <name>      : positions input file GIC native binary format\n");
+    fprintf(stderr,"-vel <name>      : velocities input file GIC native binary format\n");
+    fprintf(stderr,"> <name>         : output file in tipsy XDR format\n");
     fprintf(stderr,"\n");
     exit(1);
     }

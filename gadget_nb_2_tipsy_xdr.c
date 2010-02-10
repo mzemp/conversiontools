@@ -1,7 +1,7 @@
 /* 
 ** gb2ts.c
 **
-** written by Marcel Zemp
+** Written by Marcel Zemp
 */
 
 #include <stdio.h>
@@ -105,11 +105,11 @@ int main(int argc, char **argv) {
     ts = malloc(sizeof(TIPSY_STRUCTURE));
     assert(ts != NULL);
     ts->th = NULL;
-    ts->gp = NULL;
-    ts->dp = NULL;
-    ts->sp = NULL;
-    read_gadget_binary(stdin,ts,a,dx,dy,dz,dof,mmw,uvf);
-    write_tipsy_standard(stdout,ts);
+    ts->tgp = NULL;
+    ts->tdp = NULL;
+    ts->tsp = NULL;
+    read_gadget_nb(stdin,ts,a,dx,dy,dz,dof,mmw,uvf);
+    write_tipsy_xdr(stdout,ts);
     if (a == -1) {
 	a = ts->th->time;
 	}
@@ -133,7 +133,7 @@ int main(int argc, char **argv) {
 void usage(void) {
 
     fprintf(stderr,"\n");
-    fprintf(stderr,"Program converts gadget binary format to tipsy standard binary format.\n");
+    fprintf(stderr,"Program converts gadget native binary format to tipsy XDR format.\n");
     fprintf(stderr,"\n");
     fprintf(stderr,"Please specify the following parameters:\n");
     fprintf(stderr,"\n");
@@ -145,8 +145,8 @@ void usage(void) {
     fprintf(stderr,"-mmw <value> : mean molecular weight of gas [mp] (default: 1 mp)\n");
     fprintf(stderr,"-uvf <value> : internal unit of velocity [m s^-1] (default: 977.79219 m s^-1 => 977.79219 m s^-1 = 1 kpc Gyr^-1)\n");
     fprintf(stderr,"-v           : more informative output to screen\n");
-    fprintf(stderr,"< <name>     : input file in gadget binary format\n");
-    fprintf(stderr,"> <name>     : output file in tipsy standard binary format\n");
+    fprintf(stderr,"< <name>     : input file in gadget native binary format\n");
+    fprintf(stderr,"> <name>     : output file in tipsy XDR format\n");
     fprintf(stderr,"\n");
     exit(1);
     }

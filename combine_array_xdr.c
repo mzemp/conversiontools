@@ -1,7 +1,7 @@
 /* 
 ** cas.c
 **
-** written by Marcel Zemp
+** Written by Marcel Zemp
 */
 
 #include <stdio.h>
@@ -59,8 +59,8 @@ int main(int argc, char **argv) {
     xdrstdio_create(&xdrs1,fp1,XDR_DECODE);
     xdrstdio_create(&xdrs2,fp2,XDR_DECODE);
     xdrstdio_create(&xdrs3,stdout,XDR_ENCODE);
-    read_array_header(&xdrs1,&ah1);
-    read_array_header(&xdrs2,&ah2);
+    read_array_xdr_header(&xdrs1,&ah1);
+    read_array_xdr_header(&xdrs2,&ah2);
     assert(ah1.N[0] == ah2.N[0]);
     ah3.N[0] = ah1.N[0];
     allocate_array_particle(&ah1,&ap1);
@@ -69,10 +69,10 @@ int main(int argc, char **argv) {
 	ah3.N[i] = ah1.N[i] + ah2.N[i];
 	}
     allocate_array_particle(&ah3,&ap3);
-    write_array_header(&xdrs3,&ah3);
+    write_array_xdr_header(&xdrs3,&ah3);
     for (i = 0; i < ah3.N[0]; i++) {
-	read_array_particle(&xdrs1,&ah1,&ap1);
-	read_array_particle(&xdrs2,&ah2,&ap2);
+	read_array_xdr_particle(&xdrs1,&ah1,&ap1);
+	read_array_xdr_particle(&xdrs2,&ah2,&ap2);
 	for (j = 0; j < ah1.N[1]; j++) {
 	    ap3.ia[j] = ap1.ia[j];
 	    }
@@ -91,7 +91,7 @@ int main(int argc, char **argv) {
 	for (j = 0; j < ah2.N[3]; j++) {
 	    ap3.da[ah1.N[3]+j] = ap2.da[j];
 	    }
-	write_array_particle(&xdrs3,&ah3,&ap3);
+	write_array_xdr_particle(&xdrs3,&ah3,&ap3);
 	}
     xdr_destroy(&xdrs1);
     xdr_destroy(&xdrs2);
@@ -110,13 +110,13 @@ int main(int argc, char **argv) {
 void usage(void) {
 
     fprintf(stderr,"\n");
-    fprintf(stderr,"Program combines two array files in standard binary format.\n");
+    fprintf(stderr,"Program combines two array files in XDR format.\n");
     fprintf(stderr,"\n");
     fprintf(stderr,"Please specify the following parameters:\n");
     fprintf(stderr,"\n");
-    fprintf(stderr,"-f1 <name> : input file 1 in standard binary format\n");
-    fprintf(stderr,"-f2 <name> : input file 2 in standard binary format\n");
-    fprintf(stderr,"> <name>   : output file in standard binary format\n");
+    fprintf(stderr,"-f1 <name> : input file 1 in XDR format\n");
+    fprintf(stderr,"-f2 <name> : input file 2 in XDR format\n");
+    fprintf(stderr,"> <name>   : output file in XDR format\n");
     fprintf(stderr,"\n");
     exit(1);
     }

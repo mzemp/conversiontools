@@ -1,7 +1,7 @@
 /* 
 ** ts2silo.c
 **
-** written by Marcel Zemp
+** Written by Marcel Zemp
 */
 
 #include <stdio.h>
@@ -51,7 +51,7 @@ int main(int argc, char **argv) {
     char dname[NARRAYMAX][256];
     char reservednames[10][256];
     float **posf = NULL;
-    double **posd = NULL;;
+    double **posd = NULL;
     float **vel;
     float *mass;
     float *eps;
@@ -64,12 +64,12 @@ int main(int argc, char **argv) {
     float **fa;
     double **da;
     TIPSY_HEADER th;
-    GAS_PARTICLE gp;
-    DARK_PARTICLE dp;
-    STAR_PARTICLE sp;
-    GAS_PARTICLE_DPP gpdpp;
-    DARK_PARTICLE_DPP dpdpp;
-    STAR_PARTICLE_DPP spdpp;
+    TIPSY_GAS_PARTICLE tgp;
+    TIPSY_DARK_PARTICLE tdp;
+    TIPSY_STAR_PARTICLE tsp;
+    TIPSY_GAS_PARTICLE_DPP tgpdpp;
+    TIPSY_DARK_PARTICLE_DPP tdpdpp;
+    TIPSY_STAR_PARTICLE_DPP tspdpp;
     ARRAY_HEADER ah;
     ARRAY_PARTICLE ap;
     DBfile *dbfile = NULL;
@@ -249,7 +249,7 @@ int main(int argc, char **argv) {
     ** Read in tipsy file, write out header stuff and get arrays ready
     */
     xdrstdio_create(&xdrs,stdin,XDR_DECODE);
-    read_tipsy_standard_header(&xdrs,&th);
+    read_tipsy_xdr_header(&xdrs,&th);
     i = 1;
     DBMkDir(dbfile,"header");
     DBSetDir(dbfile,"/header");
@@ -319,30 +319,30 @@ int main(int argc, char **argv) {
 	assert(metals != NULL);
 	for (i = 0; i < th.ngas; i++) {
 	    if (positionprecision == 0) {
-		read_tipsy_standard_gas(&xdrs,&gp);
+		read_tipsy_xdr_gas(&xdrs,&tgp);
 		for (j = 0; j < th.ndim; j++) {
-		    posf[j][i] = gp.pos[j];
-		    vel[j][i] = gp.vel[j];
+		    posf[j][i] = tgp.pos[j];
+		    vel[j][i] = tgp.vel[j];
 		    }
-		mass[i] = gp.mass;
-		eps[i] = gp.hsmooth;
-		phi[i] = gp.phi;
-		rho[i] = gp.rho;
-		temp[i] = gp.temp;
-		metals[i] = gp.metals;
+		mass[i] = tgp.mass;
+		eps[i] = tgp.hsmooth;
+		phi[i] = tgp.phi;
+		rho[i] = tgp.rho;
+		temp[i] = tgp.temp;
+		metals[i] = tgp.metals;
 		}
 	    else if (positionprecision == 1) {
-		read_tipsy_standard_gas_dpp(&xdrs,&gpdpp);
+		read_tipsy_xdr_gas_dpp(&xdrs,&tgpdpp);
 		for (j = 0; j < th.ndim; j++) {
-		    posd[j][i] = gpdpp.pos[j];
-		    vel[j][i] = gpdpp.vel[j];
+		    posd[j][i] = tgpdpp.pos[j];
+		    vel[j][i] = tgpdpp.vel[j];
 		    }
-		mass[i] = gpdpp.mass;
-		eps[i] = gpdpp.hsmooth;
-		phi[i] = gpdpp.phi;
-		rho[i] = gpdpp.rho;
-		temp[i] = gpdpp.temp;
-		metals[i] = gpdpp.metals;
+		mass[i] = tgpdpp.mass;
+		eps[i] = tgpdpp.hsmooth;
+		phi[i] = tgpdpp.phi;
+		rho[i] = tgpdpp.rho;
+		temp[i] = tgpdpp.temp;
+		metals[i] = tgpdpp.metals;
 		}
 	    }
 	DBMkDir(dbfile,"gas");
@@ -392,24 +392,24 @@ int main(int argc, char **argv) {
 	assert(phi != NULL);
 	for (i = 0; i < th.ndark; i++) {
 	    if (positionprecision == 0) {
-		read_tipsy_standard_dark(&xdrs,&dp);
+		read_tipsy_xdr_dark(&xdrs,&tdp);
 		for (j = 0; j < th.ndim; j++) {
-		    posf[j][i] = dp.pos[j];
-		    vel[j][i] = dp.vel[j];
+		    posf[j][i] = tdp.pos[j];
+		    vel[j][i] = tdp.vel[j];
 		    }
-		mass[i] = dp.mass;
-		eps[i] = dp.eps;
-		phi[i] = dp.phi;
+		mass[i] = tdp.mass;
+		eps[i] = tdp.eps;
+		phi[i] = tdp.phi;
 		}
 	    else if (positionprecision == 1) {
-		read_tipsy_standard_dark_dpp(&xdrs,&dpdpp);
+		read_tipsy_xdr_dark_dpp(&xdrs,&tdpdpp);
 		for (j = 0; j < th.ndim; j++) {
-		    posd[j][i] = dpdpp.pos[j];
-		    vel[j][i] = dpdpp.vel[j];
+		    posd[j][i] = tdpdpp.pos[j];
+		    vel[j][i] = tdpdpp.vel[j];
 		    }
-		mass[i] = dpdpp.mass;
-		eps[i] = dpdpp.eps;
-		phi[i] = dpdpp.phi;
+		mass[i] = tdpdpp.mass;
+		eps[i] = tdpdpp.eps;
+		phi[i] = tdpdpp.phi;
 		}
 	    }
 	DBMkDir(dbfile,"dark");
@@ -455,28 +455,28 @@ int main(int argc, char **argv) {
 	assert(tform != NULL);
 	for (i = 0; i < th.nstar; i++) {
 	    if (positionprecision == 0) {
-		read_tipsy_standard_star(&xdrs,&sp);
+		read_tipsy_xdr_star(&xdrs,&tsp);
 		for (j = 0; j < th.ndim; j++) {
-		    posf[j][i] = sp.pos[j];
-		    vel[j][i] = sp.vel[j];
+		    posf[j][i] = tsp.pos[j];
+		    vel[j][i] = tsp.vel[j];
 		    }
-		mass[i] = sp.mass;
-		eps[i] = sp.eps;
-		phi[i] = sp.phi;
-		metals[i] = sp.metals;
-		tform[i] = sp.tform;
+		mass[i] = tsp.mass;
+		eps[i] = tsp.eps;
+		phi[i] = tsp.phi;
+		metals[i] = tsp.metals;
+		tform[i] = tsp.tform;
 		}
 	    else if (positionprecision == 1) {
-		read_tipsy_standard_star_dpp(&xdrs,&spdpp);
+		read_tipsy_xdr_star_dpp(&xdrs,&tspdpp);
 		for (j = 0; j < th.ndim; j++) {
-		    posd[j][i] = spdpp.pos[j];
-		    vel[j][i] = spdpp.vel[j];
+		    posd[j][i] = tspdpp.pos[j];
+		    vel[j][i] = tspdpp.vel[j];
 		    }
-		mass[i] = spdpp.mass;
-		eps[i] = spdpp.eps;
-		phi[i] = spdpp.phi;
-		metals[i] = spdpp.metals;
-		tform[i] = spdpp.tform;
+		mass[i] = tspdpp.mass;
+		eps[i] = tspdpp.eps;
+		phi[i] = tspdpp.phi;
+		metals[i] = tspdpp.metals;
+		tform[i] = tspdpp.tform;
 		}
 	    }
 	DBMkDir(dbfile,"star");
@@ -517,7 +517,7 @@ int main(int argc, char **argv) {
 	file = fopen(arrayfilename,"r");
 	assert(file != NULL);
 	xdrstdio_create(&xdrs,file,XDR_DECODE);
-	read_array_header(&xdrs,&ah);
+	read_array_xdr_header(&xdrs,&ah);
 	assert(ah.N[0] == th.ntotal);
 	if (ah.N[1] > NARRAYMAX || ah.N[2] > NARRAYMAX || ah.N[3] > NARRAYMAX) {
 	    fprintf(stderr,"Too many array fields! Recompile with higher NARRAYMAX value.\n");
@@ -559,7 +559,7 @@ int main(int argc, char **argv) {
 		assert(da[j] != NULL);
 		}
 	    for (i = 0; i < th.ngas; i++) {
-		read_array_particle(&xdrs,&ah,&ap);
+		read_array_xdr_particle(&xdrs,&ah,&ap);
 		for (j = 0; j < ah.N[1]; j++) {
 		    ia[j][i] = ap.ia[j];
 		    }
@@ -599,7 +599,7 @@ int main(int argc, char **argv) {
 		assert(da[j] != NULL);
 		}
 	    for (i = 0; i < th.ndark; i++) {
-		read_array_particle(&xdrs,&ah,&ap);
+		read_array_xdr_particle(&xdrs,&ah,&ap);
 		for (j = 0; j < ah.N[1]; j++) {
 		    ia[j][i] = ap.ia[j];
 		    }
@@ -639,7 +639,7 @@ int main(int argc, char **argv) {
 		assert(da[j] != NULL);
 		}
 	    for (i = 0; i < th.nstar; i++) {
-		read_array_particle(&xdrs,&ah,&ap);
+		read_array_xdr_particle(&xdrs,&ah,&ap);
 		for (j = 0; j < ah.N[1]; j++) {
 		    ia[j][i] = ap.ia[j];
 		    }
@@ -685,7 +685,7 @@ int main(int argc, char **argv) {
 void usage(void) {
 
     fprintf(stderr,"\n");
-    fprintf(stderr,"Program converts tipsy standard binary format to silo format.\n");
+    fprintf(stderr,"Program converts tipsy XDR format to silo format.\n");
     fprintf(stderr,"\n");
     fprintf(stderr,"Please specify the following parameters:\n");
     fprintf(stderr,"\n");
@@ -693,8 +693,8 @@ void usage(void) {
     fprintf(stderr,"-dpp           : set this flag if input and output files have double precision positions\n");
     fprintf(stderr,"-<a><i> <name> : name of array field (optional), <a> array type (i,f or d), <i> array index\n");
     fprintf(stderr,"-o <name>      : output file in silo format\n");
-    fprintf(stderr,"-array <name>  : array file in array standard binary format\n");
-    fprintf(stderr,"< <name>       : input file in tipsy standard binary format\n");
+    fprintf(stderr,"-array <name>  : array file in array XDR format\n");
+    fprintf(stderr,"< <name>       : input file in tipsy XDR format\n");
     fprintf(stderr,"\n");
     exit(1);
     }

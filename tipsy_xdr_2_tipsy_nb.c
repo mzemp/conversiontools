@@ -1,7 +1,7 @@
 /* 
 ** ts2tb.c
 **
-** written by Marcel Zemp
+** Written by Marcel Zemp
 */
 
 #include <stdio.h>
@@ -18,12 +18,12 @@ int main(int argc, char **argv) {
     int i;
     int positionprecision, verboselevel;
     TIPSY_HEADER th;
-    GAS_PARTICLE gp;
-    DARK_PARTICLE dp;
-    STAR_PARTICLE sp;
-    GAS_PARTICLE_DPP gpdpp;
-    DARK_PARTICLE_DPP dpdpp;
-    STAR_PARTICLE_DPP spdpp;
+    TIPSY_GAS_PARTICLE tgp;
+    TIPSY_DARK_PARTICLE tdp;
+    TIPSY_STAR_PARTICLE tsp;
+    TIPSY_GAS_PARTICLE_DPP tgpdpp;
+    TIPSY_DARK_PARTICLE_DPP tdpdpp;
+    TIPSY_STAR_PARTICLE_DPP tspdpp;
     XDR xdrs;
 
     positionprecision = 0;
@@ -50,34 +50,34 @@ int main(int argc, char **argv) {
             }
         }
     xdrstdio_create(&xdrs,stdin,XDR_ENCODE);
-    read_tipsy_standard_header(&xdrs,&th);
-    write_tipsy_binary_header(stdout,&th);
+    read_tipsy_xdr_header(&xdrs,&th);
+    write_tipsy_nb_header(stdout,&th);
     if (positionprecision == 0) {
 	for (i = 0; i < th.ngas; i++) {
-	    read_tipsy_standard_gas(&xdrs,&gp);
-	    write_tipsy_binary_gas(stdout,&gp);
+	    read_tipsy_xdr_gas(&xdrs,&tgp);
+	    write_tipsy_nb_gas(stdout,&tgp);
 	    }
 	for (i = 0; i < th.ndark; i++) {
-	    read_tipsy_standard_dark(&xdrs,&dp);
-	    write_tipsy_binary_dark(stdout,&dp);
+	    read_tipsy_xdr_dark(&xdrs,&tdp);
+	    write_tipsy_nb_dark(stdout,&tdp);
 	    }
 	for (i = 0; i < th.nstar; i++) {
-	    read_tipsy_standard_star(&xdrs,&sp);
-	    write_tipsy_binary_star(stdout,&sp);
+	    read_tipsy_xdr_star(&xdrs,&tsp);
+	    write_tipsy_nb_star(stdout,&tsp);
 	    }
 	}
     if (positionprecision == 1) {
 	for (i = 0; i < th.ngas; i++) {
-	    read_tipsy_standard_gas_dpp(&xdrs,&gpdpp);
-	    write_tipsy_binary_gas_dpp(stdout,&gpdpp);
+	    read_tipsy_xdr_gas_dpp(&xdrs,&tgpdpp);
+	    write_tipsy_nb_gas_dpp(stdout,&tgpdpp);
 	    }
 	for (i = 0; i < th.ndark; i++) {
-	    read_tipsy_standard_dark_dpp(&xdrs,&dpdpp);
-	    write_tipsy_binary_dark_dpp(stdout,&dpdpp);
+	    read_tipsy_xdr_dark_dpp(&xdrs,&tdpdpp);
+	    write_tipsy_nb_dark_dpp(stdout,&tdpdpp);
 	    }
 	for (i = 0; i < th.nstar; i++) {
-	    read_tipsy_standard_star_dpp(&xdrs,&spdpp);
-	    write_tipsy_binary_star_dpp(stdout,&spdpp);
+	    read_tipsy_xdr_star_dpp(&xdrs,&tspdpp);
+	    write_tipsy_nb_star_dpp(stdout,&tspdpp);
 	    }
 	}
     xdr_destroy(&xdrs);
@@ -91,14 +91,14 @@ int main(int argc, char **argv) {
 void usage(void) {
  
     fprintf(stderr,"\n");
-    fprintf(stderr,"Program converts tipsy standard binary format to tipsy binary format.\n");
+    fprintf(stderr,"Program converts tipsy XDR format to tipsy native binary format.\n");
     fprintf(stderr,"\n");
     fprintf(stderr,"Please specify the following parameters:\n");
     fprintf(stderr,"\n");
     fprintf(stderr,"-spp     : set this flag if input and output files have single precision positions (default)\n");
     fprintf(stderr,"-dpp     : set this flag if input and output files have double precision positions\n");
-    fprintf(stderr,"< <name> : input file in tipsy standard binary format\n");
-    fprintf(stderr,"> <name> : output file in tipsy binary format\n");
+    fprintf(stderr,"< <name> : input file in tipsy XDR format\n");
+    fprintf(stderr,"> <name> : output file in tipsy native binary format\n");
     fprintf(stderr,"\n");
     exit(1);
     }

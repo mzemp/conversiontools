@@ -1,7 +1,7 @@
 /* 
 ** tsdpp2tsspp.c
 **
-** written by Marcel Zemp
+** Written by Marcel Zemp
 */
 
 #include <stdio.h>
@@ -18,12 +18,12 @@ int main(int argc, char **argv) {
     int i;
     int verboselevel;
     TIPSY_HEADER th;
-    GAS_PARTICLE gp;
-    DARK_PARTICLE dp;
-    STAR_PARTICLE sp;
-    GAS_PARTICLE_DPP gpdpp;
-    DARK_PARTICLE_DPP dpdpp;
-    STAR_PARTICLE_DPP spdpp;
+    TIPSY_GAS_PARTICLE tgp;
+    TIPSY_DARK_PARTICLE tdp;
+    TIPSY_STAR_PARTICLE tsp;
+    TIPSY_GAS_PARTICLE_DPP tgpdpp;
+    TIPSY_DARK_PARTICLE_DPP tdpdpp;
+    TIPSY_STAR_PARTICLE_DPP tspdpp;
     XDR xdrsin, xdrsout;
 
     verboselevel = 0;
@@ -42,22 +42,22 @@ int main(int argc, char **argv) {
         }
     xdrstdio_create(&xdrsin,stdin,XDR_DECODE);
     xdrstdio_create(&xdrsout,stdout,XDR_ENCODE);
-    read_tipsy_standard_header(&xdrsin,&th);
-    write_tipsy_standard_header(&xdrsout,&th);
+    read_tipsy_xdr_header(&xdrsin,&th);
+    write_tipsy_xdr_header(&xdrsout,&th);
     for (i = 0; i < th.ngas; i++) {
-	read_tipsy_standard_gas_dpp(&xdrsin,&gpdpp);
-	copy_gpdpp_to_gp(&gpdpp,&gp);
-	write_tipsy_standard_gas(&xdrsout,&gp);
+	read_tipsy_xdr_gas_dpp(&xdrsin,&tgpdpp);
+	copy_tgpdpp_to_tgp(&tgpdpp,&tgp);
+	write_tipsy_xdr_gas(&xdrsout,&tgp);
 	}
     for (i = 0; i < th.ndark; i++) {
-	read_tipsy_standard_dark_dpp(&xdrsin,&dpdpp);
-	copy_dpdpp_to_dp(&dpdpp,&dp);
-	write_tipsy_standard_dark(&xdrsout,&dp);
+	read_tipsy_xdr_dark_dpp(&xdrsin,&tdpdpp);
+	copy_tdpdpp_to_tdp(&tdpdpp,&tdp);
+	write_tipsy_xdr_dark(&xdrsout,&tdp);
 	}
     for (i = 0; i < th.nstar; i++) {
-	read_tipsy_standard_star_dpp(&xdrsin,&spdpp);
-	copy_spdpp_to_sp(&spdpp,&sp);
-	write_tipsy_standard_star(&xdrsout,&sp);
+	read_tipsy_xdr_star_dpp(&xdrsin,&tspdpp);
+	copy_tspdpp_to_tsp(&tspdpp,&tsp);
+	write_tipsy_xdr_star(&xdrsout,&tsp);
 	}
     xdr_destroy(&xdrsin);
     xdr_destroy(&xdrsout);
@@ -71,13 +71,13 @@ int main(int argc, char **argv) {
 void usage(void) {
  
     fprintf(stderr,"\n");
-    fprintf(stderr,"Program converts tipsy standard binary format with double precision positions\n");
-    fprintf(stderr,"to tipsy standard binary format with single precision positions.\n");
+    fprintf(stderr,"Program converts tipsy XDR format with double precision positions\n");
+    fprintf(stderr,"to tipsy XDR format with single precision positions.\n");
     fprintf(stderr,"\n");
     fprintf(stderr,"Please specify the following parameters:\n");
     fprintf(stderr,"\n");
-    fprintf(stderr,"< <name> : input file in tipsy standard binary format with double precision positions\n");
-    fprintf(stderr,"> <name> : output file in tipsy standard binary format with single precision positions\n");
+    fprintf(stderr,"< <name> : input file in tipsy XDR format with double precision positions\n");
+    fprintf(stderr,"> <name> : output file in tipsy XDR format with single precision positions\n");
     fprintf(stderr,"\n");
     exit(1);
     }

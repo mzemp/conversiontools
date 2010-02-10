@@ -1,7 +1,7 @@
 /* 
 ** eas.c
 **
-** written by Marcel Zemp
+** Written by Marcel Zemp
 */
 
 #include <stdio.h>
@@ -65,7 +65,7 @@ int main(int argc, char **argv) {
         }
     xdrstdio_create(&xdrs1,stdin,XDR_DECODE);
     xdrstdio_create(&xdrs2,stdout,XDR_ENCODE);
-    read_array_header(&xdrs1,&ah1);
+    read_array_xdr_header(&xdrs1,&ah1);
     ah2.N[0] = ah1.N[0];
     if (iindex != 0) {
 	assert(findex == 0);
@@ -88,12 +88,12 @@ int main(int argc, char **argv) {
 	ah2.N[2] = 0;
 	ah2.N[3] = 1;
 	}
-    write_array_header(&xdrs2,&ah2);
+    write_array_xdr_header(&xdrs2,&ah2);
     allocate_array_particle(&ah1,&ap1);
     allocate_array_particle(&ah2,&ap2);
 
     for (i = 0; i < ah2.N[0]; i++) {
-	read_array_particle(&xdrs1,&ah1,&ap1);
+	read_array_xdr_particle(&xdrs1,&ah1,&ap1);
 	if (iindex != 0) {
 	    ap2.ia[0] = ap1.ia[iindex-1];
 	    }
@@ -103,7 +103,7 @@ int main(int argc, char **argv) {
 	else if (dindex != 0) {
 	    ap2.da[0] = ap1.da[dindex-1];
 	    }
-	write_array_particle(&xdrs2,&ah2,&ap2);
+	write_array_xdr_particle(&xdrs2,&ah2,&ap2);
 	}
     xdr_destroy(&xdrs1);
     xdr_destroy(&xdrs2);
@@ -119,15 +119,15 @@ int main(int argc, char **argv) {
 void usage(void) {
 
     fprintf(stderr,"\n");
-    fprintf(stderr,"Program extracts specific array from array file in standard binary format.\n");
+    fprintf(stderr,"Program extracts specific array from array file in XDR format.\n");
     fprintf(stderr,"\n");
     fprintf(stderr,"Please specify the following parameters:\n");
     fprintf(stderr,"\n");
     fprintf(stderr,"-i <value> : index of integer array to be extracted or\n");
     fprintf(stderr,"-f <value> : index of float array to be extracted or\n");
     fprintf(stderr,"-d <value> : index of double array to be extracted\n");
-    fprintf(stderr,"< <name>   : input file in standard binary format\n");
-    fprintf(stderr,"> <name>   : output file in standard binary format\n");
+    fprintf(stderr,"< <name>   : input file in XDR format\n");
+    fprintf(stderr,"> <name>   : output file in XDR format\n");
     fprintf(stderr,"\n");
     exit(1);
     }

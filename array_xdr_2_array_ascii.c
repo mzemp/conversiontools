@@ -1,7 +1,7 @@
 /* 
 ** as2aa.c
 **
-** written by Marcel Zemp
+** Written by Marcel Zemp
 */
 
 #include <stdio.h>
@@ -36,14 +36,14 @@ int main(int argc, char **argv) {
             }
         }
     xdrstdio_create(&xdrs,stdin,XDR_DECODE);
-    read_array_header(&xdrs,&ah);
+    read_array_xdr_header(&xdrs,&ah);
     allocate_array_particle(&ah,&ap);
     assert(fprintf(stdout,"%d\n",ah.N[0]) > 0);
     if (ah.N[1] == 1) {
 	assert(ah.N[2] == 0);
 	assert(ah.N[3] == 0);
 	for (i = 0; i < ah.N[0]; i++) {
-	    read_array_particle(&xdrs,&ah,&ap);
+	    read_array_xdr_particle(&xdrs,&ah,&ap);
 	    assert(fprintf(stdout,"%d\n",ap.ia[0]) > 0);
 	    }
 	}
@@ -51,7 +51,7 @@ int main(int argc, char **argv) {
 	assert(ah.N[1] == 0);
 	assert(ah.N[3] == 0);
 	for (i = 0; i < ah.N[0]; i++) {
-	    read_array_particle(&xdrs,&ah,&ap);
+	    read_array_xdr_particle(&xdrs,&ah,&ap);
 	    assert(fprintf(stdout,"%.6e\n",ap.fa[0]) > 0);
 	    }
 	}
@@ -59,7 +59,7 @@ int main(int argc, char **argv) {
 	assert(ah.N[1] == 0);
 	assert(ah.N[2] == 0);
 	for (i = 0; i < ah.N[0]; i++) {
-	    read_array_particle(&xdrs,&ah,&ap);
+	    read_array_xdr_particle(&xdrs,&ah,&ap);
 	    assert(fprintf(stdout,"%.14e\n",ap.da[0]) > 0);
 	    }
 	}
@@ -74,11 +74,11 @@ int main(int argc, char **argv) {
 void usage(void) {
 
     fprintf(stderr,"\n");
-    fprintf(stderr,"Program converts array in standard binary format to array in ascii format.\n");
+    fprintf(stderr,"Program converts array in XDR format to array in ascii format.\n");
     fprintf(stderr,"\n");
     fprintf(stderr,"Please specify the following parameters:\n");
     fprintf(stderr,"\n");
-    fprintf(stderr,"< <name> : input file in standard binary format\n");
+    fprintf(stderr,"< <name> : input file in XDR format\n");
     fprintf(stderr,"> <name> : output file in ascii format\n");
     fprintf(stderr,"\n");
     exit(1);

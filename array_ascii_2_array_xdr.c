@@ -1,7 +1,7 @@
 /* 
 ** aa2as.c
 **
-** written by Marcel Zemp
+** Written by Marcel Zemp
 */
 
 #include <stdio.h>
@@ -63,23 +63,23 @@ int main(int argc, char **argv) {
     xdrstdio_create(&xdrs,stdout,XDR_ENCODE);
     allocate_array_particle(&ah,&ap);
     assert(fscanf(stdin,"%d",&ah.N[0]) == 1);
-    write_array_header(&xdrs,&ah);
+    write_array_xdr_header(&xdrs,&ah);
     if (ah.N[1] == 1) {
 	for (i = 0; i < ah.N[0]; i++) {
 	    assert(fscanf(stdin,"%d",&ap.ia[0]) == 1);
-	    write_array_particle(&xdrs,&ah,&ap);
+	    write_array_xdr_particle(&xdrs,&ah,&ap);
 	    }
 	}
     else if (ah.N[2] == 1) {
 	for (i = 0; i < ah.N[0]; i++) {
 	    assert(fscanf(stdin,"%f",&ap.fa[0]) == 1);
-	    write_array_particle(&xdrs,&ah,&ap);
+	    write_array_xdr_particle(&xdrs,&ah,&ap);
 	    }
 	}
     else if (ah.N[3] == 1) {
 	for (i = 0; i < ah.N[0]; i++) {
 	    assert(fscanf(stdin,"%lf",&ap.da[0]) == 1);
-	    write_array_particle(&xdrs,&ah,&ap);
+	    write_array_xdr_particle(&xdrs,&ah,&ap);
 	    }
 	}
     xdr_destroy(&xdrs);
@@ -93,7 +93,7 @@ int main(int argc, char **argv) {
 void usage(void) {
 
     fprintf(stderr,"\n");
-    fprintf(stderr,"Program converts array in ascii format to array in standard binary format.\n");
+    fprintf(stderr,"Program converts array in ascii format to array in XDR format.\n");
     fprintf(stderr,"\n");
     fprintf(stderr,"Please specify the following parameters:\n");
     fprintf(stderr,"\n");
@@ -101,7 +101,7 @@ void usage(void) {
     fprintf(stderr,"-f       : set this flag if it is a float array\n");
     fprintf(stderr,"-d       : set this flag if it is a double array\n");
     fprintf(stderr,"< <name> : input file in ascii format\n");
-    fprintf(stderr,"> <name> : output file in standard binary format\n");
+    fprintf(stderr,"> <name> : output file in XDR format\n");
     fprintf(stderr,"\n");
     exit(1);
     }

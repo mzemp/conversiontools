@@ -1,7 +1,7 @@
 /* 
 ** artb2ts.c
 **
-** written by Marcel Zemp
+** Written by Marcel Zemp
 */
 
 #include <stdio.h>
@@ -36,8 +36,8 @@ int main(int argc, char **argv) {
     char banner[45];
     float rx, ry, rz, vx, vy, vz;
     TIPSY_HEADER th;
-    DARK_PARTICLE dp;
-    DARK_PARTICLE_DPP dpdpp;
+    TIPSY_DARK_PARTICLE tdp;
+    TIPSY_DARK_PARTICLE_DPP tdpdpp;
     ART_HEADER ah;
     FILE *HeaderFile;
     FILE *PosXFile, *PosYFile, *PosZFile;
@@ -248,14 +248,14 @@ int main(int argc, char **argv) {
     assert(fread(&header,sizeof(int),1,HeaderFile) == 1);
     if (header != 45+sizeof(ART_HEADER)) {
 	doswap = 1;
-	flip_4byte(&header,sizeof(int),1);
+	reorder(&header,sizeof(int),1);
 	}
     assert(header == 45+sizeof(ART_HEADER));
     assert(fread(&banner,sizeof(char),45,HeaderFile) == 45);
     assert(fread(&ah,sizeof(ART_HEADER),1,HeaderFile) == 1);
-    if (doswap) flip_4byte(&ah,sizeof(ART_HEADER),1);
+    if (doswap) reorder(&ah,4,sizeof(ART_HEADER)/4);
     assert(fread(&trailer,sizeof(int),1,HeaderFile) == 1);
-    if (doswap) flip_4byte(&trailer,sizeof(int),1);
+    if (doswap) reorder(&trailer,sizeof(int),1);
     fclose(HeaderFile);
 
     /*
@@ -365,7 +365,7 @@ int main(int argc, char **argv) {
     th.nstar = 0;
 
     xdrstdio_create(&xdrs,stdout,XDR_ENCODE);
-    write_tipsy_standard_header(&xdrs,&th);
+    write_tipsy_xdr_header(&xdrs,&th);
 
     /*
     ** Read and process data
@@ -397,12 +397,12 @@ int main(int argc, char **argv) {
 	    assert(fread(&vy,sizeof(float),1,VelYFile) == 1);
 	    assert(fread(&vz,sizeof(float),1,VelZFile) == 1);
 
-	    if (doswap) flip_4byte(&rx,sizeof(float),1);
-	    if (doswap) flip_4byte(&ry,sizeof(float),1);
-	    if (doswap) flip_4byte(&rz,sizeof(float),1);
-	    if (doswap) flip_4byte(&vx,sizeof(float),1);
-	    if (doswap) flip_4byte(&vy,sizeof(float),1);
-	    if (doswap) flip_4byte(&vz,sizeof(float),1);
+	    if (doswap) reorder(&rx,sizeof(float),1);
+	    if (doswap) reorder(&ry,sizeof(float),1);
+	    if (doswap) reorder(&rz,sizeof(float),1);
+	    if (doswap) reorder(&vx,sizeof(float),1);
+	    if (doswap) reorder(&vy,sizeof(float),1);
+	    if (doswap) reorder(&vz,sizeof(float),1);
 
 	    /*
 	    ** Determine current level
@@ -417,28 +417,28 @@ int main(int argc, char **argv) {
             */
 
 	    if (positionprecision == 0) {
-		dp.pos[0] = (rx+shift)*LUsf + dr[0];
-		dp.pos[1] = (ry+shift)*LUsf + dr[1];
-		dp.pos[2] = (rz+shift)*LUsf + dr[2];
-		dp.vel[0] = vx*csvelscalefac*VUsf;
-		dp.vel[1] = vy*csvelscalefac*VUsf;
-		dp.vel[2] = vz*csvelscalefac*VUsf;
-		dp.mass = mass[L];
-		dp.eps = soft[L];
-		dp.phi = 0;
-		if (index < Ntot) write_tipsy_standard_dark(&xdrs,&dp);
+		tdp.pos[0] = (rx+shift)*LUsf + dr[0];
+		tdp.pos[1] = (ry+shift)*LUsf + dr[1];
+		tdp.pos[2] = (rz+shift)*LUsf + dr[2];
+		tdp.vel[0] = vx*csvelscalefac*VUsf;
+		tdp.vel[1] = vy*csvelscalefac*VUsf;
+		tdp.vel[2] = vz*csvelscalefac*VUsf;
+		tdp.mass = mass[L];
+		tdp.eps = soft[L];
+		tdp.phi = 0;
+		if (index < Ntot) write_tipsy_xdr_dark(&xdrs,&tdp);
 		}
 	    else {
-		dpdpp.pos[0] = (rx+shift)*LUsf + dr[0];
-		dpdpp.pos[1] = (ry+shift)*LUsf + dr[1];
-		dpdpp.pos[2] = (rz+shift)*LUsf + dr[2];
-		dpdpp.vel[0] = vx*csvelscalefac*VUsf;
-		dpdpp.vel[1] = vy*csvelscalefac*VUsf;
-		dpdpp.vel[2] = vz*csvelscalefac*VUsf;
-		dpdpp.mass = mass[L];
-		dpdpp.eps = soft[L];
-		dpdpp.phi = 0;
-		if (index < Ntot) write_tipsy_standard_dark_dpp(&xdrs,&dpdpp);
+		tdpdpp.pos[0] = (rx+shift)*LUsf + dr[0];
+		tdpdpp.pos[1] = (ry+shift)*LUsf + dr[1];
+		tdpdpp.pos[2] = (rz+shift)*LUsf + dr[2];
+		tdpdpp.vel[0] = vx*csvelscalefac*VUsf;
+		tdpdpp.vel[1] = vy*csvelscalefac*VUsf;
+		tdpdpp.vel[2] = vz*csvelscalefac*VUsf;
+		tdpdpp.mass = mass[L];
+		tdpdpp.eps = soft[L];
+		tdpdpp.phi = 0;
+		if (index < Ntot) write_tipsy_xdr_dark_dpp(&xdrs,&tdpdpp);
 		}
 	    index++;
 	    }
@@ -535,7 +535,7 @@ int main(int argc, char **argv) {
 void usage(void) {
 
     fprintf(stderr,"\n");
-    fprintf(stderr,"Program converts ART binary format to tipsy standard binary format.\n");
+    fprintf(stderr,"Program converts ART native binary format to tipsy XDR format.\n");
     fprintf(stderr,"\n");
     fprintf(stderr,"Please specify the following parameters:\n");
     fprintf(stderr,"\n");
@@ -556,9 +556,9 @@ void usage(void) {
     fprintf(stderr,"-refstep <value> : refinement step factor (default: 2)\n");
     fprintf(stderr,"-noscaling       : no scaling of data\n");
     fprintf(stderr,"-v               : more informative output to screen\n");
-    fprintf(stderr,"-header <name>   : header input file in ART binary format\n");
-    fprintf(stderr,"-data <name>     : data input file in ART binary format\n");
-    fprintf(stderr,"> <name>         : output file in tipsy standard binary format\n");
+    fprintf(stderr,"-header <name>   : header input file in ART native binary format\n");
+    fprintf(stderr,"-data <name>     : data input file in ART native binary format\n");
+    fprintf(stderr,"> <name>         : output file in tipsy XDR format\n");
     fprintf(stderr,"\n");
     exit(1);
     }

@@ -1,7 +1,7 @@
 /* 
 ** ta2ts.c
 **
-** written by Marcel Zemp
+** Written by Marcel Zemp
 */
 
 #include <stdio.h>
@@ -52,11 +52,11 @@ int main(int argc, char **argv) {
 	ts = malloc(sizeof(TIPSY_STRUCTURE));
 	assert(ts != NULL);
 	ts->th = NULL;
-	ts->gp = NULL;
-	ts->dp = NULL;
-	ts->sp = NULL;
+	ts->tgp = NULL;
+	ts->tdp = NULL;
+	ts->tsp = NULL;
 	read_tipsy_ascii(stdin,ts);
-	write_tipsy_standard(stdout,ts);
+	write_tipsy_xdr(stdout,ts);
 	th = ts->th;
 	}
     else if (positionprecision == 1) {
@@ -64,11 +64,11 @@ int main(int argc, char **argv) {
 	tsdpp = malloc(sizeof(TIPSY_STRUCTURE_DPP));
 	assert(tsdpp != NULL);
 	tsdpp->th = NULL;
-	tsdpp->gpdpp = NULL;
-	tsdpp->dpdpp = NULL;
-	tsdpp->spdpp = NULL;
+	tsdpp->tgpdpp = NULL;
+	tsdpp->tdpdpp = NULL;
+	tsdpp->tspdpp = NULL;
 	read_tipsy_ascii_dpp(stdin,tsdpp);
-	write_tipsy_standard_dpp(stdout,tsdpp);
+	write_tipsy_xdr_dpp(stdout,tsdpp);
 	th = tsdpp->th;
 	}
     if (verboselevel >= 0) {
@@ -81,14 +81,14 @@ int main(int argc, char **argv) {
 void usage(void) {
 
     fprintf(stderr,"\n");
-    fprintf(stderr,"Program converts tipsy ascii format to tipsy standard binary format.\n");
+    fprintf(stderr,"Program converts tipsy ascii format to tipsy XDR format.\n");
     fprintf(stderr,"\n");
     fprintf(stderr,"Please specify the following parameters:\n");
     fprintf(stderr,"\n");
     fprintf(stderr,"-spp     : set this flag if input and output files have single precision positions (default)\n");
     fprintf(stderr,"-dpp     : set this flag if input and output files have double precision positions\n");
     fprintf(stderr,"< <name> : input file in tipsy ascii format\n");
-    fprintf(stderr,"> <name> : output file in tipsy standard binary format\n");
+    fprintf(stderr,"> <name> : output file in tipsy XDR format\n");
     fprintf(stderr,"\n");
     exit(1);
     }
