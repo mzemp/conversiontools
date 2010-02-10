@@ -1,5 +1,5 @@
 /* 
-** aartb2as.c
+** array_art_nb_2_array_xdr.c
 **
 ** Written by Marcel Zemp
 */

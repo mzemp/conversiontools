@@ -1,5 +1,5 @@
 /* 
-** gb2ts.c
+** gadget_nb_2_tipsy_xdr.c
 **
 ** Written by Marcel Zemp
 */

@@ -1,5 +1,5 @@
 /* 
-** ts2gb.c
+** tipsy_xdr_2_gadget_nb.c
 **
 ** Written by Marcel Zemp
 */

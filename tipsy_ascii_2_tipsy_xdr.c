@@ -1,5 +1,5 @@
 /* 
-** ta2ts.c
+** tipsy_ascii_2_tipsy_xdr.c
 **
 ** Written by Marcel Zemp
 */

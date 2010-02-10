@@ -1,5 +1,5 @@
 /* 
-** tsspp2tsdpp.c
+** tipsy_xdr_spp_2_tipsy_xdr_dpp.c
 **
 ** Written by Marcel Zemp
 */

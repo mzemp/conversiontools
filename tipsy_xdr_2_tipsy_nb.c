@@ -1,5 +1,5 @@
 /* 
-** ts2tb.c
+** tipsy_xdr_2_tipsy_nb.c
 **
 ** Written by Marcel Zemp
 */

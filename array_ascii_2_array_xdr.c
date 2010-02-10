@@ -1,5 +1,5 @@
 /* 
-** aa2as.c
+** array_ascii_2_array_xdr.c
 **
 ** Written by Marcel Zemp
 */

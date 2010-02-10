@@ -1,5 +1,5 @@
 /* 
-** gicb2ts.c
+** gic_nb_2_tipsy_xdr.c
 **
 ** Written by Marcel Zemp
 */

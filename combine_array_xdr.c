@@ -1,5 +1,5 @@
 /* 
-** cas.c
+** combine_array_xdr.c
 **
 ** Written by Marcel Zemp
 */

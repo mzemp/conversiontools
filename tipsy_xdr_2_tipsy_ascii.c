@@ -1,5 +1,5 @@
 /* 
-** ts2ta.c
+** tipsy_xdr_2_tipsy_ascii.c
 **
 ** Written by Marcel Zemp
 */

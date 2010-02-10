@@ -1,5 +1,5 @@
 /* 
-** ts2silo.c
+** tipsy_xdr_2_silo.c
 **
 ** Written by Marcel Zemp
 */

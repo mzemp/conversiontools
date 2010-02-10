@@ -1,5 +1,5 @@
 /* 
-** tscom2tsphy.c
+** tipsy_xdr_comoving_2_tipsy_xdr_physical.c
 **
 ** Written by Marcel Zemp
 */
