@@ -1,12 +1,25 @@
 # Names
 
 NAME	= conversiontools
-TOOLS	= ts2ta ts2tb ts2gb ta2ts tb2ts gb2ts\
-	tsspp2tsdpp tsdpp2tsspp tscom2tsphy ts2silo\
-	aa2as as2aa cas eas gicb2ts artb2ts \
-	aartb2as
-EXT	= 64
-VERSION = 1.1
+TOOLS	= tipsy_xdr_2_tipsy_ascii \
+	tipsy_xdr_2_tipsy_nb \
+	tipsy_xdr_2_gadget_nb \
+	tipsy_xdr_2_silo \
+	tipsy_ascii_2_tipsy_xdr \
+	tipsy_nb_2_tipsy_xdr \
+	gadget_nb_2_tipsy_xdr \
+	art_nb_2_tipsy_xdr \
+	gic_nb_2_tipsy_xdr \
+	tipsy_xdr_spp_2_tipsy_xdr_dpp \
+	tipsy_xdr_dpp_2_tipsy_xdr_spp \
+	tipsy_xdr_comoving_2_tipsy_xdr_physical \
+	array_xdr_2_array_ascii \
+	array_ascii_2_array_xdr \
+	array_art_nb_2_array_xdr \
+	combine_array_xdr \
+	extract_array_xdr
+EXT	= 
+VERSION = 1.9
 
 # Compiler stuff
 
