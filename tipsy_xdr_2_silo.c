@@ -110,18 +110,14 @@ int main(int argc, char **argv) {
             }
 	else if (strcmp(argv[i],"-o") == 0) {
             i++;
-            if (i >= argc) {
-                usage();
-                }
+            if (i >= argc) usage();
             strcpy(outputname,argv[i]);
             i++;
 	    continue;
             }
 	else if (strcmp(argv[i],"-array") == 0) {
             i++;
-            if (i >= argc) {
-                usage();
-                }
+            if (i >= argc) usage();
 	    arrayfile = 1;
             strcpy(arrayfilename,argv[i]);
             i++;
@@ -133,9 +129,7 @@ int main(int argc, char **argv) {
 	    if (strcmp(argv[i],arrayname) == 0) {
 		getmatch = 1;
 		i++;
-		if (i >= argc) {
-		    usage();
-		    }
+		if (i >= argc) usage();
 		strcpy(iname[j],argv[i]);
 		i++;
 		}
@@ -148,9 +142,7 @@ int main(int argc, char **argv) {
 	    if (strcmp(argv[i],arrayname) == 0) {
 		getmatch = 1;
 		i++;
-		if (i >= argc) {
-		    usage();
-		    }
+		if (i >= argc) usage();
 		strcpy(fname[j],argv[i]);
 		i++;
 		}
@@ -163,9 +155,7 @@ int main(int argc, char **argv) {
 	    if (strcmp(argv[i],arrayname) == 0) {
 		getmatch = 1;
 		i++;
-		if (i >= argc) {
-		    usage();
-		    }
+		if (i >= argc) usage();
 		strcpy(dname[j],argv[i]);
 		i++;
 		}

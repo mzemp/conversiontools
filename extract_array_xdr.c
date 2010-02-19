@@ -30,25 +30,19 @@ int main(int argc, char **argv) {
     while (i < argc) {
 	if (strcmp(argv[i],"-i") == 0) {
 	    i++;
-	    if (i >= argc) {
-                usage();
-                }
+	    if (i >= argc) usage();
 	    iindex = atoi(argv[i]);
 	    i++;
 	    }
 	else if (strcmp(argv[i],"-f") == 0) {
 	    i++;
-	    if (i >= argc) {
-                usage();
-                }
+	    if (i >= argc) usage();
 	    findex = atoi(argv[i]);
 	    i++;
 	    }
 	else if (strcmp(argv[i],"-d") == 0) {
 	    i++;
-	    if (i >= argc) {
-                usage();
-                }
+	    if (i >= argc) usage();
 	    dindex = atoi(argv[i]);
 	    i++;
 	    }
@@ -91,7 +85,6 @@ int main(int argc, char **argv) {
     write_array_xdr_header(&xdrs2,&ah2);
     allocate_array_particle(&ah1,&ap1);
     allocate_array_particle(&ah2,&ap2);
-
     for (i = 0; i < ah2.N[0]; i++) {
 	read_array_xdr_particle(&xdrs1,&ah1,&ap1);
 	if (iindex != 0) {

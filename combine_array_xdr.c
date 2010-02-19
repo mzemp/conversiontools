@@ -29,17 +29,13 @@ int main(int argc, char **argv) {
     while (i < argc) {
 	if (strcmp(argv[i],"-f1") == 0) {
 	    i++;
-	    if (i >= argc) {
-                usage();
-                }
+	    if (i >= argc) usage();
 	    fp1 = fopen(argv[i],"r");
 	    i++;
 	    }
 	else if (strcmp(argv[i],"-f2") == 0) {
 	    i++;
-	    if (i >= argc) {
-                usage();
-                }
+	    if (i >= argc) usage();
 	    fp2 = fopen(argv[i],"r");
 	    i++;
 	    }

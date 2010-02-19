@@ -32,9 +32,7 @@ int main(int argc, char **argv) {
     while (i < argc) {
 	if (strcmp(argv[i],"-a") == 0) {
 	    i++;
-	    if (i >= argc) {
-                usage();
-                }
+	    if (i >= argc) usage();
 	    if (strcmp(argv[i],"time") == 0) {
 		a = -1;
 		}
@@ -45,49 +43,37 @@ int main(int argc, char **argv) {
             }
 	else if (strcmp(argv[i],"-drx") == 0) {
 	    i++;
-	    if (i >= argc) {
-                usage();
-                }
+	    if (i >= argc) usage();
 	    dx = atof(argv[i]);
 	    i++;
             }
 	else if (strcmp(argv[i],"-dry") == 0) {
 	    i++;
-	    if (i >= argc) {
-                usage();
-                }
+	    if (i >= argc) usage();
 	    dy = atof(argv[i]);
 	    i++;
             }
 	else if (strcmp(argv[i],"-drz") == 0) {
 	    i++;
-	    if (i >= argc) {
-                usage();
-                }
+	    if (i >= argc) usage();
 	    dz = atof(argv[i]);
 	    i++;
             }
 	else if (strcmp(argv[i],"-dof") == 0) {
 	    i++;
-	    if (i >= argc) {
-                usage();
-                }
+	    if (i >= argc) usage();
 	    dof = atof(argv[i]);
 	    i++;
             }
 	else if (strcmp(argv[i],"-mmw") == 0) {
 	    i++;
-	    if (i >= argc) {
-                usage();
-                }
+	    if (i >= argc) usage();
 	    mmw = atof(argv[i]);
 	    i++;
             }
 	else if (strcmp(argv[i],"-uvf") == 0) {
 	    i++;
-	    if (i >= argc) {
-                usage();
-                }
+	    if (i >= argc) usage();
 	    uvf = atof(argv[i]);
 	    i++;
             }

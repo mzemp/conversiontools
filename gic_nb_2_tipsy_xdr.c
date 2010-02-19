@@ -108,73 +108,55 @@ int main(int argc, char **argv) {
             }
         else if (strcmp(argv[i],"-drx") == 0) {
             i++;
-            if (i >= argc) {
-                usage();
-                }
+            if (i >= argc) usage();
             dr[0] = atof(argv[i]);
             i++;
             }
         else if (strcmp(argv[i],"-dry") == 0) {
             i++;
-            if (i >= argc) {
-                usage();
-                }
+            if (i >= argc) usage();
             dr[1] = atof(argv[i]);
             i++;
             }
         else if (strcmp(argv[i],"-drz") == 0) {
             i++;
-            if (i >= argc) {
-                usage();
-                }
+            if (i >= argc) usage();
             dr[2] = atof(argv[i]);
             i++;
             }
         else if (strcmp(argv[i],"-soft") == 0) {
             i++;
-            if (i >= argc) {
-                usage();
-                }
+            if (i >= argc) usage();
             toplevelsoftening = atof(argv[i]);
             i++;
             }
         else if (strcmp(argv[i],"-mass") == 0) {
             i++;
-            if (i >= argc) {
-                usage();
-                }
+            if (i >= argc) usage();
             toplevelmass = atof(argv[i]);
             i++;
             }
         else if (strcmp(argv[i],"-LUsf") == 0) {
             i++;
-            if (i >= argc) {
-                usage();
-                }
+            if (i >= argc) usage();
             LUsf = atof(argv[i]);
             i++;
             }
         else if (strcmp(argv[i],"-VUsf") == 0) {
             i++;
-            if (i >= argc) {
-                usage();
-                }
+            if (i >= argc) usage();
             VUsf = atof(argv[i]);
             i++;
             }
         else if (strcmp(argv[i],"-MUsf") == 0) {
             i++;
-            if (i >= argc) {
-                usage();
-                }
+            if (i >= argc) usage();
             MUsf = atof(argv[i]);
             i++;
             }
         else if (strcmp(argv[i],"-b2dmfac") == 0) {
             i++;
-            if (i >= argc) {
-                usage();
-                }
+            if (i >= argc) usage();
             b2dmscalefac = atof(argv[i]);
             i++;
             }
@@ -192,33 +174,25 @@ int main(int argc, char **argv) {
 	    }
         else if (strcmp(argv[i],"-softfac") == 0) {
             i++;
-            if (i >= argc) {
-                usage();
-                }
+            if (i >= argc) usage();
             softfac = atof(argv[i]);
             i++;
             }
         else if (strcmp(argv[i],"-refstep") == 0) {
             i++;
-            if (i >= argc) {
-                usage();
-                }
+            if (i >= argc) usage();
             refinementstep = atof(argv[i]);
             i++;
             }
         else if (strcmp(argv[i],"-pos") == 0) {
             i++;
-            if (i >= argc) {
-                usage();
-                }
+            if (i >= argc) usage();
             strcpy(PosFileName,argv[i]);
             i++;
             }
         else if (strcmp(argv[i],"-vel") == 0) {
             i++;
-            if (i >= argc) {
-                usage();
-                }
+            if (i >= argc) usage();
             strcpy(VelFileName,argv[i]);
             i++;
             }

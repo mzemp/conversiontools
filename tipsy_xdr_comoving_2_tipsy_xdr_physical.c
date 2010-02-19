@@ -54,81 +54,61 @@ int main(int argc, char **argv) {
             }
 	else if (strcmp(argv[i],"-rxcen") == 0) {
 	    i++;
-	    if (i >= argc) {
-		usage();
-		}
+	    if (i >= argc) usage();
 	    rcen[0] = atof(argv[i]);
 	    i++;
 	    }
 	else if (strcmp(argv[i],"-rycen") == 0) {
 	    i++;
-	    if (i >= argc) {
-		usage();
-		}
+	    if (i >= argc) usage();
 	    rcen[1] = atof(argv[i]);
 	    i++;
 	    }
 	else if (strcmp(argv[i],"-rzcen") == 0) {
 	    i++;
-	    if (i >= argc) {
-		usage();
-		}
+	    if (i >= argc) usage();
 	    rcen[2] = atof(argv[i]);
 	    i++;
 	    }
 	else if (strcmp(argv[i],"-vxcen") == 0) {
 	    i++;
-	    if (i >= argc) {
-		usage();
-		}
+	    if (i >= argc) usage();
 	    vcen[0] = atof(argv[i]);
 	    i++;
 	    }
 	else if (strcmp(argv[i],"-vycen") == 0) {
 	    i++;
-	    if (i >= argc) {
-		usage();
-		}
+	    if (i >= argc) usage();
 	    vcen[1] = atof(argv[i]);
 	    i++;
 	    }
 	else if (strcmp(argv[i],"-vzcen") == 0) {
 	    i++;
-	    if (i >= argc) {
-		usage();
-		}
+	    if (i >= argc) usage();
 	    vcen[2] = atof(argv[i]);
 	    i++;
 	    }
 	else if (strcmp(argv[i],"-mscale") == 0) {
 	    i++;
-	    if (i >= argc) {
-		usage();
-		}
+	    if (i >= argc) usage();
 	    mscale = atof(argv[i]);
 	    i++;
 	    }
 	else if (strcmp(argv[i],"-rscale") == 0) {
 	    i++;
-	    if (i >= argc) {
-		usage();
-		}
+	    if (i >= argc) usage();
 	    rscale = atof(argv[i]);
 	    i++;
 	    }
 	else if (strcmp(argv[i],"-vscale") == 0) {
 	    i++;
-	    if (i >= argc) {
-		usage();
-		}
+	    if (i >= argc) usage();
 	    vscale = atof(argv[i]);
 	    i++;
 	    }
 	else if (strcmp(argv[i],"-Hubble") == 0) {
 	    i++;
-	    if (i >= argc) {
-		usage();
-		}
+	    if (i >= argc) usage();
 	    if (strcmp(argv[i],"sqrt_8pi_3") == 0) {
 		hubble = sqrt(8*M_PI/3.0);
 		}
