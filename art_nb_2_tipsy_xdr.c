@@ -13,68 +13,71 @@
 #include <rpc/types.h>
 #include <rpc/xdr.h>
 #include <iof.h>
+#include <art_sfc.h>
 
 void usage(void);
 
 int main(int argc, char **argv) {
 
-    int i = 0, j = 0, k = 0;
-    int header, trailer;
-    int positionprecision, verboselevel, doswap, massfromfile, headerincludesstars;
-    long Ntot, index, N[10];
-    int Nrec, Npage, N1Dlow, Nlow, L, Lmax;
-    double LUsf, VUsf, MUsf;
-    double b2dmscalefac, csvelscalefac, refinementstep;
-    double toplevelmass, toplevelsoftening;
-    double dr[3], acurrent, VelConvertFac, rhocrit, LBox, softfac, shift;
-    double OmegaM0, OmegaDM0, OmegaB0, OmegaL0, OmegaK0, OmegaR0, h100;
-    double H_TIPSY_DEFAULT, TU_TIPSY_DEFAULT, LU_TIPSY_DEFAULT, VU_TIPSY_DEFAULT, MU_TIPSY_DEFAULT;
-    double TU_TIPSY, LU_TIPSY, VU_TIPSY, MU_TIPSY;
-    double TU_ART, LU_ART, VU_ART, MU_ART;
-    double mass[10], soft[10];
-    char HeaderFileName[256], DataFileName[256];
-    char banner[45];
-    float rx, ry, rz, vx, vy, vz;
+    int positionprecision, verboselevel, scaling, massdarkfromdata;
+    int L;
+    int index[3] = {-1,-1,-1};
+    int *cellrefined = NULL;
+    long int i, j, k;
+    long int mothercellindex, childcellindex;
+    long int Nparticleread, Nrecordread, Ngasread, Ngaswritten;
+    long int *Icoordinates = NULL;
+    double ***coordinates = NULL;
+    double r[3];
+    double celllength, cellvolume;
+    double softfac, LBox;
+    double chemical_species_number_density;
+    COSMOLOGICAL_PARAMETERS cp;
+    UNIT_SYSTEM artus, tipsyus, cosmous;
+    COORDINATE_TRANSFORMATION art2tipsy_ct, art2cosmo_ct, tipsy2cosmo_ct;
     TIPSY_HEADER th;
+    TIPSY_GAS_PARTICLE tgp;
     TIPSY_DARK_PARTICLE tdp;
+    TIPSY_STAR_PARTICLE tsp;
+    TIPSY_GAS_PARTICLE_DPP tgpdpp;
     TIPSY_DARK_PARTICLE_DPP tdpdpp;
-    ART_HEADER ah;
-    FILE *HeaderFile;
-    FILE *PosXFile, *PosYFile, *PosZFile;
-    FILE *VelXFile, *VelYFile, *VelZFile;
-    XDR xdrs;
+    TIPSY_STAR_PARTICLE_DPP tspdpp;
+    ART_DATA ad;
+    ART_GAS_PROPERTIES agp;
+    ART_STAR_PROPERTIES asp;
+    ART_COORDINATES *ac = NULL;
+    FILE *file;
+    XDR xdrsin, xdrsout;
 
     /*
     ** Set some default values
     */
 
+    set_default_values_art_data(&ad);
+    set_default_values_coordinate_transformation(&art2tipsy_ct);
+
+    artus.LBox = 0;
+    artus.GNewton = 0;
+    artus.rhocrit0 = 0;
+    artus.Hubble0 = 0;
+
+    tipsyus.LBox = 0;
+    tipsyus.GNewton = 0;
+    tipsyus.rhocrit0 = 0;
+    tipsyus.Hubble0 = 0;
+
+    cosmous.LBox = 0;
+    cosmous.GNewton = 0;
+    cosmous.rhocrit0 = 0;
+    cosmous.Hubble0 = 0;
+
     positionprecision = 0;
     verboselevel = 0;
-    doswap = 0;
-    massfromfile = 0;
-    headerincludesstars = 0;
-    dr[0] = -0.5;
-    dr[1] = -0.5;
-    dr[2] = -0.5;
-    LBox = 1;
-    shift = 0;
-    L = 0;
-    refinementstep = 2;
-    toplevelsoftening = -2;
-    toplevelmass = -2;
-    LUsf = -2;
-    VUsf = -2;
-    MUsf = -2;
-    b2dmscalefac = -2;
+    scaling = 0;
+    massdarkfromdata = 1;
     softfac = 50;
-    H_TIPSY_DEFAULT = sqrt(8*M_PI/3); /* TU_TIPSY_DEFAULT^-1 */
-    VelConvertFac = 1.0227121651152353693;
-    rhocrit = 277.53662719; /* h^2 Mo kpc^-3 */
-    for (i = 0; i < 10; i++) {
-	N[i] = 0;
-	mass[i] = 0;
-	soft[i] = 0;
-	}
+    Ngaswritten = 0;
+    L = 0;
 
     /*
     ** Read in options
@@ -90,111 +93,119 @@ int main(int argc, char **argv) {
             positionprecision = 1;
             i++;
             }
-        else if (strcmp(argv[i],"-LBox") == 0) {
+	else if (strcmp(argv[i],"-scaling") == 0) {
+            scaling = 1;
             i++;
-            if (i >= argc) usage();
-            LBox = atof(argv[i]);
-            i++;
-            }
-        else if (strcmp(argv[i],"-drx") == 0) {
-            i++;
-            if (i >= argc) usage();
-            dr[0] = atof(argv[i]);
-            i++;
-            }
-        else if (strcmp(argv[i],"-dry") == 0) {
-            i++;
-            if (i >= argc) usage();
-            dr[1] = atof(argv[i]);
-            i++;
-            }
-        else if (strcmp(argv[i],"-drz") == 0) {
-            i++;
-            if (i >= argc) usage();
-            dr[2] = atof(argv[i]);
-            i++;
-            }
-        else if (strcmp(argv[i],"-shift") == 0) {
-            i++;
-            if (i >= argc) usage();
-            shift = atof(argv[i]);
-            i++;
-            }
-        else if (strcmp(argv[i],"-soft") == 0) {
-            i++;
-            if (i >= argc) usage();
-            toplevelsoftening = atof(argv[i]);
-            i++;
-            }
-        else if (strcmp(argv[i],"-mass") == 0) {
-            i++;
-            if (i >= argc) usage();
-            toplevelmass = atof(argv[i]);
-            i++;
-            }
-        else if (strcmp(argv[i],"-LUsf") == 0) {
-            i++;
-            if (i >= argc) usage();
-            LUsf = atof(argv[i]);
-            i++;
-            }
-        else if (strcmp(argv[i],"-VUsf") == 0) {
-            i++;
-            if (i >= argc) usage();
-            VUsf = atof(argv[i]);
-            i++;
-            }
-        else if (strcmp(argv[i],"-MUsf") == 0) {
-            i++;
-            if (i >= argc) usage();
-            MUsf = atof(argv[i]);
-            i++;
-            }
-        else if (strcmp(argv[i],"-b2dmfac") == 0) {
-            i++;
-            if (i >= argc) usage();
-            b2dmscalefac = atof(argv[i]);
-            i++;
-            }
-	else if (strcmp(argv[i],"-noscaling") == 0) {
-	    dr[0] = 0;
-	    dr[1] = 0;
-	    dr[2] = 0;
-	    shift = 0;
-	    LUsf = 1;
-	    VUsf = 1;
-	    MUsf = 1;
-	    b2dmscalefac = 1;
-	    toplevelmass = -1;
-	    toplevelsoftening = -2;
-	    i++;
 	    }
+	else if (strcmp(argv[i],"-noscaling") == 0) {
+            scaling = 0;
+            i++;
+	    }
+	else if (strcmp(argv[i],"-massdarkfromdata") == 0) {
+	    massdarkfromdata = 1;
+            i++;
+	    }
+	else if (strcmp(argv[i],"-massdarknotfromdata") == 0) {
+	    massdarkfromdata = 0;
+            i++;
+	    }
+        else if (strcmp(argv[i],"-toplevelsoftdark") == 0) {
+            i++;
+            if (i >= argc) usage();
+            ad.toplevelsoftdark = atof(argv[i]);
+            i++;
+            }
+        else if (strcmp(argv[i],"-toplevelmassdark") == 0) {
+            i++;
+            if (i >= argc) usage();
+            ad.toplevelmassdark = atof(argv[i]);
+            i++;
+            }
         else if (strcmp(argv[i],"-softfac") == 0) {
             i++;
             if (i >= argc) usage();
             softfac = atof(argv[i]);
             i++;
             }
-        else if (strcmp(argv[i],"-refstep") == 0) {
+        else if (strcmp(argv[i],"-LBox") == 0) {
             i++;
             if (i >= argc) usage();
-            refinementstep = atof(argv[i]);
+            LBox = atof(argv[i]);
             i++;
             }
-	else if (strcmp(argv[i],"-stars") == 0) {
-            headerincludesstars = 1;
+	else if (strcmp(argv[i],"-GRAVITY") == 0) {
+	    i++;
+            if (i >= argc) usage();
+	    ad.GRAVITY = atoi(argv[i]);
             i++;
             }
-        else if (strcmp(argv[i],"-header") == 0) {
+	else if (strcmp(argv[i],"-HYDRO") == 0) {
+	    i++;
+            if (i >= argc) usage();
+	    ad.HYDRO = atoi(argv[i]);
+            i++;
+            }
+	else if (strcmp(argv[i],"-ADVECT_SPECIES") == 0) {
+	    i++;
+            if (i >= argc) usage();
+	    ad.ADVECT_SPECIES = atoi(argv[i]);
+            i++;
+            }
+	else if (strcmp(argv[i],"-STARFORM") == 0) {
+	    i++;
+            if (i >= argc) usage();
+	    ad.STARFORM = atoi(argv[i]);
+            i++;
+            }
+	else if (strcmp(argv[i],"-ENRICH") == 0) {
+	    i++;
+            if (i >= argc) usage();
+	    ad.ENRICH = atoi(argv[i]);
+            i++;
+            }
+	else if (strcmp(argv[i],"-ENRICH_SNIa") == 0) {
+	    i++;
+            if (i >= argc) usage();
+	    ad.ENRICH_SNIa = atoi(argv[i]);
+            i++;
+            }
+	else if (strcmp(argv[i],"-RADIATIVE_TRANSFER") == 0) {
+	    i++;
+            if (i >= argc) usage();
+	    ad.RADIATIVE_TRANSFER = atoi(argv[i]);
+            i++;
+            }
+	else if (strcmp(argv[i],"-ELECTRON_ION_NONEQUILIBRIUM") == 0) {
+	    i++;
+            if (i >= argc) usage();
+	    ad.ELECTRON_ION_NONEQUILIBRIUM = atoi(argv[i]);
+            i++;
+            }
+        else if (strcmp(argv[i],"-headerfile") == 0) {
             i++;
             if (i >= argc) usage();
-            strcpy(HeaderFileName,argv[i]);
+            strcpy(ad.HeaderFileName,argv[i]);
             i++;
             }
-        else if (strcmp(argv[i],"-data") == 0) {
+        else if (strcmp(argv[i],"-coordinatesdatafile") == 0) {
+	    ad.darkcontained = 1;
             i++;
             if (i >= argc) usage();
-            strcpy(DataFileName,argv[i]);
+            strcpy(ad.CoordinatesDataFileName,argv[i]);
+            i++;
+            }
+        else if (strcmp(argv[i],"-starpropertiesfile") == 0) {
+	    ad.starcontained = 1;
+            i++;
+            if (i >= argc) usage();
+            strcpy(ad.StarPropertiesFileName,argv[i]);
+            i++;
+            }
+        else if (strcmp(argv[i],"-gasfile") == 0) {
+	    ad.gascontained = 1;
+            i++;
+            if (i >= argc) usage();
+            strcpy(ad.GasFileName,argv[i]);
             i++;
             }
         else if (strcmp(argv[i],"-v") == 0) {
@@ -213,286 +224,438 @@ int main(int argc, char **argv) {
     ** Read heder file
     */
 
-    HeaderFile = fopen(HeaderFileName,"r");
-    assert(HeaderFile != NULL);
-    assert(fread(&header,sizeof(int),1,HeaderFile) == 1);
-    if (header != 45+sizeof(ART_HEADER)) {
-	doswap = 1;
-	reorder(&header,sizeof(int),1);
-	}
-    assert(header == 45+sizeof(ART_HEADER));
-    assert(fread(&banner,sizeof(char),45,HeaderFile) == 45);
-    assert(fread(&ah,sizeof(ART_HEADER),1,HeaderFile) == 1);
-    if (doswap) reorder(&ah,4,sizeof(ART_HEADER)/4);
-    assert(fread(&trailer,sizeof(int),1,HeaderFile) == 1);
-    if (doswap) reorder(&trailer,sizeof(int),1);
-    fclose(HeaderFile);
+    prepare_art_data(&ad);
 
-    /*
-    ** Set some parameters
-    */
+    cp.OmegaM0 = ad.ah.OmM0;
+    cp.OmegaB0 = ad.ah.OmB0;
+    cp.OmegaDM0 = cp.OmegaM0 - cp.OmegaB0;
+    cp.OmegaL0 = ad.ah.OmL0;
+    cp.OmegaK0 = ad.ah.OmK0;
+    cp.OmegaR0 = 0;
 
-    Nrec = ah.Nrow*ah.Nrow;
-    if (headerincludesstars == 1) {
-	Lmax = ah.Nspecies-2;
-	}
-    else {
-	Lmax = ah.Nspecies-1;
-	}
-    Ntot = ah.num[Lmax];
-    Npage = (Ntot+Nrec-1)/Nrec;
-    N1Dlow = ah.Ngrid;
-    Nlow = N1Dlow*N1Dlow*N1Dlow;
+    if(artus.LBox == 0) artus.LBox = ad.ah.Ngrid;
+    if(artus.GNewton == 0) artus.GNewton = 3.0/(2*M_PI);
+    if(artus.rhocrit0 == 0) artus.rhocrit0 = 1/cp.OmegaM0;
+    if(artus.Hubble0 == 0) artus.Hubble0 = 2.0/sqrt(cp.OmegaM0);
 
-    acurrent = ah.aunin;
-    h100 = ah.h100;
-    OmegaM0 = ah.OmM0;
-    OmegaDM0 = ah.OmM0-ah.OmB0;
-    OmegaB0 = ah.OmB0;
-    OmegaL0 = ah.OmL0;
-    OmegaK0 = ah.OmK0;
-    OmegaR0 = 0;
+    if(tipsyus.LBox == 0) tipsyus.LBox = 1;
+    if(tipsyus.GNewton == 0) tipsyus.GNewton = 1;
+    if(tipsyus.rhocrit0 == 0) tipsyus.rhocrit0 = 1;
+    if(tipsyus.Hubble0 == 0) tipsyus.Hubble0 = sqrt(8.0*M_PI/3.0);
+
+    if(cosmous.LBox == 0) cosmous.LBox = LBox;
+    if(cosmous.GNewton == 0) cosmous.GNewton = PhysicalConstants.GNewton_Cosmology;
+    if(cosmous.rhocrit0 == 0) cosmous.rhocrit0 = PhysicalConstants.rho_crit_Cosmology*pow(ad.ah.h100,2);
+    if(cosmous.Hubble0 == 0) cosmous.Hubble0 = 100*ad.ah.h100*ConversionFactors.km_per_s_2_kpc_per_Gyr/1e3;
 
     /*
     ** Calculate scaling factors and set masses and softenings
     */
 
-    TU_TIPSY_DEFAULT = (H_TIPSY_DEFAULT*1000)/(h100*100); /* kpc km^-1 s */
-    LU_TIPSY_DEFAULT = LBox*1000/h100; /* kpc */
-    VU_TIPSY_DEFAULT = LU_TIPSY_DEFAULT/TU_TIPSY_DEFAULT; /* km s^-1 */
-    MU_TIPSY_DEFAULT = rhocrit*h100*h100*LU_TIPSY_DEFAULT*LU_TIPSY_DEFAULT*LU_TIPSY_DEFAULT; /* Mo */
-
-    TU_ART = 1000*2.0/(100*h100*sqrt(OmegaM0)); /* kpc km^-1 s */
-    LU_ART = LBox*1000/(h100*N1Dlow); /* kpc */
-    VU_ART = LU_ART/TU_ART; /* km s^-1 */
-    MU_ART = rhocrit*h100*h100*LU_ART*LU_ART*LU_ART*OmegaM0; /* Mo */
-    
-    if (LUsf < 0) LUsf = 1.0/ah.Ngrid; /* LU_ART / LU_TIPSY_DEFAULT */
-    if (VUsf < 0) VUsf = VU_ART/VU_TIPSY_DEFAULT;
-    if (MUsf < 0) MUsf = MU_ART/MU_TIPSY_DEFAULT;
-    if (b2dmscalefac < 0) b2dmscalefac = OmegaM0/OmegaDM0;
-    csvelscalefac = 1/(acurrent*acurrent);
-
-    LU_TIPSY = LU_ART/LUsf; /* kpc */
-    VU_TIPSY = VU_ART/VUsf; /* km s^-1 */
-    MU_TIPSY = MU_ART/MUsf; /* Mo */
-    TU_TIPSY = LU_TIPSY/VU_TIPSY; /* kpc km^-1 s */
-
-    if (toplevelsoftening < 0) toplevelsoftening = (LBox/(N1Dlow*softfac))*(1000/(h100*LU_TIPSY));
-    if (toplevelmass < 0) {
-	if (toplevelmass == -1) {
-	    massfromfile = 1;
-	    toplevelmass = ah.mass[Lmax]*b2dmscalefac*MUsf;
+    if (scaling == 1) {
+	/* 
+	** ART canonical momentum, Tipsy comoving velocity
+	*/
+	art2tipsy_ct.V_cssf = 1/pow(ad.ah.aunin,2);
+	/*
+	** Box is shifted by 0.5 LBox in Tipsy units
+	*/
+	for (i = 0; i < 3; i++ ) {
+	    art2tipsy_ct.L_css[i] = -0.5;
 	    }
-	else {
-	    toplevelmass = OmegaM0/Nlow;
-	    }
+	calculate_units_transformation(artus,tipsyus,&art2tipsy_ct);
 	}
-
-    for (k = 0; k <= Lmax; k++) {
-	L = Lmax-k;
-	if (k == 0) {
-	    N[L] = ah.num[k];
-	    }
-	else {
-	    N[L] = ah.num[k]-ah.num[k-1];
-	    }
-	soft[L] = toplevelsoftening/pow(refinementstep,L);
-	if (massfromfile == 1) {
-	    mass[L] = ah.mass[k]*b2dmscalefac*MUsf;
-	    }
-	else {
-	    mass[L] = toplevelmass/pow(refinementstep,3.0*L);
-	    }
-	}
+    calculate_units_transformation(artus,cosmous,&art2cosmo_ct);
+    calculate_units_transformation(tipsyus,cosmous,&tipsy2cosmo_ct);
 
     /*
-    ** Get data files ready
+    ** Set masses and softenings for dark matter in ART units
     */
 
-    PosXFile = fopen(DataFileName,"r");
-    assert(PosXFile != NULL);
-    PosYFile = fopen(DataFileName,"r");
-    assert(PosYFile != NULL);
-    PosZFile = fopen(DataFileName,"r");
-    assert(PosZFile != NULL);
-    VelXFile = fopen(DataFileName,"r");
-    assert(VelXFile != NULL);
-    VelYFile = fopen(DataFileName,"r");
-    assert(VelYFile != NULL);
-    VelZFile = fopen(DataFileName,"r");
-    assert(VelZFile != NULL);
+    if (ad.toplevelsoftdark == -1) ad.toplevelsoftdark = ad.rootcelllength/softfac;
+    if (ad.toplevelmassdark == -1) {
+	if (massdarkfromdata == 1) ad.toplevelmassdark = ad.ah.mass[ad.Lmaxdark];
+	else ad.toplevelmassdark = cp.OmegaDM0/cp.OmegaM0;
+	}
+
+    assert(ad.toplevelsoftdark > 0);
+    assert(ad.toplevelmassdark > 0);
+    for (i = ad.Lmindark; i <= ad.Lmaxdark; i++) {
+	ad.softdark[i] = ad.toplevelsoftdark/pow(ad.refinementstepdark,i);
+	if (massdarkfromdata == 1) ad.massdark[i] = ad.ah.mass[ad.Lmaxdark-i];
+	else ad.massdark[i] = ad.toplevelmassdark/pow(ad.refinementstepdark,3*i);
+	}
 
     /*
     ** Get output file ready
     */
 
-    th.time = acurrent;
-    th.ntotal = Ntot;
-    th.ndim = 3;
-    th.ngas = 0; 
-    th.ndark = Ntot;
+    th.time = ad.ah.aunin;
+    th.ntotal = 0;
+    th.ndim = ad.Ndim;
+    th.ngas = 0;
+    th.ndark = 0;
     th.nstar = 0;
 
-    xdrstdio_create(&xdrs,stdout,XDR_ENCODE);
-    write_tipsy_xdr_header(&xdrs,&th);
+    file = fopen("temporary_file_you_can_delete","w");
+    assert(file != NULL);
+    xdrstdio_create(&xdrsout,file,XDR_ENCODE);
+    write_tipsy_xdr_header(&xdrsout,&th);
 
     /*
     ** Read and process data
     */
 
-    index = 0;
-    for (i = 0; i < Npage; i++) {
-
+    if (ad.gascontained) {
 	/*
-	** Get file pointers ready
+	** Gas
 	*/
-
-	assert(fseek(PosYFile,1*Nrec*sizeof(float),SEEK_CUR) == 0);
-	assert(fseek(PosZFile,2*Nrec*sizeof(float),SEEK_CUR) == 0);
-	assert(fseek(VelXFile,3*Nrec*sizeof(float),SEEK_CUR) == 0);
-	assert(fseek(VelYFile,4*Nrec*sizeof(float),SEEK_CUR) == 0);
-	assert(fseek(VelZFile,5*Nrec*sizeof(float),SEEK_CUR) == 0);
-
-	/*
-	** Go through records
-	*/
-
-	for (j = 0; j < Nrec; j++) {
-
-	    assert(fread(&rx,sizeof(float),1,PosXFile) == 1);
-	    assert(fread(&ry,sizeof(float),1,PosYFile) == 1);
-	    assert(fread(&rz,sizeof(float),1,PosZFile) == 1);
-	    assert(fread(&vx,sizeof(float),1,VelXFile) == 1);
-	    assert(fread(&vy,sizeof(float),1,VelYFile) == 1);
-	    assert(fread(&vz,sizeof(float),1,VelZFile) == 1);
-
-	    if (doswap) reorder(&rx,sizeof(float),1);
-	    if (doswap) reorder(&ry,sizeof(float),1);
-	    if (doswap) reorder(&rz,sizeof(float),1);
-	    if (doswap) reorder(&vx,sizeof(float),1);
-	    if (doswap) reorder(&vy,sizeof(float),1);
-	    if (doswap) reorder(&vz,sizeof(float),1);
-
-	    /*
-	    ** Determine current level
-	    */
-
-	    for (k = Lmax; k >=0; k--) {
-		if (ah.num[k] > index) L = Lmax-k;
-		}
-
-            /*
-	    ** Set particle properties
-            */
-
-	    if (positionprecision == 0) {
-		tdp.pos[0] = (rx+shift)*LUsf + dr[0];
-		tdp.pos[1] = (ry+shift)*LUsf + dr[1];
-		tdp.pos[2] = (rz+shift)*LUsf + dr[2];
-		tdp.vel[0] = vx*csvelscalefac*VUsf;
-		tdp.vel[1] = vy*csvelscalefac*VUsf;
-		tdp.vel[2] = vz*csvelscalefac*VUsf;
-		tdp.mass = mass[L];
-		tdp.eps = soft[L];
-		tdp.phi = 0;
-		if (index < Ntot) write_tipsy_xdr_dark(&xdrs,&tdp);
-		}
-	    else {
-		tdpdpp.pos[0] = (rx+shift)*LUsf + dr[0];
-		tdpdpp.pos[1] = (ry+shift)*LUsf + dr[1];
-		tdpdpp.pos[2] = (rz+shift)*LUsf + dr[2];
-		tdpdpp.vel[0] = vx*csvelscalefac*VUsf;
-		tdpdpp.vel[1] = vy*csvelscalefac*VUsf;
-		tdpdpp.vel[2] = vz*csvelscalefac*VUsf;
-		tdpdpp.mass = mass[L];
-		tdpdpp.eps = soft[L];
-		tdpdpp.phi = 0;
-		if (index < Ntot) write_tipsy_xdr_dark_dpp(&xdrs,&tdpdpp);
-		}
-	    index++;
+	fprintf(stderr,"Processing gas ... ");
+	coordinates = malloc((ad.Lmaxgas+1)*sizeof(double **));
+	assert(coordinates != NULL);
+	Icoordinates = malloc((ad.Lmaxgas+1)*sizeof(long));
+	assert(Icoordinates != NULL);
+	for (i = 0; i <= (ad.Lmaxgas+1); i++) {
+	    Icoordinates[i] = 0;
 	    }
-
+	Ngasread = 0;
+	init_sfc(&ad.asfci);
 	/*
-	** Move all pointers to the end of the record
+	** Go through all levels
 	*/
-
-	assert(fseek(PosXFile,5*Nrec*sizeof(float),SEEK_CUR) == 0);
-	assert(fseek(PosYFile,4*Nrec*sizeof(float),SEEK_CUR) == 0);
-	assert(fseek(PosZFile,3*Nrec*sizeof(float),SEEK_CUR) == 0);
-	assert(fseek(VelXFile,2*Nrec*sizeof(float),SEEK_CUR) == 0);
-	assert(fseek(VelYFile,1*Nrec*sizeof(float),SEEK_CUR) == 0);
+	for (i = ad.Lmingas; i <= ad.Lmaxgas; i++) {
+	    /*
+	    ** Calculate level properties and read level header
+	    */
+	    celllength = ad.rootcelllength/pow(2,i);
+	    cellvolume = celllength*celllength*celllength;
+	    read_art_nb_gas_header_level(&ad,i,&cellrefined);
+	    /*
+	    ** get coordinates array ready
+	    */
+	    coordinates[i] = malloc(ad.Ncellrefined[i]*sizeof(double *));
+	    assert(coordinates[i] != NULL);
+	    for (j = 0; j < ad.Ncellrefined[i]; j++) {
+		coordinates[i][j] = malloc(3*sizeof(double));
+		assert(coordinates[i][j] != NULL);
+		}
+	    /*
+	    ** Move file positions
+	    */
+	    move_art_nb_gas_filepositions_level_begin(ad,i);
+	    /*
+	    ** Go through cells in this level
+	    */
+	    for (j = 0; j < ad.Ncell[i]; j++) {
+		read_art_nb_gas_properties(ad,&agp);
+		Ngasread++;
+		/*
+		** Calculate coordinates
+		*/
+		if (i == ad.Lmingas) {
+		    sfc_coords(ad.asfci,j,index);
+		    for (k = 0; k < 3; k++) {
+			r[k] = index[k] + 0.5;
+			}
+		    }
+		else {
+		    for (k = 0; k < 3; k++) {
+			mothercellindex = j/8;
+			childcellindex = j%8;
+			r[k] = coordinates[i-1][mothercellindex][k] + celllength*art_cell_delta[childcellindex][k];
+			}
+		    }
+		/*
+		** Check if cell is refined
+		*/
+		if (cellrefined[j] == 0) {
+		    /*
+		    ** not refined => write it out
+		    */
+		    Ngaswritten++;
+		    chemical_species_number_density  = agp.HI_number_density  + 2*agp.HII_number_density;
+		    chemical_species_number_density += agp.HeI_number_density + 2*agp.HeII_number_density + 3*agp.HeIII_number_density;
+		    chemical_species_number_density += agp.H2_number_density;
+		    if (positionprecision == 0) {
+			for (k = 0; k < 3; k++) {
+			    tgp.pos[k] = r[k]*art2tipsy_ct.L_usf + art2tipsy_ct.L_css[k];
+			    tgp.vel[k] = (agp.momentum[k]/agp.gas_density)*art2tipsy_ct.V_usf*art2tipsy_ct.V_cssf;
+			    }
+			tgp.mass =  cellvolume*agp.gas_density*art2tipsy_ct.M_usf;
+			tgp.rho = 0; //agp.gas_density*art2tipsy_ct.M_usf/pow(art2tipsy_ct.L_usf,3);
+			tgp.temp = 0; //agp.internal_energy*(agp.gamma-1)/chemical_species_number_density*art2tipsy_ct.M_usf*pow(art2tipsy_ct.V_usf,2); // k_B T
+			tgp.hsmooth = 0; //celllength*art2tipsy_ct.L_usf;
+			tgp.metals = 0; //agp.metal_density_total;
+			tgp.phi = 0; //agp.potential*pow(art2tipsy_ct.V_usf*art2tipsy_ct.V_cssf,2);
+			write_tipsy_xdr_gas(&xdrsout,&tgp);
+			}
+		    else if (positionprecision == 1) {
+			for (k = 0; k < 3; k++) {
+			    tgpdpp.pos[k] = r[k]*art2tipsy_ct.L_usf + art2tipsy_ct.L_css[k];
+			    tgpdpp.vel[k] = (agp.momentum[k]/agp.gas_density)*art2tipsy_ct.V_usf*art2tipsy_ct.V_cssf;
+			    }
+			tgpdpp.mass =  cellvolume*agp.gas_density*art2tipsy_ct.M_usf;
+			tgpdpp.rho = 0;
+			tgpdpp.temp = 0;
+			tgpdpp.hsmooth = 0;
+			tgpdpp.metals = 0;
+			tgpdpp.phi = 0;
+			write_tipsy_xdr_gas_dpp(&xdrsout,&tgpdpp);
+			}
+		    }
+		else {
+		    /*
+		    ** refined => add it to corresponding coordinates array
+		    */
+		    for (k = 0; k < 3; k++) {
+			coordinates[i][Icoordinates[i]][k] = r[k];
+			}
+		    Icoordinates[i]++;
+		    }
+		}
+	    /*
+	    ** Move file positions
+	    */
+	    move_art_nb_gas_filepositions_level_end(ad,i);
+	    /*
+	    ** Checks and free coordinates of level below
+	    */
+	    assert(Icoordinates[i] == ad.Ncellrefined[i]);
+	    if (i > ad.Lmingas) {
+		for (j = 0; j < ad.Ncellrefined[i-1]; j++) {
+		    free(coordinates[i-1][j]);
+		    }
+		free(coordinates[i-1]);
+		}
+	    }
+	/*
+	** Some checks and free remaining arrays
+	*/
+	assert(ad.Ncellrefined[ad.Lmaxgas] == 0);
+	assert(ad.Ngas == Ngasread);
+	j = 0;
+	k = 0;
+	for (i = ad.Lmingas; i <= ad.Lmaxgas; i++) {
+	    j += ad.Ncell[i];
+	    k += ad.Ncellrefined[i];
+	    }
+	assert(ad.Ngas == j);
+	assert(ad.Ngas == k + Ngaswritten);
+	free(Icoordinates);
+	free(cellrefined);
+	fprintf(stderr,"Done. Processed in total %ld gas particles whereof %ld written out.\n\n",ad.Ngas,Ngaswritten);
+	}
+    if (ad.darkcontained || ad.starcontained) {
+	/*
+	** Dark Matter and Stars
+	*/
+	fprintf(stderr,"Processing dark matter and stars ... ");
+	ac = malloc(ad.Nparticleperrecord*sizeof(ART_COORDINATES));
+	assert(ac != NULL);
+	if (ad.starcontained) move_art_nb_star_filepositions_begin(ad);
+	Nparticleread = 0;
+	Nrecordread = 0;
+	for (i = 0; i < ad.Nrecord; i++) {
+	    read_art_nb_coordinates_record(ad,ac);
+	    for (j = 0; j < ad.Nparticleperrecord; j++) {
+		if (Nparticleread < ad.Ndark) {
+		    /*
+		    ** Dark Matter
+		    */
+		    if (positionprecision == 0) {
+			for (k = 0; k < 3; k++) {
+			    tdp.pos[k] = (ac[j].r[k]-ad.shift)*art2tipsy_ct.L_usf + art2tipsy_ct.L_css[k];
+			    tdp.vel[k] = ac[j].v[k]*art2tipsy_ct.V_usf*art2tipsy_ct.V_cssf;
+			    }
+			for (k = ad.Lmaxdark; k >=0; k--) {
+			    if (ad.ah.num[k] >= Nparticleread) L = ad.Lmaxdark-k;
+			    }
+			tdp.mass = ad.massdark[L]*art2tipsy_ct.M_usf;
+			tdp.eps = 0; //ad.softdark[L]*art2tipsy_ct.L_usf;
+			tdp.phi = 0;
+			write_tipsy_xdr_dark(&xdrsout,&tdp);
+			}
+		    else if (positionprecision == 1) {
+			for (k = 0; k < 3; k++) {
+			    tdpdpp.pos[k] = (ac[j].r[k]-ad.shift)*art2tipsy_ct.L_usf + art2tipsy_ct.L_css[k];
+			    tdpdpp.vel[k] = ac[j].v[k]*art2tipsy_ct.V_usf*art2tipsy_ct.V_cssf;
+			    }
+			for (k = ad.Lmaxdark; k >=0; k--) {
+			    if (ad.ah.num[k] >= Nparticleread) L = ad.Lmaxdark-k;
+			    }
+			tdpdpp.mass = ad.massdark[L]*art2tipsy_ct.M_usf;
+			tdpdpp.eps = 0;
+			tdpdpp.phi = 0;
+			write_tipsy_xdr_dark_dpp(&xdrsout,&tdpdpp);
+			}
+		    Nparticleread++;
+		    }
+		else if (Nparticleread < ad.Ndark+ad.Nstar) {
+		    /*
+		    ** Star
+		    */
+		    read_art_nb_star_properties(ad,&asp);
+		    if (positionprecision == 0) {
+			for (k = 0; k < 3; k++) {
+			    tsp.pos[k] = (ac[j].r[k]-ad.shift)*art2tipsy_ct.L_usf + art2tipsy_ct.L_css[k];
+			    tsp.vel[k] = ac[j].v[k]*art2tipsy_ct.V_usf*art2tipsy_ct.V_cssf;
+			    }
+			tsp.mass = asp.mass*art2tipsy_ct.M_usf;
+			tsp.metals = 0; // asp.metallicity_SNII+asp.metallicity_SNIa;
+			tsp.tform = 0; // requires integral
+			tsp.eps = 0;
+			tsp.phi = 0;
+			write_tipsy_xdr_star(&xdrsout,&tsp);
+			}
+		    else if (positionprecision == 0) {
+			for (k = 0; k < 3; k++) {
+			    tspdpp.pos[k] = (ac[j].r[k]-ad.shift)*art2tipsy_ct.L_usf + art2tipsy_ct.L_css[k];
+			    tspdpp.vel[k] = ac[j].v[k]*art2tipsy_ct.V_usf*art2tipsy_ct.V_cssf;
+			    }
+			tspdpp.mass = asp.mass*art2tipsy_ct.M_usf;
+			tspdpp.metals = 0;
+			tspdpp.tform = 0;
+			tspdpp.eps = 0;
+			tspdpp.phi = 0;
+			write_tipsy_xdr_star_dpp(&xdrsout,&tspdpp);
+			}
+		    Nparticleread++;
+		    }
+		}
+	    }
+	if (ad.starcontained) move_art_nb_star_filepositions_end(ad);
+	free(ac);
+	fprintf(stderr,"Done. Processed in total %ld dark matter and %ld star particles.\n\n",ad.Ndark,ad.Nstar);
 	}
 
-    xdr_destroy(&xdrs);
+    xdr_destroy(&xdrsout);
+    fclose(file);
+
+    fprintf(stderr,"Rewriting data ... ");
+
+    file = fopen("temporary_file_you_can_delete","r");
+    xdrstdio_create(&xdrsin,file,XDR_DECODE);
+    xdrstdio_create(&xdrsout,stdout,XDR_ENCODE);
+
+    read_tipsy_xdr_header(&xdrsin,&th);
+    th.time = ad.ah.aunin;
+    th.ntotal = Ngaswritten+ad.Ndark+ad.Nstar;
+    th.ndim = ad.Ndim;
+    th.ngas = Ngaswritten; 
+    th.ndark = ad.Ndark;
+    th.nstar = ad.Nstar;
+    write_tipsy_xdr_header(&xdrsout,&th);
+    if (positionprecision == 0) {
+	for (i = 0; i < th.ngas; i++) { 
+	    read_tipsy_xdr_gas(&xdrsin,&tgp);
+	    write_tipsy_xdr_gas(&xdrsout,&tgp);
+	    }
+	for (i = 0; i < th.ndark; i++) { 
+	    read_tipsy_xdr_dark(&xdrsin,&tdp);
+	    write_tipsy_xdr_dark(&xdrsout,&tdp);
+	    }
+	for (i = 0; i < th.nstar; i++) { 
+	    read_tipsy_xdr_star(&xdrsin,&tsp);
+	    write_tipsy_xdr_star(&xdrsout,&tsp);
+	    }
+	}
+    xdr_destroy(&xdrsin);
+    xdr_destroy(&xdrsout);
+    fclose(file);
+
+    fprintf(stderr,"Done.\n\n");
 
     /*
     ** Write out some additional stuff depending on verbose level
     */
 
     if (verboselevel >= 1) {
-	fprintf(stderr,"There are %d refinement levels:\n\n",Lmax+1);
-	for (L = 0; L <= Lmax; L++) {
-	    fprintf(stderr,"L %d Lmax %d Nlev %ld Softening %.6e LU_TIPSY = %.6e kpc Mass %.6e MU_TIPSY = %.6e Mo\n",L,Lmax,N[L],soft[L],soft[L]*LU_TIPSY,mass[L],mass[L]*MU_TIPSY);
-	    if (L == Lmax) fprintf(stderr,"\n");
+	fprintf(stderr,"There are %d refinement levels for the dark matter:\n\n",ad.Nleveldark);
+	for (L = ad.Lmindark; L <= ad.Lmaxdark; L++) {
+	    fprintf(stderr,"L %d Lmax %d Nlevel %d Softening %.6e LU_ART = %.6e kpc Mass %.6e MU_ART = %.6e Mo\n",L,ad.Lmaxdark,ad.Ndarklevel[L],ad.softdark[L],ad.softdark[L]*art2cosmo_ct.L_usf,ad.massdark[L],ad.massdark[L]*art2cosmo_ct.M_usf);
 	    }
-	fprintf(stderr,"Parameters from ART file:\n\n");
-        fprintf(stderr,"aunin    : %.6e\n",ah.aunin);
-        fprintf(stderr,"auni0    : %.6e\n",ah.auni0);
-        fprintf(stderr,"amplt    : %.6e\n",ah.amplt);
-        fprintf(stderr,"astep    : %.6e\n",ah.astep);
-        fprintf(stderr,"istep    : %d\n",ah.istep);
-        fprintf(stderr,"partw    : %.6e\n",ah.partw);
-        fprintf(stderr,"tintg    : %.6e\n",ah.tintg);
-        fprintf(stderr,"ekin     : %.6e\n",ah.ekin);
-        fprintf(stderr,"ekin1    : %.6e\n",ah.ekin1);
-        fprintf(stderr,"ekin2    : %.6e\n",ah.ekin2);
-        fprintf(stderr,"au0      : %.6e\n",ah.au0);
-        fprintf(stderr,"aeu0     : %.6e\n",ah.aeu0);
-        fprintf(stderr,"Nrow     : %d\n",ah.Nrow);
-        fprintf(stderr,"Ngrid    : %d\n",ah.Ngrid);
-        fprintf(stderr,"Nspecies : %d\n",ah.Nspecies);
-        fprintf(stderr,"Nseed    : %d\n",ah.Nseed);
-        fprintf(stderr,"OmM0     : %.6e\n",ah.OmM0);
-        fprintf(stderr,"OmL0     : %.6e\n",ah.OmL0);
-        fprintf(stderr,"h100     : %.6e\n",ah.h100);
-        fprintf(stderr,"Wp5      : %.6e\n",ah.Wp5);
-        fprintf(stderr,"OmK0     : %.6e\n",ah.OmK0);
-        fprintf(stderr,"OmB0     : %.6e\n",ah.OmB0);
-        fprintf(stderr,"Banner   : %s\n",banner);
-        fprintf(stderr,"Nrec     : %d\n",Nrec);
-        fprintf(stderr,"LBox     : %.6e chimp\n",LBox);
-        fprintf(stderr,"Lmax     : %d\n\n",Lmax);
+	fprintf(stderr,"\n");
+	fprintf(stderr,"ART general header:\n\n");
+        fprintf(stderr,"aunin    : %.6e\n",ad.ah.aunin);
+        fprintf(stderr,"auni0    : %.6e\n",ad.ah.auni0);
+        fprintf(stderr,"amplt    : %.6e\n",ad.ah.amplt);
+        fprintf(stderr,"astep    : %.6e\n",ad.ah.astep);
+        fprintf(stderr,"istep    : %d\n",ad.ah.istep);
+        fprintf(stderr,"partw    : %.6e\n",ad.ah.partw);
+        fprintf(stderr,"tintg    : %.6e\n",ad.ah.tintg);
+        fprintf(stderr,"ekin     : %.6e\n",ad.ah.ekin);
+        fprintf(stderr,"ekin1    : %.6e\n",ad.ah.ekin1);
+        fprintf(stderr,"ekin2    : %.6e\n",ad.ah.ekin2);
+        fprintf(stderr,"au0      : %.6e\n",ad.ah.au0);
+        fprintf(stderr,"aeu0     : %.6e\n",ad.ah.aeu0);
+        fprintf(stderr,"Nrow     : %d\n",ad.ah.Nrow);
+        fprintf(stderr,"Ngrid    : %d\n",ad.ah.Ngrid);
+        fprintf(stderr,"Nspecies : %d\n",ad.ah.Nspecies);
+        fprintf(stderr,"Nseed    : %d\n",ad.ah.Nseed);
+        fprintf(stderr,"OmM0     : %.6e\n",ad.ah.OmM0);
+        fprintf(stderr,"OmL0     : %.6e\n",ad.ah.OmL0);
+        fprintf(stderr,"h100     : %.6e\n",ad.ah.h100);
+        fprintf(stderr,"Wp5      : %.6e\n",ad.ah.Wp5);
+        fprintf(stderr,"OmK0     : %.6e\n",ad.ah.OmK0);
+        fprintf(stderr,"OmB0     : %.6e\n",ad.ah.OmB0);
+        fprintf(stderr,"Banner   : %s\n",ad.Banner);
+	fprintf(stderr,"\n");
+	fprintf(stderr,"ART data properties:\n\n");
+        fprintf(stderr,"Nparticleperrecord : %d\n",ad.Nparticleperrecord);
+	fprintf(stderr,"Nhydroproperties   : %d\n",ad.Nhydroproperties);
+	fprintf(stderr,"Notherproperties   : %d\n",ad.Notherproperties);
+	fprintf(stderr,"Nrtchemspecies     : %d\n",ad.Nrtchemspecies);
+	fprintf(stderr,"Nchemspecies       : %d\n",ad.Nchemspecies);
+	fprintf(stderr,"Toplevelsoftdark   : %.6e LU_ART = %.6e kpc\n",ad.toplevelsoftdark,ad.toplevelsoftdark*art2cosmo_ct.L_usf);
+	fprintf(stderr,"Toplevelmassdark   : %.6e MU_ART = %.6e Mo\n",ad.toplevelmassdark,ad.toplevelmassdark*art2cosmo_ct.M_usf);
+	fprintf(stderr,"\n");
+	fprintf(stderr,"ART preprocessor flags:\n\n");
+	fprintf(stderr,"-GRAVITY                     : %s\n",(ad.GRAVITY == 0)?"not set":"set");
+	fprintf(stderr,"-HYDRO                       : %s\n",(ad.HYDRO == 0)?"not set":"set");
+	fprintf(stderr,"-ADVECT_SPECIES              : %s\n",(ad.ADVECT_SPECIES == 0)?"not set":"set");
+	fprintf(stderr,"-STARFORM                    : %s\n",(ad.STARFORM == 0)?"not set":"set");
+	fprintf(stderr,"-ENRICH                      : %s\n",(ad.ENRICH == 0)?"not set":"set");
+	fprintf(stderr,"-ENRICH_SNIa                 : %s\n",(ad.ENRICH_SNIa == 0)?"not set":"set");
+	fprintf(stderr,"-RADIATIVE_TRANSFER          : %s\n",(ad.RADIATIVE_TRANSFER == 0)?"not set":"set");
+	fprintf(stderr,"-ELECTRON_ION_NONEQUILIBRIUM : %s\n",(ad.ELECTRON_ION_NONEQUILIBRIUM == 0)?"not set":"set");
+	fprintf(stderr,"\n");
+	fprintf(stderr,"ART units:\n\n");
+	fprintf(stderr,"LU_ART   : %.6e kpc\n",art2cosmo_ct.L_usf);
+	fprintf(stderr,"TU_ART   : %.6e Gyr\n",art2cosmo_ct.T_usf);
+	fprintf(stderr,"VU_ART   : %.6e kpc Gyr^{-1} = %.6e km s^{-1}\n",art2cosmo_ct.V_usf,art2cosmo_ct.V_usf*ConversionFactors.kpc_per_Gyr_2_km_per_s);
+	fprintf(stderr,"MU_ART   : %.6e Mo\n",art2cosmo_ct.M_usf);
+	fprintf(stderr,"\n");
+	fprintf(stderr,"Tipsy units:\n\n");
+	fprintf(stderr,"LU_TIPSY : %.6e kpc\n",tipsy2cosmo_ct.L_usf);
+	fprintf(stderr,"TU_TIPSY : %.6e Gyr\n",tipsy2cosmo_ct.T_usf);
+	fprintf(stderr,"VU_TIPSY : %.6e kpc Gyr^{-1} = %.6e km s^{-1}\n",tipsy2cosmo_ct.V_usf,tipsy2cosmo_ct.V_usf*ConversionFactors.kpc_per_Gyr_2_km_per_s);
+	fprintf(stderr,"MU_TIPSY : %.6e Mo\n",tipsy2cosmo_ct.M_usf);
+	fprintf(stderr,"\n");
         fprintf(stderr,"Cosmology:\n\n");
-        fprintf(stderr,"OmegaM0  : %.6e\n",OmegaM0);
-        fprintf(stderr,"OmegaDM0 : %.6e\n",OmegaDM0);
-        fprintf(stderr,"OmegaB0  : %.6e\n",OmegaB0);
-        fprintf(stderr,"OmegaL0  : %.6e\n",OmegaL0);
-        fprintf(stderr,"OmegaK0  : %.6e\n",OmegaK0);
-        fprintf(stderr,"OmegaR0  : %.6e\n",OmegaR0);
-        fprintf(stderr,"h100     : %.6e\n\n",h100);
+        fprintf(stderr,"OmegaM0  : %.6e\n",cp.OmegaM0);
+        fprintf(stderr,"OmegaDM0 : %.6e\n",cp.OmegaDM0);
+        fprintf(stderr,"OmegaB0  : %.6e\n",cp.OmegaB0);
+        fprintf(stderr,"OmegaL0  : %.6e\n",cp.OmegaL0);
+        fprintf(stderr,"OmegaK0  : %.6e\n",cp.OmegaK0);
+        fprintf(stderr,"OmegaR0  : %.6e\n",cp.OmegaR0);
+	fprintf(stderr,"\n");
+	fprintf(stderr,"Coordinate transformation:\n\n");
+        fprintf(stderr,"L_usf    : %.6e\n",art2tipsy_ct.L_usf);
+        fprintf(stderr,"T_usf    : %.6e\n",art2tipsy_ct.T_usf);
+        fprintf(stderr,"V_usf    : %.6e\n",art2tipsy_ct.V_usf);
+        fprintf(stderr,"M_usf    : %.6e\n",art2tipsy_ct.M_usf);
+        fprintf(stderr,"L_cssf   : %.6e\n",art2tipsy_ct.L_cssf);
+        fprintf(stderr,"V_cssf   : %.6e\n",art2tipsy_ct.V_cssf);
+	for (i = 0; i < 3; i++) fprintf(stderr,"L_css[%ld] : %.6e\n",i,art2tipsy_ct.L_css[i]);
+	for (i = 0; i < 3; i++) fprintf(stderr,"V_css[%ld] : %.6e\n",i,art2tipsy_ct.V_css[i]);
+	fprintf(stderr,"\n");
 	fprintf(stderr,"Used values:\n\n");
-        fprintf(stderr,"shift     : %.6e LU_ART\n",shift);
-        fprintf(stderr,"drx       : %.6e LU_TIPSY\n",dr[0]);
-        fprintf(stderr,"dry       : %.6e LU_TIPSY\n",dr[1]);
-        fprintf(stderr,"drz       : %.6e LU_TIPSY\n",dr[2]);
-        fprintf(stderr,"LUsf      : %.6e\n",LUsf);
-        fprintf(stderr,"VUsf      : %.6e\n",VUsf);
-        fprintf(stderr,"MUsf      : %.6e\n",MUsf);
-        fprintf(stderr,"b2dmfac   : %.6e\n",b2dmscalefac);
-        fprintf(stderr,"softfac   : %.6e\n",softfac);
-        fprintf(stderr,"Softening : %.6e LU_TIPSY (toplevel)\n",toplevelsoftening);
-        fprintf(stderr,"Mass      : %.6e MU_TIPSY (toplevel)\n\n",toplevelmass);
-        fprintf(stderr,"Resulting internal ART units:\n\n");
-        fprintf(stderr,"LU_ART : %.6e kpc\n",LU_ART);
-        fprintf(stderr,"TU_ART : %.6e Gyr\n",TU_ART/VelConvertFac);
-        fprintf(stderr,"VU_ART : %.6e km s^-1 = %.6e kpc Gyr^-1\n",VU_ART,VU_ART*VelConvertFac);
-        fprintf(stderr,"MU_ART : %.6e Mo\n\n",MU_ART);
-        fprintf(stderr,"Resulting internal tipsy units:\n\n");
-        fprintf(stderr,"LU_TIPSY : %.6e kpc\n",LU_TIPSY);
-        fprintf(stderr,"TU_TIPSY : %.6e Gyr\n",TU_TIPSY/VelConvertFac);
-        fprintf(stderr,"VU_TIPSY : %.6e km s^-1 = %.6e kpc Gyr^-1\n",VU_TIPSY,VU_TIPSY*VelConvertFac);
-        fprintf(stderr,"MU_TIPSY : %.6e Mo\n\n",MU_TIPSY);
+        fprintf(stderr,"softfac                    : %.6e\n",softfac);
+        fprintf(stderr,"LBox                       : %.6e kpc\n",LBox);
+        fprintf(stderr,"Position precision         : %s\n",(positionprecision == 0)?"spp":"dpp");
+        fprintf(stderr,"Scaling                    : %s\n",(scaling == 0)?"no":"yes");
+        fprintf(stderr,"Dark matter mass from data : %s\n",(massdarkfromdata == 0)?"no":"yes");
+	fprintf(stderr,"\n");
 	}
     if (verboselevel >= 0) {
         fprintf(stderr,"Time: %g Ntotal: %d Ngas: %d Ndark: %d Nstar: %d\n",
@@ -509,26 +672,30 @@ void usage(void) {
     fprintf(stderr,"\n");
     fprintf(stderr,"Please specify the following parameters:\n");
     fprintf(stderr,"\n");
-    fprintf(stderr,"-spp             : set this flag if output file has single precision positions (default)\n");
-    fprintf(stderr,"-dpp             : set this flag if output file has double precision positions\n");
-    fprintf(stderr,"-LBox <value>    : side length of box [chimp] (default: 1 chimp)\n");
-    fprintf(stderr,"-drx <value>     : shift along x-axis [LU_TIPSY] (default: -0.5 LU_TIPSY)\n");
-    fprintf(stderr,"-dry <value>     : shift along y-axis [LU_TIPSY] (default: -0.5 LU_TIPSY)\n");
-    fprintf(stderr,"-drz <value>     : shift along z-axis [LU_TIPSY] (default: -0.5 LU_TIPSY)\n");
-    fprintf(stderr,"-shift <value>   : internal shift before scaling [LU_ART] (default: 0 LU_ART)\n");
-    fprintf(stderr,"-soft <value>    : softening length of top level particles [LU_TIPSY] (default: 1/softfac mean particle separation => LBox/(N1Dlow*softfac) LU_TIPSY)\n");
-    fprintf(stderr,"-mass <value>    : mass of top level particles [MU_TIPSY] (default: OmegaM0/Nlow - if you want masses from file set -1)\n");
-    fprintf(stderr,"-LUsf <value>    : length unit scale factor (default: LU_ART/LU_TIPSY_DEFAULT)\n");
-    fprintf(stderr,"-VUsf <value>    : velocity unit scale factor (default: VU_ART/VU_TIPSY_DEFAULT)\n");
-    fprintf(stderr,"-MUsf <value>    : mass unit scale factor (default: MU_ART/MU_TIPSY_DEFAULT)\n");
-    fprintf(stderr,"-b2dmfac <value> : baryon to dark matter scale factor (default: OmegaM0/OmegaDM0)\n");
-    fprintf(stderr,"-softfac <value> : softening factor (default: 50)\n");
-    fprintf(stderr,"-refstep <value> : refinement step factor (default: 2)\n");
-    fprintf(stderr,"-noscaling       : no scaling of data\n");
-    fprintf(stderr,"-v               : more informative output to screen\n");
-    fprintf(stderr,"-header <name>   : header input file in ART native binary format\n");
-    fprintf(stderr,"-data <name>     : data input file in ART native binary format\n");
-    fprintf(stderr,"> <name>         : output file in tipsy XDR format\n");
+    fprintf(stderr,"-spp                                 : set this flag if output file has single precision positions (default)\n");
+    fprintf(stderr,"-dpp                                 : set this flag if output file has double precision positions\n");
+    fprintf(stderr,"-scaling                             : scaling from ART to tipsy units\n");
+    fprintf(stderr,"-noscaling                           : no scaling from ART to tipsy units (default)\n");
+    fprintf(stderr,"-massdarkfromdata                    : take dark matter particle masses from data (default)\n");
+    fprintf(stderr,"-massdarknotfromdata                 : use value of top level dark matter particle mass for calculating dark matter particle masses\n");
+    fprintf(stderr,"-toplevelsoftdark <value>            : softening length of top level dark matter particles [LU_ART] (default: rootcelllength/softfac)\n");
+    fprintf(stderr,"-toplevelmassdark <value>            : mass of top level dark matter particles [MU_ART] (default: OmegaDM0/OmegaM0)\n");
+    fprintf(stderr,"-softfac <value>                     : softening factor (default: 50)\n");
+    fprintf(stderr,"-LBox <value>                        : comoving box length [kpc]\n");
+    fprintf(stderr,"-GRAVITY <value>                     : 0 = flag not set / 1 = flag set (default: 1)\n");
+    fprintf(stderr,"-HYDRO <value>                       : 0 = flag not set / 1 = flag set (default: 1)\n");
+    fprintf(stderr,"-ADVECT_SPECIES <value>              : 0 = flag not set / 1 = flag set (default: 1)\n");
+    fprintf(stderr,"-STARFORM <value>                    : 0 = flag not set / 1 = flag set (default: 1)\n");
+    fprintf(stderr,"-ENRICH <value>                      : 0 = flag not set / 1 = flag set (default: 1)\n");
+    fprintf(stderr,"-ENRICH_SNIa <value>                 : 0 = flag not set / 1 = flag set (default: 1)\n");
+    fprintf(stderr,"-RADIATIVE_TRANSFER <value>          : 0 = flag not set / 1 = flag set (default: 1)\n");
+    fprintf(stderr,"-ELECTRON_ION_NONEQUILIBRIUM <value> : 0 = flag not set / 1 = flag set (default: 0)\n");
+    fprintf(stderr,"-headerfile <name>                   : header file in ART native binary format\n");
+    fprintf(stderr,"-coordinatesdatafile <name>          : coordinates data file in ART native binary format\n");
+    fprintf(stderr,"-starpropertiesfile <name>           : star properties file in ART native binary format\n");
+    fprintf(stderr,"-gasfile <name>                      : gas file in ART native binary format\n");
+    fprintf(stderr,"-v                                   : more informative output to screen\n");
+    fprintf(stderr,"> <name>                             : output file in tipsy XDR format\n");
     fprintf(stderr,"\n");
     exit(1);
     }
