@@ -19,7 +19,7 @@ void usage(void);
 
 int main(int argc, char **argv) {
 
-    int positionprecision, verboselevel, scaling, massdarkfromdata;
+    int positionprecision, verboselevel, scaling, massdarkfromdata, Lmaxgaswrite;
     int L;
     int index[3] = {-1,-1,-1};
     int *cellrefined = NULL;
@@ -75,6 +75,7 @@ int main(int argc, char **argv) {
     verboselevel = 0;
     scaling = 0;
     massdarkfromdata = 1;
+    Lmaxgaswrite = -1;
     softfac = 50;
     Ngaswritten = 0;
     L = 0;
@@ -125,6 +126,12 @@ int main(int argc, char **argv) {
             i++;
             if (i >= argc) usage();
             softfac = atof(argv[i]);
+            i++;
+            }
+        else if (strcmp(argv[i],"-Lmaxgaswrite") == 0) {
+            i++;
+            if (i >= argc) usage();
+            Lmaxgaswrite = atoi(argv[i]);
             i++;
             }
         else if (strcmp(argv[i],"-LBox") == 0) {
@@ -226,6 +233,9 @@ int main(int argc, char **argv) {
 
     prepare_art_data(&ad);
 
+    if (Lmaxgaswrite == -1) Lmaxgaswrite = ad.Lmaxgas;
+    assert(Lmaxgaswrite >= 0);
+
     cp.OmegaM0 = ad.ah.OmM0;
     cp.OmegaB0 = ad.ah.OmB0;
     cp.OmegaDM0 = cp.OmegaM0 - cp.OmegaB0;
@@ -249,7 +259,7 @@ int main(int argc, char **argv) {
     if(cosmous.Hubble0 == 0) cosmous.Hubble0 = 100*ad.ah.h100*ConversionFactors.km_per_s_2_kpc_per_Gyr/1e3;
 
     /*
-    ** Calculate scaling factors and set masses and softenings
+    ** Calculate coordinate transformation
     */
 
     if (scaling == 1) {
@@ -323,7 +333,7 @@ int main(int argc, char **argv) {
 	/*
 	** Go through all levels
 	*/
-	for (i = ad.Lmingas; i <= ad.Lmaxgas; i++) {
+	for (i = ad.Lmingas; i <= Lmaxgaswrite; i++) {
 	    /*
 	    ** Calculate level properties and read level header
 	    */
@@ -333,11 +343,13 @@ int main(int argc, char **argv) {
 	    /*
 	    ** get coordinates array ready
 	    */
-	    coordinates[i] = malloc(ad.Ncellrefined[i]*sizeof(double *));
-	    assert(coordinates[i] != NULL);
-	    for (j = 0; j < ad.Ncellrefined[i]; j++) {
-		coordinates[i][j] = malloc(3*sizeof(double));
-		assert(coordinates[i][j] != NULL);
+	    if (i < Lmaxgaswrite) {
+		coordinates[i] = malloc(ad.Ncellrefined[i]*sizeof(double *));
+		assert(coordinates[i] != NULL);
+		for (j = 0; j < ad.Ncellrefined[i]; j++) {
+		    coordinates[i][j] = malloc(3*sizeof(double));
+		    assert(coordinates[i][j] != NULL);
+		    }
 		}
 	    /*
 	    ** Move file positions
@@ -368,9 +380,9 @@ int main(int argc, char **argv) {
 		/*
 		** Check if cell is refined
 		*/
-		if (cellrefined[j] == 0) {
+		if ((cellrefined[j] == 0) || (i == Lmaxgaswrite)) {
 		    /*
-		    ** not refined => write it out
+		    ** not refined or maximum level reached => write it out
 		    */
 		    Ngaswritten++;
 		    chemical_species_number_density  = agp.HI_number_density  + 2*agp.HII_number_density;
@@ -403,9 +415,9 @@ int main(int argc, char **argv) {
 			write_tipsy_xdr_gas_dpp(&xdrsout,&tgpdpp);
 			}
 		    }
-		else {
+		else if (i < Lmaxgaswrite) {
 		    /*
-		    ** refined => add it to corresponding coordinates array
+		    ** refined and lower level than Lmaxgaswrite => add it to corresponding coordinates array
 		    */
 		    for (k = 0; k < 3; k++) {
 			coordinates[i][Icoordinates[i]][k] = r[k];
@@ -420,7 +432,7 @@ int main(int argc, char **argv) {
 	    /*
 	    ** Checks and free coordinates of level below
 	    */
-	    assert(Icoordinates[i] == ad.Ncellrefined[i]);
+	    if (i < Lmaxgaswrite) assert(Icoordinates[i] == ad.Ncellrefined[i]);
 	    if (i > ad.Lmingas) {
 		for (j = 0; j < ad.Ncellrefined[i-1]; j++) {
 		    free(coordinates[i-1][j]);
@@ -431,16 +443,18 @@ int main(int argc, char **argv) {
 	/*
 	** Some checks and free remaining arrays
 	*/
-	assert(ad.Ncellrefined[ad.Lmaxgas] == 0);
-	assert(ad.Ngas == Ngasread);
-	j = 0;
-	k = 0;
-	for (i = ad.Lmingas; i <= ad.Lmaxgas; i++) {
-	    j += ad.Ncell[i];
-	    k += ad.Ncellrefined[i];
+	if (Lmaxgaswrite == ad.Lmaxgas) {
+	    assert(ad.Ncellrefined[ad.Lmaxgas] == 0);
+	    assert(ad.Ngas == Ngasread);
+	    j = 0;
+	    k = 0;
+	    for (i = ad.Lmingas; i <= ad.Lmaxgas; i++) {
+		j += ad.Ncell[i];
+		k += ad.Ncellrefined[i];
+		}
+	    assert(ad.Ngas == j);
+	    assert(ad.Ngas == k + Ngaswritten);
 	    }
-	assert(ad.Ngas == j);
-	assert(ad.Ngas == k + Ngaswritten);
 	free(Icoordinates);
 	free(cellrefined);
 	fprintf(stderr,"Done. Processed in total %ld gas particles whereof %ld written out.\n\n",ad.Ngas,Ngaswritten);
@@ -651,6 +665,7 @@ int main(int argc, char **argv) {
 	fprintf(stderr,"\n");
 	fprintf(stderr,"Used values:\n\n");
         fprintf(stderr,"softfac                    : %.6e\n",softfac);
+        fprintf(stderr,"Lmaxgaswrite               : %d\n",Lmaxgaswrite);
         fprintf(stderr,"LBox                       : %.6e kpc\n",LBox);
         fprintf(stderr,"Position precision         : %s\n",(positionprecision == 0)?"spp":"dpp");
         fprintf(stderr,"Scaling                    : %s\n",(scaling == 0)?"no":"yes");
