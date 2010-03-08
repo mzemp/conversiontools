@@ -242,6 +242,7 @@ int main(int argc, char **argv) {
     cp.OmegaL0 = ad.ah.OmL0;
     cp.OmegaK0 = ad.ah.OmK0;
     cp.OmegaR0 = 0;
+    cp.h0_100 = ad.ah.h100;
 
     if(artus.LBox == 0) artus.LBox = ad.ah.Ngrid;
     if(artus.GNewton == 0) artus.GNewton = 3.0/(2*M_PI);
@@ -255,8 +256,8 @@ int main(int argc, char **argv) {
 
     if(cosmous.LBox == 0) cosmous.LBox = LBox;
     if(cosmous.GNewton == 0) cosmous.GNewton = PhysicalConstants.GNewton_Cosmology;
-    if(cosmous.rhocrit0 == 0) cosmous.rhocrit0 = PhysicalConstants.rho_crit_Cosmology*pow(ad.ah.h100,2);
-    if(cosmous.Hubble0 == 0) cosmous.Hubble0 = 100*ad.ah.h100*ConversionFactors.km_per_s_2_kpc_per_Gyr/1e3;
+    if(cosmous.rhocrit0 == 0) cosmous.rhocrit0 = PhysicalConstants.rho_crit_Cosmology*pow(cp.h0_100,2);
+    if(cosmous.Hubble0 == 0) cosmous.Hubble0 = 100*cp.h0_100*ConversionFactors.km_per_s_2_kpc_per_Gyr/1e3;
 
     /*
     ** Calculate coordinate transformation
@@ -652,6 +653,7 @@ int main(int argc, char **argv) {
         fprintf(stderr,"OmegaL0  : %.6e\n",cp.OmegaL0);
         fprintf(stderr,"OmegaK0  : %.6e\n",cp.OmegaK0);
         fprintf(stderr,"OmegaR0  : %.6e\n",cp.OmegaR0);
+        fprintf(stderr,"h0_100   : %.6e\n",cp.h0_100);
 	fprintf(stderr,"\n");
 	fprintf(stderr,"Coordinate transformation:\n\n");
         fprintf(stderr,"L_usf    : %.6e\n",art2tipsy_ct.L_usf);
