@@ -55,6 +55,8 @@ int main(int argc, char **argv) {
 
     set_default_values_art_data(&ad);
     set_default_values_coordinate_transformation(&art2tipsy_ct);
+    set_default_values_coordinate_transformation(&art2cosmo_ct);
+    set_default_values_coordinate_transformation(&tipsy2cosmo_ct);
 
     artus.LBox = 0;
     artus.GNewton = 0;
