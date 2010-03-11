@@ -59,19 +59,16 @@ int main(int argc, char **argv) {
     set_default_values_coordinate_transformation(&tipsy2cosmo_ct);
 
     artus.LBox = 0;
-    artus.GNewton = 0;
-    artus.rhocrit0 = 0;
     artus.Hubble0 = 0;
+    artus.rhocrit0 = 0;
 
     tipsyus.LBox = 0;
-    tipsyus.GNewton = 0;
-    tipsyus.rhocrit0 = 0;
     tipsyus.Hubble0 = 0;
+    tipsyus.rhocrit0 = 0;
 
     cosmous.LBox = 0;
-    cosmous.GNewton = 0;
-    cosmous.rhocrit0 = 0;
     cosmous.Hubble0 = 0;
+    cosmous.rhocrit0 = 0;
 
     positionprecision = 0;
     verboselevel = 0;
@@ -247,19 +244,16 @@ int main(int argc, char **argv) {
     cp.h0_100 = ad.ah.h100;
 
     if(artus.LBox == 0) artus.LBox = ad.ah.Ngrid;
-    if(artus.GNewton == 0) artus.GNewton = 3.0/(2*M_PI);
-    if(artus.rhocrit0 == 0) artus.rhocrit0 = 1/cp.OmegaM0;
     if(artus.Hubble0 == 0) artus.Hubble0 = 2.0/sqrt(cp.OmegaM0);
+    if(artus.rhocrit0 == 0) artus.rhocrit0 = 1/cp.OmegaM0;
 
     if(tipsyus.LBox == 0) tipsyus.LBox = 1;
-    if(tipsyus.GNewton == 0) tipsyus.GNewton = 1;
-    if(tipsyus.rhocrit0 == 0) tipsyus.rhocrit0 = 1;
     if(tipsyus.Hubble0 == 0) tipsyus.Hubble0 = sqrt(8.0*M_PI/3.0);
+    if(tipsyus.rhocrit0 == 0) tipsyus.rhocrit0 = 1;
 
     if(cosmous.LBox == 0) cosmous.LBox = LBox;
-    if(cosmous.GNewton == 0) cosmous.GNewton = PhysicalConstants.GNewton_Cosmology;
-    if(cosmous.rhocrit0 == 0) cosmous.rhocrit0 = PhysicalConstants.rho_crit_Cosmology*pow(cp.h0_100,2);
     if(cosmous.Hubble0 == 0) cosmous.Hubble0 = 100*cp.h0_100*ConversionFactors.km_per_s_2_kpc_per_Gyr/1e3;
+    if(cosmous.rhocrit0 == 0) cosmous.rhocrit0 = PhysicalConstants.rho_crit_Cosmology*pow(cp.h0_100,2);
 
     /*
     ** Calculate coordinate transformation
