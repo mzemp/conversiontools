@@ -234,6 +234,7 @@ int main(int argc, char **argv) {
 
     if (Lmaxgaswrite == -1) Lmaxgaswrite = ad.Lmaxgas;
     assert(Lmaxgaswrite >= 0);
+    assert(Lmaxgaswrite <= ad.Lmaxgas);
 
     cp.OmegaM0 = ad.ah.OmM0;
     cp.OmegaB0 = ad.ah.OmB0;
