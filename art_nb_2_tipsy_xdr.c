@@ -321,9 +321,9 @@ int main(int argc, char **argv) {
 	fprintf(stderr,"Processing gas ... ");
 	coordinates = malloc((ad.Lmaxgas+1)*sizeof(double **));
 	assert(coordinates != NULL);
-	Icoordinates = malloc((ad.Lmaxgas+1)*sizeof(long));
+	Icoordinates = malloc((ad.Lmaxgas+1)*sizeof(long int));
 	assert(Icoordinates != NULL);
-	for (i = 0; i <= (ad.Lmaxgas+1); i++) {
+	for (i = 0; i < (ad.Lmaxgas+1); i++) {
 	    Icoordinates[i] = 0;
 	    }
 	Ngasread = 0;
