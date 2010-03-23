@@ -610,14 +610,28 @@ int main(int argc, char **argv) {
         fprintf(stderr,"Wp5      : %.6e\n",ad.ah.Wp5);
         fprintf(stderr,"OmK0     : %.6e\n",ad.ah.OmK0);
         fprintf(stderr,"OmB0     : %.6e\n",ad.ah.OmB0);
+        fprintf(stderr,"magic1   : %.6e\n",ad.ah.magic1);
+        fprintf(stderr,"DelDC    : %.6e\n",ad.ah.DelDC);
+        fprintf(stderr,"abox     : %.6e\n",ad.ah.abox);
+        fprintf(stderr,"Hbox     : %.6e\n",ad.ah.Hbox);
+        fprintf(stderr,"magic2   : %.6e\n",ad.ah.magic2);
         fprintf(stderr,"Banner   : %s\n",ad.Banner);
+	for (i = 0; i < 10; i++) {
+       	    fprintf(stderr,"mass[%ld] : %.6e num[%ld] : %d\n",i,ad.ah.mass[i],i,ad.ah.num[i]);
+	    }
 	fprintf(stderr,"\n");
 	fprintf(stderr,"ART data properties:\n\n");
         fprintf(stderr,"Nparticleperrecord : %d\n",ad.Nparticleperrecord);
+	fprintf(stderr,"Nrecord            : %d\n",ad.Nrecord);
 	fprintf(stderr,"Nhydroproperties   : %d\n",ad.Nhydroproperties);
 	fprintf(stderr,"Notherproperties   : %d\n",ad.Notherproperties);
 	fprintf(stderr,"Nrtchemspecies     : %d\n",ad.Nrtchemspecies);
 	fprintf(stderr,"Nchemspecies       : %d\n",ad.Nchemspecies);
+	fprintf(stderr,"Nstarproperties    : %d\n",ad.Nstarproperties);
+	fprintf(stderr,"Lmingas            : %d\n",ad.Lmingas);
+	fprintf(stderr,"Lmaxgas            : %d\n",ad.Lmaxgas);
+	fprintf(stderr,"Lmindark           : %d\n",ad.Lmindark);
+	fprintf(stderr,"Lmaxdark           : %d\n",ad.Lmaxdark);
 	fprintf(stderr,"Toplevelsoftdark   : %.6e LU_ART = %.6e kpc\n",ad.toplevelsoftdark,ad.toplevelsoftdark*art2cosmo_ct.L_usf);
 	fprintf(stderr,"Toplevelmassdark   : %.6e MU_ART = %.6e Mo\n",ad.toplevelmassdark,ad.toplevelmassdark*art2cosmo_ct.M_usf);
 	fprintf(stderr,"\n");
