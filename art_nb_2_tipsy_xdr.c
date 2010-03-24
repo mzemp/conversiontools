@@ -31,7 +31,6 @@ int main(int argc, char **argv) {
     double r[3];
     double celllength, cellvolume;
     double softfac, LBox;
-    double chemical_species_number_density;
     COSMOLOGICAL_PARAMETERS cp;
     UNIT_SYSTEM artus, tipsyus, cosmous;
     COORDINATE_TRANSFORMATION art2tipsy_ct, art2cosmo_ct, tipsy2cosmo_ct;
@@ -383,9 +382,6 @@ int main(int argc, char **argv) {
 		    ** not refined or maximum level reached => write it out
 		    */
 		    Ngaswritten++;
-		    chemical_species_number_density  = agp.HI_number_density  + 2*agp.HII_number_density;
-		    chemical_species_number_density += agp.HeI_number_density + 2*agp.HeII_number_density + 3*agp.HeIII_number_density;
-		    chemical_species_number_density += agp.H2_number_density;
 		    if (positionprecision == 0) {
 			for (k = 0; k < 3; k++) {
 			    tgp.pos[k] = r[k]*art2tipsy_ct.L_usf + art2tipsy_ct.L_css[k];
