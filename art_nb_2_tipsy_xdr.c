@@ -388,11 +388,11 @@ int main(int argc, char **argv) {
 			    tgp.vel[k] = (agp.momentum[k]/agp.gas_density)*art2tipsy_ct.V_usf*art2tipsy_ct.V_cssf;
 			    }
 			tgp.mass =  cellvolume*agp.gas_density*art2tipsy_ct.M_usf;
-			tgp.rho = 0; //agp.gas_density*art2tipsy_ct.M_usf/pow(art2tipsy_ct.L_usf,3);
-			tgp.temp = 0; //agp.internal_energy*(agp.gamma-1)/chemical_species_number_density*art2tipsy_ct.M_usf*pow(art2tipsy_ct.V_usf,2); // k_B T
-			tgp.hsmooth = 0; //celllength*art2tipsy_ct.L_usf;
-			tgp.metals = 0; //agp.metal_density_total;
-			tgp.phi = 0; //agp.potential*pow(art2tipsy_ct.V_usf*art2tipsy_ct.V_cssf,2);
+			tgp.rho = 0; /* agp.gas_density*art2tipsy_ct.M_usf/pow(art2tipsy_ct.L_usf,3); */
+			tgp.temp = 0; /* agp.internal_energy*(agp.gamma-1)/chemical_species_number_density*art2tipsy_ct.M_usf*pow(art2tipsy_ct.V_usf,2); k_B T */
+			tgp.hsmooth = 0; /* celllength*art2tipsy_ct.L_usf; */
+			tgp.metals = 0; /* agp.metal_density_total; */
+			tgp.phi = 0; /* agp.potential*pow(art2tipsy_ct.V_usf*art2tipsy_ct.V_cssf,2); */
 			write_tipsy_xdr_gas(&xdrsout,&tgp);
 			}
 		    else if (positionprecision == 1) {
@@ -479,7 +479,7 @@ int main(int argc, char **argv) {
 			    if (ad.ah.num[k] >= Nparticleread) L = ad.Lmaxdark-k;
 			    }
 			tdp.mass = ad.massdark[L]*art2tipsy_ct.M_usf;
-			tdp.eps = 0; //ad.softdark[L]*art2tipsy_ct.L_usf;
+			tdp.eps = 0; /* ad.softdark[L]*art2tipsy_ct.L_usf; */
 			tdp.phi = 0;
 			write_tipsy_xdr_dark(&xdrsout,&tdp);
 			}
@@ -509,8 +509,8 @@ int main(int argc, char **argv) {
 			    tsp.vel[k] = ac[j].v[k]*art2tipsy_ct.V_usf*art2tipsy_ct.V_cssf;
 			    }
 			tsp.mass = asp.mass*art2tipsy_ct.M_usf;
-			tsp.metals = 0; // asp.metallicity_SNII+asp.metallicity_SNIa;
-			tsp.tform = 0; // requires integral
+			tsp.metals = 0; /* asp.metallicity_SNII+asp.metallicity_SNIa; */
+			tsp.tform = 0; /* requires integral */
 			tsp.eps = 0;
 			tsp.phi = 0;
 			write_tipsy_xdr_star(&xdrsout,&tsp);
