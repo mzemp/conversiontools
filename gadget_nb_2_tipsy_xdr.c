@@ -110,7 +110,7 @@ int main(int argc, char **argv) {
 	fprintf(stderr,"uvf : %.6e m s^-1\n",uvf);
 	}
     if (verboselevel >= 0) {
-	fprintf(stderr,"Time: %g Ntotal: %d Ngas: %d Ndark: %d Nstar: %d\n",
+	fprintf(stderr,"Time: %g Ntotal: %u Ngas: %u Ndark: %u Nstar: %u\n",
 		ts->th->time,ts->th->ntotal,ts->th->ngas,ts->th->ndark,ts->th->nstar);
 	}
     exit(0);

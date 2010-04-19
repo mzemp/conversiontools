@@ -747,7 +747,7 @@ int main(int argc, char **argv) {
 	fprintf(stderr,"MU_TIPSY : %.6e Mo\n\n",MU_TIPSY);
 	}
     if (verboselevel >= 0) {
-	fprintf(stderr,"Time: %g Ntotal: %d Ngas: %d Ndark: %d Nstar: %d\n",
+	fprintf(stderr,"Time: %g Ntotal: %u Ngas: %u Ndark: %u Nstar: %u\n",
 	       th.time,th.ntotal,th.ngas,th.ndark,th.nstar);
 	}
 

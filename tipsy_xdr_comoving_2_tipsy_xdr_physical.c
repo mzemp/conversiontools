@@ -227,7 +227,7 @@ int main(int argc, char **argv) {
 	fprintf(stderr,"Hubble : %.6e VUnew/LUnew\n",hubble);
 	}
     if (verboselevel >= 0) {
-	fprintf(stderr,"Time: %g Ntotal: %d Ngas: %d Ndark: %d Nstar: %d\n",
+	fprintf(stderr,"Time: %g Ntotal: %u Ngas: %u Ndark: %u Nstar: %u\n",
 		th.time,th.ntotal,th.ngas,th.ndark,th.nstar);
 	}
     exit(0);
