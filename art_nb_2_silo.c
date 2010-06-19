@@ -16,6 +16,8 @@
 #include <iof.h>
 #include <art_sfc.h>
 
+#define GAS_DATA_SIZE 1e6
+
 void usage(void);
 
 int main(int argc, char **argv) {
@@ -27,6 +29,7 @@ int main(int argc, char **argv) {
     long int i, j, k;
     long int mothercellindex, childcellindex;
     long int Nparticleread, Nrecordread, Ngasread, Ngaswritten, Ndarkread, Nstarread;
+    long int SizeGasData;
     long int *Icoordinates = NULL;
     double ***coordinates = NULL;
     double r[3];
@@ -45,14 +48,12 @@ int main(int argc, char **argv) {
     int types[] = {DB_VARTYPE_SCALAR,DB_VARTYPE_SCALAR,DB_VARTYPE_SCALAR,
 		    DB_VARTYPE_SCALAR,DB_VARTYPE_SCALAR,DB_VARTYPE_SCALAR,
 		    DB_VARTYPE_SCALAR,DB_VARTYPE_SCALAR};
-/*
     char *gas_names[] = {"gas/gas_rx","gas/gas_ry","gas/gas_rz",
 			   "gas/gas_vx","gas/gas_vy","gas/gas_vz",
 			   "gas/gas_mag_r","gas/gas_mag_v"};
     char *gas_defs[] = {"coord(<gas/gas_pos>)[0]","coord(<gas/gas_pos>)[1]","coord(<gas/gas_pos>)[2]",
 			  "dot(<gas/gas_vel>,{1,0,0})","dot(<gas/gas_vel>,{0,1,0})","dot(<gas/gas_vel>,{0,0,1})",
 			  "polar_radius(<gas/gas_pos>)","magnitude(<gas/gas_vel>)"};
-*/
     char *dark_names[] = {"dark/dark_rx","dark/dark_ry","dark/dark_rz",
 			   "dark/dark_vx","dark/dark_vy","dark/dark_vz",
 			   "dark/dark_mag_r","dark/dark_mag_v"};
@@ -65,10 +66,10 @@ int main(int argc, char **argv) {
     char *star_defs[] = {"coord(<star/star_pos>)[0]","coord(<star/star_pos>)[1]","coord(<star/star_pos>)[2]",
 			  "dot(<star/star_vel>,{1,0,0})","dot(<star/star_vel>,{0,1,0})","dot(<star/star_vel>,{0,0,1})",
 			  "polar_radius(<star/star_pos>)","magnitude(<star/star_vel>)"};
-    float **darkposf = NULL, **starposf = NULL;
-    double **darkposd = NULL, **starposd = NULL;
-    float **darkvel = NULL, **starvel = NULL;
-    float *darkmass = NULL, *starmass = NULL;
+    float **gasposf = NULL, **darkposf = NULL, **starposf = NULL;
+    double **gasposd = NULL, **darkposd = NULL, **starposd = NULL;
+    float **gasvel = NULL, **darkvel = NULL, **starvel = NULL;
+    float *gasmass = NULL, *darkmass = NULL, *starmass = NULL;
 
     /*
     ** Set some default values
@@ -135,13 +136,13 @@ int main(int argc, char **argv) {
             softfac = atof(argv[i]);
             i++;
             }
+*/
         else if (strcmp(argv[i],"-Lmaxgaswrite") == 0) {
             i++;
             if (i >= argc) usage();
             Lmaxgaswrite = atoi(argv[i]);
             i++;
             }
-*/
         else if (strcmp(argv[i],"-LBox") == 0) {
             i++;
             if (i >= argc) usage();
@@ -216,7 +217,6 @@ int main(int argc, char **argv) {
             strcpy(ad.StarPropertiesFileName,argv[i]);
             i++;
             }
-/*
         else if (strcmp(argv[i],"-gasfile") == 0) {
 	    ad.gascontained = 1;
             i++;
@@ -224,7 +224,6 @@ int main(int argc, char **argv) {
             strcpy(ad.GasFileName,argv[i]);
             i++;
             }
-*/
 	else if (strcmp(argv[i],"-o") == 0) {
             i++;
             if (i >= argc) usage();
@@ -294,31 +293,65 @@ int main(int argc, char **argv) {
     */
 
     if (positionprecision == 0) {
-	darkposf = realloc(starposf,3*sizeof(float *));
+	gasposf = realloc(gasposf,3*sizeof(float *));
+	assert(gasposf != NULL);
+	darkposf = realloc(darkposf,3*sizeof(float *));
 	assert(darkposf != NULL);
 	starposf = realloc(starposf,3*sizeof(float *));
 	assert(starposf != NULL);
 	}
     else if (positionprecision == 1) {
+	gasposd = realloc(gasposd,3*sizeof(double *));
+	assert(gasposd != NULL);
 	darkposd = realloc(darkposd,3*sizeof(double *));
 	assert(darkposd != NULL);
 	starposd = realloc(starposd,3*sizeof(double *));
 	assert(starposd != NULL);
 	}
+    gasvel = malloc(3*sizeof(float *));
+    assert(gasvel != NULL);
     darkvel = malloc(3*sizeof(float *));
     assert(darkvel != NULL);
     starvel = malloc(3*sizeof(float *));
     assert(starvel != NULL);
 
     /*
+    ** Create silo file
+    */
+
+    dbfile = DBCreate(outputname,DB_CLOBBER,DB_LOCAL,"N-body",DB_PDB);
+    assert(dbfile != NULL);
+
+    /*
     ** Read and process data
     */
 
-    if (0) {
+    if (ad.gascontained) {
 	/*
 	** Gas
 	*/
 	fprintf(stderr,"Processing gas ... ");
+	/*
+	** Get silo arrays ready
+	*/
+	SizeGasData = GAS_DATA_SIZE;
+	for (j = 0; j < 3; j++) {
+	    if (positionprecision == 0) {
+		gasposf[j] = realloc(gasposf[j],SizeGasData*sizeof(float));
+		assert(gasposf[j] != NULL);
+		}
+	    else if (positionprecision == 1) {
+		gasposd[j] = realloc(gasposd[j],SizeGasData*sizeof(double));
+		assert(gasposd[j] != NULL);
+		}
+	    gasvel[j] = realloc(gasvel[j],SizeGasData*sizeof(float));
+	    assert(gasvel[j] != NULL);
+	    }
+	gasmass = realloc(gasmass,SizeGasData*sizeof(float));
+	assert(gasmass != NULL);
+	/*
+	** Get ART stuff ready
+	*/
 	coordinates = malloc((ad.Lmaxgas+1)*sizeof(double **));
 	assert(coordinates != NULL);
 	Icoordinates = malloc((ad.Lmaxgas+1)*sizeof(long int));
@@ -382,13 +415,38 @@ int main(int argc, char **argv) {
 		    /*
 		    ** not refined or maximum level reached => write it out
 		    */
-		    Ngaswritten++;
+		    if (SizeGasData < Ngaswritten+1) {
+			SizeGasData += GAS_DATA_SIZE;
+			for (k = 0; k < 3; k++) {
+			    if (positionprecision == 0) {
+				gasposf[k] = realloc(gasposf[k],SizeGasData*sizeof(float));
+				assert(gasposf[k] != NULL);
+				}
+			    else if (positionprecision == 1) {
+				gasposd[k] = realloc(gasposd[k],SizeGasData*sizeof(double));
+				assert(gasposd[k] != NULL);
+				}
+			    gasvel[k] = realloc(gasvel[k],SizeGasData*sizeof(float));
+			    assert(gasvel[k] != NULL);
+			    }
+			gasmass = realloc(gasmass,SizeGasData*sizeof(float));
+			assert(gasmass != NULL);
+			}
 		    if (positionprecision == 0) {
-
+			for (k = 0; k < 3; k++) {
+			    gasposf[k][Ngaswritten] = r[k];
+			    }
 			}
 		    else if (positionprecision == 1) {
-
+			for (k = 0; k < 3; k++) {
+			    gasposf[k][Ngaswritten] = r[k];
+			    }
 			}
+		    for (k = 0; k < 3; k++) {
+			gasvel[k][Ngaswritten] = agp.momentum[k]/agp.gas_density;
+			}
+		    gasmass[Ngaswritten] = cellvolume*agp.gas_density;
+		    Ngaswritten++;
 		    }
 		else if (i < Lmaxgaswrite) {
 		    /*
@@ -432,6 +490,27 @@ int main(int argc, char **argv) {
 	    }
 	free(Icoordinates);
 	free(cellrefined);
+	/*
+	** Write gas
+	*/
+	DBMkDir(dbfile,"gas");
+	DBSetDir(dbfile,"/gas");
+	if (positionprecision == 0) {
+	    DBPutPointmesh(dbfile,"gas_pos",3,gasposf,Ngaswritten,DB_FLOAT,NULL);
+	    }
+	else if (positionprecision == 1) {
+	    DBPutPointmesh(dbfile,"gas_pos",3,(float **)gasposd,Ngaswritten,DB_DOUBLE,NULL);
+	    }
+	DBPutPointvar(dbfile,"gas_vel","gas_pos",3,gasvel,Ngaswritten,DB_FLOAT,NULL);
+	DBPutPointvar1(dbfile,"gas_mass","gas_pos",gasmass,Ngaswritten,DB_FLOAT,NULL);
+	DBPutDefvars(dbfile,"variables",nvar,gas_names,types,gas_defs,NULL);
+	DBSetDir(dbfile,"/");
+	for (j = 0; j < 3; j++) {
+	    if (positionprecision == 0) free(gasposf[j]);
+	    else if (positionprecision == 1) free(gasposd[j]);
+	    free(gasvel[j]);
+	    }
+	free(gasmass);
 	fprintf(stderr,"Done. Processed in total %ld gas particles whereof %ld written out.\n\n",ad.Ngas,Ngaswritten);
 	}
     if (ad.darkcontained || ad.starcontained) {
@@ -526,18 +605,51 @@ int main(int argc, char **argv) {
 		}
 	    }
 	if (ad.starcontained) move_art_nb_star_filepositions_end(ad);
+	/*
+	** Write dark matter and stars
+	*/
+	DBMkDir(dbfile,"dark");
+	DBSetDir(dbfile,"/dark");
+	if (positionprecision == 0) {
+	    DBPutPointmesh(dbfile,"dark_pos",3,darkposf,ad.Ndark,DB_FLOAT,NULL);
+	    }
+	else if (positionprecision == 1) {
+	    DBPutPointmesh(dbfile,"dark_pos",3,(float **)darkposd,ad.Ndark,DB_DOUBLE,NULL);
+	    }
+	DBPutPointvar(dbfile,"dark_vel","dark_pos",3,darkvel,ad.Ndark,DB_FLOAT,NULL);
+	DBPutPointvar1(dbfile,"dark_mass","dark_pos",darkmass,ad.Ndark,DB_FLOAT,NULL);
+	DBPutDefvars(dbfile,"variables",nvar,dark_names,types,dark_defs,NULL);
+	DBSetDir(dbfile,"/");
+	DBMkDir(dbfile,"star");
+	DBSetDir(dbfile,"/star");
+	if (positionprecision == 0) {
+	    DBPutPointmesh(dbfile,"star_pos",3,starposf,ad.Nstar,DB_FLOAT,NULL);
+	    }
+	else if (positionprecision == 1) {
+	    DBPutPointmesh(dbfile,"star_pos",3,(float **)starposd,ad.Nstar,DB_DOUBLE,NULL);
+	    }
+	DBPutPointvar(dbfile,"star_vel","star_pos",3,starvel,ad.Nstar,DB_FLOAT,NULL);
+	DBPutPointvar1(dbfile,"star_mass","star_pos",starmass,ad.Nstar,DB_FLOAT,NULL);
+	DBPutDefvars(dbfile,"variables",nvar,star_names,types,star_defs,NULL);
+	DBSetDir(dbfile,"/");
+
+	for (j = 0; j < 3; j++) {
+	    if (positionprecision == 0) {
+		free(darkposf[j]);
+		free(starposf[j]);
+		}
+	    else if (positionprecision == 1) {
+		free(darkposd[j]);
+		free(starposd[j]);
+		}
+	    free(darkvel[j]);
+	    free(starvel[j]);
+	    }
+	free(darkmass);
+	free(starmass);
 	free(ac);
 	fprintf(stderr,"Done. Processed in total %ld dark matter and %ld star particles.\n\n",ad.Ndark,ad.Nstar);
 	}
-
-    fprintf(stderr,"Writing data ... ");
-
-    /*
-    ** Create silo file
-    */
-
-    dbfile = DBCreate(outputname,DB_CLOBBER,DB_LOCAL,"N-body",DB_PDB);
-    assert(dbfile != NULL);
 
     /*
     ** Write header
@@ -546,41 +658,14 @@ int main(int argc, char **argv) {
     L = 1;
     DBMkDir(dbfile,"header");
     DBSetDir(dbfile,"/header");
+    DBWrite(dbfile,"Ngas",&Ngaswritten,&L,1,DB_INT);
     DBWrite(dbfile,"Ndark",&ad.Ndark,&L,1,DB_INT);
     DBWrite(dbfile,"Nstar",&ad.Nstar,&L,1,DB_INT);
     DBWrite(dbfile,"auni",&ad.ah.aunin,&L,1,DB_DOUBLE);
     DBWrite(dbfile,"abox",&ad.ah.abox,&L,1,DB_DOUBLE);
     DBSetDir(dbfile,"/");
 
-    DBMkDir(dbfile,"dark");
-    DBSetDir(dbfile,"/dark");
-    if (positionprecision == 0) {
-	DBPutPointmesh(dbfile,"dark_pos",3,darkposf,ad.Ndark,DB_FLOAT,NULL);
-	}
-    else if (positionprecision == 1) {
-	DBPutPointmesh(dbfile,"dark_pos",3,(float **)darkposd,ad.Ndark,DB_DOUBLE,NULL);
-	}
-    DBPutPointvar(dbfile,"dark_vel","dark_pos",3,darkvel,ad.Ndark,DB_FLOAT,NULL);
-    DBPutPointvar1(dbfile,"dark_mass","dark_pos",darkmass,ad.Ndark,DB_FLOAT,NULL);
-    DBPutDefvars(dbfile,"variables",nvar,dark_names,types,dark_defs,NULL);
-    DBSetDir(dbfile,"/");
-
-    DBMkDir(dbfile,"star");
-    DBSetDir(dbfile,"/star");
-    if (positionprecision == 0) {
-	DBPutPointmesh(dbfile,"star_pos",3,starposf,ad.Nstar,DB_FLOAT,NULL);
-	}
-    else if (positionprecision == 1) {
-	DBPutPointmesh(dbfile,"star_pos",3,(float **)starposd,ad.Nstar,DB_DOUBLE,NULL);
-	}
-    DBPutPointvar(dbfile,"star_vel","star_pos",3,starvel,ad.Nstar,DB_FLOAT,NULL);
-    DBPutPointvar1(dbfile,"star_mass","star_pos",starmass,ad.Nstar,DB_FLOAT,NULL);
-    DBPutDefvars(dbfile,"variables",nvar,star_names,types,star_defs,NULL);
-    DBSetDir(dbfile,"/");
-
     DBClose(dbfile);
-
-    fprintf(stderr,"Done.\n\n");
 
     /*
     ** Write out some additional stuff depending on verbose level
@@ -633,14 +718,12 @@ int main(int argc, char **argv) {
 	fprintf(stderr,"Nrtchemspecies     : %d\n",ad.Nrtchemspecies);
 	fprintf(stderr,"Nchemspecies       : %d\n",ad.Nchemspecies);
 	fprintf(stderr,"Nstarproperties    : %d\n",ad.Nstarproperties);
-/*
 	fprintf(stderr,"Lmingas            : %d\n",ad.Lmingas);
 	fprintf(stderr,"Lmaxgas            : %d\n",ad.Lmaxgas);
 	fprintf(stderr,"Lmindark           : %d\n",ad.Lmindark);
 	fprintf(stderr,"Lmaxdark           : %d\n",ad.Lmaxdark);
 	fprintf(stderr,"Toplevelsoftdark   : %.6e LU_ART = %.6e kpc\n",ad.toplevelsoftdark,ad.toplevelsoftdark*art2cosmo_ct.L_usf);
 	fprintf(stderr,"Toplevelmassdark   : %.6e MU_ART = %.6e Mo\n",ad.toplevelmassdark,ad.toplevelmassdark*art2cosmo_ct.M_usf);
-*/
 	fprintf(stderr,"\n");
 	fprintf(stderr,"ART preprocessor flags:\n\n");
 	fprintf(stderr,"-GRAVITY                     : %s\n",(ad.GRAVITY == 0)?"not set":"set");
@@ -670,8 +753,8 @@ int main(int argc, char **argv) {
 	fprintf(stderr,"Used values:\n\n");
 /*
         fprintf(stderr,"softfac                    : %.6e\n",softfac);
-        fprintf(stderr,"Lmaxgaswrite               : %d\n",Lmaxgaswrite);
 */
+        fprintf(stderr,"Lmaxgaswrite               : %d\n",Lmaxgaswrite);
         fprintf(stderr,"LBox                       : %.6e kpc\n",LBox);
 /*
         fprintf(stderr,"Position precision         : %s\n",(positionprecision == 0)?"spp":"dpp");
@@ -680,9 +763,8 @@ int main(int argc, char **argv) {
 	fprintf(stderr,"\n");
 	}
     if (verboselevel >= 0) {
-	ad.Ngas = 0;
         fprintf(stderr,"Time: %g Ntotal: %lu Ngas: %lu Ndark: %lu Nstar: %lu\n",
-		ad.ah.aunin,ad.Ndark+ad.Nstar,ad.Ngas,ad.Ndark,ad.Nstar);
+		ad.ah.aunin,ad.Ndark+ad.Nstar,Ngaswritten,ad.Ndark,ad.Nstar);
         }
 
     exit(0);
