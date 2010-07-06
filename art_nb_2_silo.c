@@ -17,24 +17,33 @@
 #include <art_sfc.h>
 
 #define GAS_DATA_SIZE 1e6
+#define DARK_DATA_SIZE 1e6
+#define STAR_DATA_SIZE 1e6
 
 void usage(void);
+int check_selection(double *, double *, double *);
 
 int main(int argc, char **argv) {
 
     int positionprecision, verboselevel, scaling, massdarkfromdata, Lmaxgaswrite;
+    int writegas, writedark, writestar;
+    int darkdensityfile, stardensityfile;
     int L;
+    int selected;
     int index[3] = {-1,-1,-1};
     int *cellrefined = NULL;
     long int i, j, k;
     long int mothercellindex, childcellindex;
-    long int Nparticleread, Nrecordread, Ngasread, Ngaswritten, Ndarkread, Nstarread;
-    long int SizeGasData;
+    long int Nparticleread, Nrecordread, Ngasread, Ngaswritten, Ngasselected, Ndarkselected, Nstarselected;
+    long int SizeGasData, SizeDarkData, SizeStarData;
     long int *Icoordinates = NULL;
     double ***coordinates = NULL;
     double r[3];
     double celllength, cellvolume;
     double softfac, LBox;
+    double rsel[3], dsel[3], bsel[6], bsim[6];
+    ARRAY_HEADER darkah, starah;
+    ARRAY_PARTICLE darkap, starap;
     COSMOLOGICAL_PARAMETERS cp;
     UNIT_SYSTEM artus, cosmous;
     COORDINATE_TRANSFORMATION art2cosmo_ct;
@@ -43,7 +52,9 @@ int main(int argc, char **argv) {
     ART_STAR_PROPERTIES asp;
     ART_COORDINATES *ac = NULL;
     DBfile *dbfile = NULL;
-    char outputname[256];
+    FILE *darkfile = NULL, *starfile = NULL;
+    XDR darkxdrs, starxdrs;
+    char outputname[256], darkdensityfilename[256], stardensityfilename[256];
     int nvar = 8;
     int types[] = {DB_VARTYPE_SCALAR,DB_VARTYPE_SCALAR,DB_VARTYPE_SCALAR,
 		    DB_VARTYPE_SCALAR,DB_VARTYPE_SCALAR,DB_VARTYPE_SCALAR,
@@ -70,6 +81,11 @@ int main(int argc, char **argv) {
     double **gasposd = NULL, **darkposd = NULL, **starposd = NULL;
     float **gasvel = NULL, **darkvel = NULL, **starvel = NULL;
     float *gasmass = NULL, *darkmass = NULL, *starmass = NULL;
+    float *gasdensity = NULL, *darkdensity = NULL, *stardensity = NULL;
+    float *gasdensity_HI = NULL, *gasdensity_HII = NULL;
+    float *gasdensity_HeI = NULL, *gasdensity_HeII = NULL, *gasdensity_HeIII = NULL;
+    float *gasdensity_H2 = NULL;
+    float *gaslevel = NULL;
 
     /*
     ** Set some default values
@@ -93,7 +109,21 @@ int main(int argc, char **argv) {
     Lmaxgaswrite = -1;
     softfac = 50;
     Ngaswritten = 0;
+    Ngasselected = 0;
+    Ndarkselected = 0;
+    Nstarselected = 0;
     L = 0;
+    writegas = 1;
+    writedark = 1;
+    writestar = 1;
+    darkdensityfile = 0;
+    stardensityfile = 0;
+    for (i = 0; i < 3; i++) {
+	rsel[i] = 0;
+	dsel[i] = 0;
+	bsel[i] = 0;
+	bsel[i+3] = 0;
+	}
 
     /*
     ** Read in options
@@ -143,10 +173,64 @@ int main(int argc, char **argv) {
             Lmaxgaswrite = atoi(argv[i]);
             i++;
             }
+        else if (strcmp(argv[i],"-writegas") == 0) {
+            i++;
+            if (i >= argc) usage();
+            writegas = atoi(argv[i]);
+            i++;
+            }
+        else if (strcmp(argv[i],"-writedark") == 0) {
+            i++;
+            if (i >= argc) usage();
+            writedark = atoi(argv[i]);
+            i++;
+            }
+        else if (strcmp(argv[i],"-writestar") == 0) {
+            i++;
+            if (i >= argc) usage();
+            writestar = atoi(argv[i]);
+            i++;
+            }
         else if (strcmp(argv[i],"-LBox") == 0) {
             i++;
             if (i >= argc) usage();
             LBox = atof(argv[i]);
+            i++;
+            }
+        else if (strcmp(argv[i],"-rxsel") == 0) {
+            i++;
+            if (i >= argc) usage();
+            rsel[0] = atof(argv[i]);
+            i++;
+            }
+        else if (strcmp(argv[i],"-rysel") == 0) {
+            i++;
+            if (i >= argc) usage();
+            rsel[1] = atof(argv[i]);
+            i++;
+            }
+        else if (strcmp(argv[i],"-rzsel") == 0) {
+            i++;
+            if (i >= argc) usage();
+            rsel[2] = atof(argv[i]);
+            i++;
+            }
+        else if (strcmp(argv[i],"-dxsel") == 0) {
+            i++;
+            if (i >= argc) usage();
+            dsel[0] = atof(argv[i]);
+            i++;
+            }
+        else if (strcmp(argv[i],"-dysel") == 0) {
+            i++;
+            if (i >= argc) usage();
+            dsel[1] = atof(argv[i]);
+            i++;
+            }
+        else if (strcmp(argv[i],"-dzsel") == 0) {
+            i++;
+            if (i >= argc) usage();
+            dsel[2] = atof(argv[i]);
             i++;
             }
 	else if (strcmp(argv[i],"-GRAVITY") == 0) {
@@ -224,6 +308,20 @@ int main(int argc, char **argv) {
             strcpy(ad.GasFileName,argv[i]);
             i++;
             }
+	else if (strcmp(argv[i],"-darkdensityfile") == 0) {
+            i++;
+            if (i >= argc) usage();
+	    darkdensityfile = 1;
+            strcpy(darkdensityfilename,argv[i]);
+            i++;
+            }
+	else if (strcmp(argv[i],"-stardensityfile") == 0) {
+            i++;
+            if (i >= argc) usage();
+	    stardensityfile = 1;
+            strcpy(stardensityfilename,argv[i]);
+            i++;
+            }
 	else if (strcmp(argv[i],"-o") == 0) {
             i++;
             if (i >= argc) usage();
@@ -269,6 +367,20 @@ int main(int argc, char **argv) {
     if(cosmous.rhocrit0 == 0) cosmous.rhocrit0 = PhysicalConstants.rho_crit_Cosmology*pow(cp.h0_100,2);
 
     calculate_units_transformation(artus,cosmous,&art2cosmo_ct);
+
+    /*
+    ** Calculate selection boundaries
+    */
+
+    for (i = 0; i < 3; i++) {
+	rsel[i] = put_in_box(rsel[i],0,artus.LBox);
+	if (dsel[i] > 0) {
+	    bsim[i] = 0;
+	    bsim[i+3] = artus.LBox;
+	    bsel[i] = rsel[i] - 0.5*dsel[i];
+	    bsel[i+3] = rsel[i] + 0.5*dsel[i];
+	    }
+	}
 
     /*
     ** Set masses and softenings for dark matter in ART units
@@ -326,7 +438,7 @@ int main(int argc, char **argv) {
     ** Read and process data
     */
 
-    if (ad.gascontained) {
+    if (ad.gascontained && writegas) {
 	/*
 	** Gas
 	*/
@@ -349,6 +461,22 @@ int main(int argc, char **argv) {
 	    }
 	gasmass = realloc(gasmass,SizeGasData*sizeof(float));
 	assert(gasmass != NULL);
+	gasdensity = realloc(gasdensity,SizeGasData*sizeof(float));
+	assert(gasdensity != NULL);
+	gasdensity_HI = realloc(gasdensity_HI,SizeGasData*sizeof(float));
+	assert(gasdensity_HI != NULL);
+	gasdensity_HII = realloc(gasdensity_HII,SizeGasData*sizeof(float));
+	assert(gasdensity_HII != NULL);
+	gasdensity_HeI = realloc(gasdensity_HeI,SizeGasData*sizeof(float));
+	assert(gasdensity_HeI != NULL);
+	gasdensity_HeII = realloc(gasdensity_HeII,SizeGasData*sizeof(float));
+	assert(gasdensity_HeII != NULL);
+	gasdensity_HeIII = realloc(gasdensity_HeIII,SizeGasData*sizeof(float));
+	assert(gasdensity_HeIII != NULL);
+	gasdensity_H2 = realloc(gasdensity_H2,SizeGasData*sizeof(float));
+	assert(gasdensity_H2 != NULL);
+	gaslevel = realloc(gaslevel,SizeGasData*sizeof(float));
+	assert(gaslevel != NULL);
 	/*
 	** Get ART stuff ready
 	*/
@@ -415,38 +543,66 @@ int main(int argc, char **argv) {
 		    /*
 		    ** not refined or maximum level reached => write it out
 		    */
-		    if (SizeGasData < Ngaswritten+1) {
-			SizeGasData += GAS_DATA_SIZE;
-			for (k = 0; k < 3; k++) {
-			    if (positionprecision == 0) {
-				gasposf[k] = realloc(gasposf[k],SizeGasData*sizeof(float));
-				assert(gasposf[k] != NULL);
-				}
-			    else if (positionprecision == 1) {
-				gasposd[k] = realloc(gasposd[k],SizeGasData*sizeof(double));
-				assert(gasposd[k] != NULL);
-				}
-			    gasvel[k] = realloc(gasvel[k],SizeGasData*sizeof(float));
-			    assert(gasvel[k] != NULL);
-			    }
-			gasmass = realloc(gasmass,SizeGasData*sizeof(float));
-			assert(gasmass != NULL);
-			}
-		    if (positionprecision == 0) {
-			for (k = 0; k < 3; k++) {
-			    gasposf[k][Ngaswritten] = r[k];
-			    }
-			}
-		    else if (positionprecision == 1) {
-			for (k = 0; k < 3; k++) {
-			    gasposf[k][Ngaswritten] = r[k];
-			    }
-			}
-		    for (k = 0; k < 3; k++) {
-			gasvel[k][Ngaswritten] = agp.momentum[k]/agp.gas_density;
-			}
-		    gasmass[Ngaswritten] = cellvolume*agp.gas_density;
 		    Ngaswritten++;
+		    selected = check_selection(r,bsim,bsel);
+                    if (writegas && selected) {
+                        Ngasselected++;
+			if (SizeGasData < Ngasselected) {
+			    SizeGasData += GAS_DATA_SIZE;
+			    for (k = 0; k < 3; k++) {
+				if (positionprecision == 0) {
+				    gasposf[k] = realloc(gasposf[k],SizeGasData*sizeof(float));
+				    assert(gasposf[k] != NULL);
+				    }
+				else if (positionprecision == 1) {
+				    gasposd[k] = realloc(gasposd[k],SizeGasData*sizeof(double));
+				    assert(gasposd[k] != NULL);
+				    }
+				gasvel[k] = realloc(gasvel[k],SizeGasData*sizeof(float));
+				assert(gasvel[k] != NULL);
+				}
+			    gasmass = realloc(gasmass,SizeGasData*sizeof(float));
+			    assert(gasmass != NULL);
+			    gasdensity = realloc(gasdensity,SizeGasData*sizeof(float));
+			    assert(gasdensity != NULL);
+			    gasdensity_HI = realloc(gasdensity_HI,SizeGasData*sizeof(float));
+			    assert(gasdensity_HI != NULL);
+			    gasdensity_HII = realloc(gasdensity_HII,SizeGasData*sizeof(float));
+			    assert(gasdensity_HII != NULL);
+			    gasdensity_HeI = realloc(gasdensity_HeI,SizeGasData*sizeof(float));
+			    assert(gasdensity_HeI != NULL);
+			    gasdensity_HeII = realloc(gasdensity_HeII,SizeGasData*sizeof(float));
+			    assert(gasdensity_HeII != NULL);
+			    gasdensity_HeIII = realloc(gasdensity_HeIII,SizeGasData*sizeof(float));
+			    assert(gasdensity_HeIII != NULL);
+			    gasdensity_H2 = realloc(gasdensity_H2,SizeGasData*sizeof(float));
+			    assert(gasdensity_H2 != NULL);
+			    gaslevel = realloc(gaslevel,SizeGasData*sizeof(float));
+			    assert(gaslevel != NULL);
+			    }
+			if (positionprecision == 0) {
+			    for (k = 0; k < 3; k++) {
+				gasposf[k][Ngasselected-1] = r[k];
+				}
+			    }
+			else if (positionprecision == 1) {
+			    for (k = 0; k < 3; k++) {
+				gasposf[k][Ngasselected-1] = r[k];
+				}
+			    }
+			for (k = 0; k < 3; k++) {
+			    gasvel[k][Ngasselected-1] = agp.momentum[k]/agp.gas_density;
+			    }
+			gasmass[Ngasselected-1] = cellvolume*agp.gas_density;
+			gasdensity[Ngasselected-1] = agp.gas_density;
+			gasdensity_HI[Ngasselected-1] = agp.HI_density;
+			gasdensity_HII[Ngasselected-1] = agp.HII_density;
+			gasdensity_HeI[Ngasselected-1] = agp.HeI_density;
+			gasdensity_HeII[Ngasselected-1] = agp.HeII_density;
+			gasdensity_HeIII[Ngasselected-1] = agp.HeIII_density;
+			gasdensity_H2[Ngasselected-1] = agp.H2_density;
+			gaslevel[Ngasselected-1] = i;
+			}
 		    }
 		else if (i < Lmaxgaswrite) {
 		    /*
@@ -493,56 +649,106 @@ int main(int argc, char **argv) {
 	/*
 	** Write gas
 	*/
-	DBMkDir(dbfile,"gas");
-	DBSetDir(dbfile,"/gas");
-	if (positionprecision == 0) {
-	    DBPutPointmesh(dbfile,"gas_pos",3,gasposf,Ngaswritten,DB_FLOAT,NULL);
+	if (Ngasselected > 0) {
+	    DBMkDir(dbfile,"gas");
+	    DBSetDir(dbfile,"/gas");
+	    if (positionprecision == 0) {
+		DBPutPointmesh(dbfile,"gas_pos",3,gasposf,Ngasselected,DB_FLOAT,NULL);
+		}
+	    else if (positionprecision == 1) {
+		DBPutPointmesh(dbfile,"gas_pos",3,(float **)gasposd,Ngasselected,DB_DOUBLE,NULL);
+		}
+	    DBPutPointvar(dbfile,"gas_vel","gas_pos",3,gasvel,Ngasselected,DB_FLOAT,NULL);
+	    DBPutPointvar1(dbfile,"gas_mass","gas_pos",gasmass,Ngasselected,DB_FLOAT,NULL);
+	    DBPutPointvar1(dbfile,"gas_density","gas_pos",gasdensity,Ngasselected,DB_FLOAT,NULL);
+	    DBPutPointvar1(dbfile,"gas_density_HI","gas_pos",gasdensity_HI,Ngasselected,DB_FLOAT,NULL);
+	    DBPutPointvar1(dbfile,"gas_density_HII","gas_pos",gasdensity_HII,Ngasselected,DB_FLOAT,NULL);
+	    DBPutPointvar1(dbfile,"gas_density_HeI","gas_pos",gasdensity_HeI,Ngasselected,DB_FLOAT,NULL);
+	    DBPutPointvar1(dbfile,"gas_density_HeII","gas_pos",gasdensity_HeII,Ngasselected,DB_FLOAT,NULL);
+	    DBPutPointvar1(dbfile,"gas_density_HeIII","gas_pos",gasdensity_HeIII,Ngasselected,DB_FLOAT,NULL);
+	    DBPutPointvar1(dbfile,"gas_density_H2","gas_pos",gasdensity_H2,Ngasselected,DB_FLOAT,NULL);
+	    DBPutPointvar1(dbfile,"gas_level","gas_pos",gaslevel,Ngasselected,DB_FLOAT,NULL);
+	    DBPutDefvars(dbfile,"variables",nvar,gas_names,types,gas_defs,NULL);
+	    DBSetDir(dbfile,"/");
 	    }
-	else if (positionprecision == 1) {
-	    DBPutPointmesh(dbfile,"gas_pos",3,(float **)gasposd,Ngaswritten,DB_DOUBLE,NULL);
-	    }
-	DBPutPointvar(dbfile,"gas_vel","gas_pos",3,gasvel,Ngaswritten,DB_FLOAT,NULL);
-	DBPutPointvar1(dbfile,"gas_mass","gas_pos",gasmass,Ngaswritten,DB_FLOAT,NULL);
-	DBPutDefvars(dbfile,"variables",nvar,gas_names,types,gas_defs,NULL);
-	DBSetDir(dbfile,"/");
 	for (j = 0; j < 3; j++) {
 	    if (positionprecision == 0) free(gasposf[j]);
 	    else if (positionprecision == 1) free(gasposd[j]);
 	    free(gasvel[j]);
 	    }
+	if (positionprecision == 0) free(gasposf);
+	else if (positionprecision == 1) free(gasposd);
+	free(gasvel);
 	free(gasmass);
-	fprintf(stderr,"Done. Processed in total %ld gas particles whereof %ld written out.\n\n",ad.Ngas,Ngaswritten);
+	free(gasdensity);
+	free(gasdensity_HI);
+	free(gasdensity_HII);
+	free(gasdensity_HeI);
+	free(gasdensity_HeII);
+	free(gasdensity_HeIII);
+	free(gasdensity_H2);
+	free(gaslevel);
+	fprintf(stderr,"Done. Processed in total %ld gas particles whereof %ld written out.\n\n",ad.Ngas,Ngasselected);
 	}
-    if (ad.darkcontained || ad.starcontained) {
+    if ((ad.darkcontained || ad.starcontained) && (writedark || writestar)) {
 	/*
 	** Dark Matter and Stars
 	*/
 	fprintf(stderr,"Processing dark matter and stars ... ");
 	/*
+	** Check if we have density arrays
+	*/
+	if (darkdensityfile == 1) {
+	    darkfile = fopen(darkdensityfilename,"r");
+	    assert(darkfile != NULL);
+	    xdrstdio_create(&darkxdrs,darkfile,XDR_DECODE);
+	    read_array_xdr_header(&darkxdrs,&darkah);
+	    assert(darkah.N[0] == ad.Ndark);
+	    allocate_array_particle(&darkah,&darkap);
+	    }
+	if (stardensityfile == 1) {
+	    starfile = fopen(stardensityfilename,"r");
+	    assert(starfile != NULL);
+	    xdrstdio_create(&starxdrs,starfile,XDR_DECODE);
+	    read_array_xdr_header(&starxdrs,&starah);
+	    assert(starah.N[0] == ad.Nstar);
+	    allocate_array_particle(&starah,&starap);
+	    }
+	/*
 	** Get silo arrays ready
 	*/
+	SizeDarkData = DARK_DATA_SIZE;
+	SizeStarData = STAR_DATA_SIZE;
 	for (j = 0; j < 3; j++) {
 	    if (positionprecision == 0) {
-		darkposf[j] = realloc(darkposf[j],ad.Ndark*sizeof(float));
+		darkposf[j] = realloc(darkposf[j],SizeDarkData*sizeof(float));
 		assert(darkposf[j] != NULL);
-		starposf[j] = realloc(starposf[j],ad.Nstar*sizeof(float));
+		starposf[j] = realloc(starposf[j],SizeStarData*sizeof(float));
 		assert(starposf[j] != NULL);
 		}
 	    else if (positionprecision == 1) {
-		darkposd[j] = realloc(darkposd[j],ad.Ndark*sizeof(double));
+		darkposd[j] = realloc(darkposd[j],SizeDarkData*sizeof(double));
 		assert(darkposd[j] != NULL);
-		starposd[j] = realloc(starposd[j],ad.Nstar*sizeof(double));
+		starposd[j] = realloc(starposd[j],SizeStarData*sizeof(double));
 		assert(starposd[j] != NULL);
 		}
-	    darkvel[j] = realloc(darkvel[j],ad.Ndark*sizeof(float));
+	    darkvel[j] = realloc(darkvel[j],SizeDarkData*sizeof(float));
 	    assert(darkvel[j] != NULL);
-	    starvel[j] = realloc(starvel[j],ad.Nstar*sizeof(float));
+	    starvel[j] = realloc(starvel[j],SizeStarData*sizeof(float));
 	    assert(starvel[j] != NULL);
 	    }
-	darkmass = realloc(darkmass,ad.Ndark*sizeof(float));
+	darkmass = realloc(darkmass,SizeDarkData*sizeof(float));
 	assert(darkmass != NULL);
-	starmass = realloc(starmass,ad.Ndark*sizeof(float));
+	starmass = realloc(starmass,SizeStarData*sizeof(float));
 	assert(starmass != NULL);
+	if (darkdensityfile == 1) {
+	    darkdensity = realloc(darkdensity,SizeDarkData*sizeof(float));
+	    assert(darkdensity != NULL);
+	    }
+	if (stardensityfile == 1) {
+	    stardensity = realloc(stardensity,SizeStarData*sizeof(float));
+	    assert(stardensity != NULL);
+	    }
 	/*
 	** Get ART stuff ready
 	*/
@@ -550,57 +756,106 @@ int main(int argc, char **argv) {
 	assert(ac != NULL);
 	if (ad.starcontained) move_art_nb_star_filepositions_begin(ad);
 	Nparticleread = 0;
-	Ndarkread = 0;
-	Nstarread = 0;
 	Nrecordread = 0;
 	for (i = 0; i < ad.Nrecord; i++) {
 	    read_art_nb_coordinates_record(ad,ac);
 	    for (j = 0; j < ad.Nparticleperrecord; j++) {
-		if (Nparticleread < ad.Ndark) {
+		Nparticleread++;
+		for (k = 0; k < 3; k++) r[k] = ac[j].r[k]-ad.shift;
+		selected = check_selection(r,bsim,bsel);
+		if (Nparticleread <= ad.Ndark) {
 		    /*
 		    ** Dark Matter
 		    */
-		    if (positionprecision == 0) {
-			for (k = 0; k < 3; k++) {
-			    darkposf[k][Ndarkread] = ac[j].r[k];
+		    if (darkdensityfile == 1) read_array_xdr_particle(&darkxdrs,&darkah,&darkap);
+                    if (writedark && selected) {
+                        Ndarkselected++;
+			if (SizeDarkData < Ndarkselected) {
+			    SizeDarkData += DARK_DATA_SIZE;
+			    for (k = 0; k < 3; k++) {
+				if (positionprecision == 0) {
+				    darkposf[k] = realloc(darkposf[k],SizeDarkData*sizeof(float));
+				    assert(darkposf[k] != NULL);
+				    }
+				else if (positionprecision == 1) {
+				    darkposd[k] = realloc(darkposd[k],SizeDarkData*sizeof(double));
+				    assert(darkposd[k] != NULL);
+				    }
+				darkvel[k] = realloc(darkvel[k],SizeDarkData*sizeof(float));
+				assert(darkvel[k] != NULL);
+				}
+			    darkmass = realloc(darkmass,SizeDarkData*sizeof(float));
+			    assert(darkmass != NULL);
+			    if (darkdensityfile == 1) {
+				darkdensity = realloc(darkdensity,SizeDarkData*sizeof(float));
+				assert(darkdensity != NULL);
+				}
 			    }
-			}
-		    else if (positionprecision == 1) {
-			for (k = 0; k < 3; k++) {
-			    darkposd[k][Ndarkread] = ac[j].r[k];
+			if (positionprecision == 0) {
+			    for (k = 0; k < 3; k++) {
+				darkposf[k][Ndarkselected-1] = r[k];
+				}
 			    }
+			else if (positionprecision == 1) {
+			    for (k = 0; k < 3; k++) {
+				darkposd[k][Ndarkselected-1] = r[k];
+				}
+			    }
+			for (k = 0; k < 3; k++) {
+			    darkvel[k][Ndarkselected-1] = ac[j].v[k];
+			    }
+			for (k = ad.Lmaxdark; k >=0; k--) {
+			    if (ad.ah.num[k] > Nparticleread) L = ad.Lmaxdark-k;
+			    }
+			darkmass[Ndarkselected-1] = ad.massdark[L];
+			if (darkdensityfile == 1) darkdensity[Ndarkselected-1] = darkap.fa[0];
 			}
-		    for (k = 0; k < 3; k++) {
-			darkvel[k][Ndarkread] = ac[j].v[k];
-			}
-		    for (k = ad.Lmaxdark; k >=0; k--) {
-			if (ad.ah.num[k] >= Nparticleread) L = ad.Lmaxdark-k;
-			}
-		    darkmass[Ndarkread] = ad.massdark[L];
-		    Nparticleread++;
-		    Ndarkread++;
 		    }
-		else if (Nparticleread < ad.Ndark+ad.Nstar) {
+		else if (Nparticleread <= ad.Ndark+ad.Nstar) {
 		    /*
 		    ** Star
 		    */
 		    read_art_nb_star_properties(ad,&asp);
-		    if (positionprecision == 0) {
-			for (k = 0; k < 3; k++) {
-			    starposf[k][Nstarread] = ac[j].r[k];
+		    if (stardensityfile == 1) read_array_xdr_particle(&starxdrs,&starah,&starap);
+                    if (writestar && selected) {
+                        Nstarselected++;
+			if (SizeStarData < Nstarselected) {
+			    SizeStarData += STAR_DATA_SIZE;
+			    for (k = 0; k < 3; k++) {
+				if (positionprecision == 0) {
+				    starposf[k] = realloc(starposf[k],SizeStarData*sizeof(float));
+				    assert(starposf[k] != NULL);
+				    }
+				else if (positionprecision == 1) {
+				    starposd[k] = realloc(starposd[k],SizeStarData*sizeof(double));
+				    assert(starposd[k] != NULL);
+				    }
+				starvel[k] = realloc(starvel[k],SizeStarData*sizeof(float));
+				assert(starvel[k] != NULL);
+				}
+			    starmass = realloc(starmass,SizeStarData*sizeof(float));
+			    assert(starmass != NULL);
+			    if (stardensityfile == 1) {
+				stardensity = realloc(stardensity,SizeStarData*sizeof(float));
+				assert(stardensity != NULL);
+				}
 			    }
-			}
-		    else if (positionprecision == 0) {
-			for (k = 0; k < 3; k++) {
-			    starposd[k][Nstarread] = ac[j].r[k];
+			if (positionprecision == 0) {
+			    for (k = 0; k < 3; k++) {
+				starposf[k][Nstarselected-1] = r[k];
+				}
 			    }
+			else if (positionprecision == 0) {
+			    for (k = 0; k < 3; k++) {
+				starposd[k][Nstarselected-1] = r[k];
+				}
+			    }
+			for (k = 0; k < 3; k++) {
+			    starvel[k][Nstarselected-1] = ac[j].v[k];
+			    }
+			starmass[Nstarselected-1] = asp.mass;
+			if (stardensityfile == 1) stardensity[Nstarselected-1] = starap.fa[0];
 			}
-		    for (k = 0; k < 3; k++) {
-			starvel[k][Nstarread] = ac[j].v[k];
-			}
-		    starmass[Nstarread] = asp.mass;
-		    Nparticleread++;
-		    Nstarread++;
 		    }
 		}
 	    }
@@ -608,31 +863,36 @@ int main(int argc, char **argv) {
 	/*
 	** Write dark matter and stars
 	*/
-	DBMkDir(dbfile,"dark");
-	DBSetDir(dbfile,"/dark");
-	if (positionprecision == 0) {
-	    DBPutPointmesh(dbfile,"dark_pos",3,darkposf,ad.Ndark,DB_FLOAT,NULL);
+	if (Ndarkselected > 0) {
+	    DBMkDir(dbfile,"dark");
+	    DBSetDir(dbfile,"/dark");
+	    if (positionprecision == 0) {
+		DBPutPointmesh(dbfile,"dark_pos",3,darkposf,Ndarkselected,DB_FLOAT,NULL);
+		}
+	    else if (positionprecision == 1) {
+		DBPutPointmesh(dbfile,"dark_pos",3,(float **)darkposd,Ndarkselected,DB_DOUBLE,NULL);
+		}
+	    DBPutPointvar(dbfile,"dark_vel","dark_pos",3,darkvel,Ndarkselected,DB_FLOAT,NULL);
+	    DBPutPointvar1(dbfile,"dark_mass","dark_pos",darkmass,Ndarkselected,DB_FLOAT,NULL);
+	    if (darkdensityfile == 1) DBPutPointvar1(dbfile,"dark_density","dark_pos",darkdensity,Ndarkselected,DB_FLOAT,NULL);
+	    DBPutDefvars(dbfile,"variables",nvar,dark_names,types,dark_defs,NULL);
+	    DBSetDir(dbfile,"/");
 	    }
-	else if (positionprecision == 1) {
-	    DBPutPointmesh(dbfile,"dark_pos",3,(float **)darkposd,ad.Ndark,DB_DOUBLE,NULL);
+	if (Nstarselected > 0) {
+	    DBMkDir(dbfile,"star");
+	    DBSetDir(dbfile,"/star");
+	    if (positionprecision == 0) {
+		DBPutPointmesh(dbfile,"star_pos",3,starposf,Nstarselected,DB_FLOAT,NULL);
+		}
+	    else if (positionprecision == 1) {
+		DBPutPointmesh(dbfile,"star_pos",3,(float **)starposd,Nstarselected,DB_DOUBLE,NULL);
+		}
+	    DBPutPointvar(dbfile,"star_vel","star_pos",3,starvel,Nstarselected,DB_FLOAT,NULL);
+	    DBPutPointvar1(dbfile,"star_mass","star_pos",starmass,Nstarselected,DB_FLOAT,NULL);
+	    if (stardensityfile == 1) DBPutPointvar1(dbfile,"star_density","star_pos",stardensity,Nstarselected,DB_FLOAT,NULL);
+	    DBPutDefvars(dbfile,"variables",nvar,star_names,types,star_defs,NULL);
+	    DBSetDir(dbfile,"/");
 	    }
-	DBPutPointvar(dbfile,"dark_vel","dark_pos",3,darkvel,ad.Ndark,DB_FLOAT,NULL);
-	DBPutPointvar1(dbfile,"dark_mass","dark_pos",darkmass,ad.Ndark,DB_FLOAT,NULL);
-	DBPutDefvars(dbfile,"variables",nvar,dark_names,types,dark_defs,NULL);
-	DBSetDir(dbfile,"/");
-	DBMkDir(dbfile,"star");
-	DBSetDir(dbfile,"/star");
-	if (positionprecision == 0) {
-	    DBPutPointmesh(dbfile,"star_pos",3,starposf,ad.Nstar,DB_FLOAT,NULL);
-	    }
-	else if (positionprecision == 1) {
-	    DBPutPointmesh(dbfile,"star_pos",3,(float **)starposd,ad.Nstar,DB_DOUBLE,NULL);
-	    }
-	DBPutPointvar(dbfile,"star_vel","star_pos",3,starvel,ad.Nstar,DB_FLOAT,NULL);
-	DBPutPointvar1(dbfile,"star_mass","star_pos",starmass,ad.Nstar,DB_FLOAT,NULL);
-	DBPutDefvars(dbfile,"variables",nvar,star_names,types,star_defs,NULL);
-	DBSetDir(dbfile,"/");
-
 	for (j = 0; j < 3; j++) {
 	    if (positionprecision == 0) {
 		free(darkposf[j]);
@@ -645,10 +905,22 @@ int main(int argc, char **argv) {
 	    free(darkvel[j]);
 	    free(starvel[j]);
 	    }
+	if (positionprecision == 0) {
+	    free(darkposf);
+	    free(starposf);
+	    }
+	else if (positionprecision == 1) {
+	    free(darkposd);
+	    free(starposd);
+	    }
+	free(darkvel);
+	free(starvel);
 	free(darkmass);
 	free(starmass);
+	if (darkdensityfile == 1) free(darkdensity);
+	if (stardensityfile == 1) free(stardensity);
 	free(ac);
-	fprintf(stderr,"Done. Processed in total %ld dark matter and %ld star particles.\n\n",ad.Ndark,ad.Nstar);
+	fprintf(stderr,"Done. Processed in total %ld dark matter and %ld star particles whereof %ld and %ld written out.\n\n",ad.Ndark,ad.Nstar,Ndarkselected,Nstarselected);
 	}
 
     /*
@@ -658,9 +930,9 @@ int main(int argc, char **argv) {
     L = 1;
     DBMkDir(dbfile,"header");
     DBSetDir(dbfile,"/header");
-    DBWrite(dbfile,"Ngas",&Ngaswritten,&L,1,DB_INT);
-    DBWrite(dbfile,"Ndark",&ad.Ndark,&L,1,DB_INT);
-    DBWrite(dbfile,"Nstar",&ad.Nstar,&L,1,DB_INT);
+    DBWrite(dbfile,"Ngas",&Ngasselected,&L,1,DB_INT);
+    DBWrite(dbfile,"Ndark",&Ndarkselected,&L,1,DB_INT);
+    DBWrite(dbfile,"Nstar",&Nstarselected,&L,1,DB_INT);
     DBWrite(dbfile,"auni",&ad.ah.aunin,&L,1,DB_DOUBLE);
     DBWrite(dbfile,"abox",&ad.ah.abox,&L,1,DB_DOUBLE);
     DBSetDir(dbfile,"/");
@@ -750,6 +1022,17 @@ int main(int argc, char **argv) {
         fprintf(stderr,"OmegaR0  : %.6e\n",cp.OmegaR0);
         fprintf(stderr,"h0_100   : %.6e\n",cp.h0_100);
 	fprintf(stderr,"\n");
+	fprintf(stderr,"Selected volume:\n\n");
+	if (dsel[0] == 0 && dsel[1] == 0 && dsel[2] == 0) {
+	    fprintf(stderr,"No selection chosen.\n");
+	    fprintf(stderr,"\n");
+	    }
+	else {
+	    fprintf(stderr,"Centre: (%.6e, %.6e, %.6e) LU_ART\n",rsel[0],rsel[1],rsel[2]);
+	    fprintf(stderr,"Width: (%.6e, %.6e, %.6e) LU_ART\n",dsel[0],dsel[1],dsel[2]);
+	    fprintf(stderr,"Box: [%.6e ... %.6e] x [%.6e ... %.6e] x [%.6e ... %.6e] LU_ART\n",bsel[0],bsel[3],bsel[1],bsel[4],bsel[2],bsel[5]);
+	    fprintf(stderr,"\n");
+	    }
 	fprintf(stderr,"Used values:\n\n");
 /*
         fprintf(stderr,"softfac                    : %.6e\n",softfac);
@@ -760,11 +1043,14 @@ int main(int argc, char **argv) {
         fprintf(stderr,"Position precision         : %s\n",(positionprecision == 0)?"spp":"dpp");
         fprintf(stderr,"Dark matter mass from data : %s\n",(massdarkfromdata == 0)?"no":"yes");
 */
+        fprintf(stderr,"Written out gas            : %s\n",(writegas == 0)?"no":"yes");
+        fprintf(stderr,"Written out dark matter    : %s\n",(writedark == 0)?"no":"yes");
+        fprintf(stderr,"Written out stars          : %s\n",(writestar == 0)?"no":"yes");
 	fprintf(stderr,"\n");
 	}
     if (verboselevel >= 0) {
         fprintf(stderr,"Time: %g Ntotal: %lu Ngas: %lu Ndark: %lu Nstar: %lu\n",
-		ad.ah.aunin,ad.Ndark+ad.Nstar,Ngaswritten,ad.Ndark,ad.Nstar);
+		ad.ah.aunin,Ngasselected+Ndarkselected+Nstarselected,Ngasselected,Ndarkselected,Nstarselected);
         }
 
     exit(0);
@@ -785,8 +1071,17 @@ void usage(void) {
     fprintf(stderr,"-toplevelsoftdark <value>            : softening length of top level dark matter particles [LU_ART] (default: rootcelllength/softfac)\n");
     fprintf(stderr,"-toplevelmassdark <value>            : mass of top level dark matter particles [MU_ART] (default: OmegaDM0/OmegaM0)\n");
     fprintf(stderr,"-softfac <value>                     : softening factor (default: 50)\n");
-    fprintf(stderr,"-Lmaxgaswrite <value>                : maximum level of gas written out [counting from 0] (default: Lmaxgas in data)\n");
 */
+    fprintf(stderr,"-Lmaxgaswrite <value>                : maximum level of gas written out [counting from 0] (default: Lmaxgas in data)\n");
+    fprintf(stderr,"-writegas <value>                    : 0 = don't write out gas / 1 = write out gas (default: 1)\n");
+    fprintf(stderr,"-writedark <value>                   : 0 = don't write out dark matter / 1 = write out dark matter (default: 1)\n");
+    fprintf(stderr,"-writestar <value>                   : 0 = don't write out stars / 1 = write out stars (default: 1)\n");
+    fprintf(stderr,"-rxsel <value>                       : x-coordinate of centre of selection box (default: 0)\n");
+    fprintf(stderr,"-rysel <value>                       : y-coordinate of centre of selection box (default: 0)\n");
+    fprintf(stderr,"-rzsel <value>                       : z-coordinate of centre of selection box (default: 0)\n");
+    fprintf(stderr,"-dxsel <value>                       : x-width of selection box (default: 0, i.e. no selection)\n");
+    fprintf(stderr,"-dysel <value>                       : y-width of selection box (default: 0, i.e. no selection)\n");
+    fprintf(stderr,"-dzsel <value>                       : z-width of selection box (default: 0, i.e. no selection)\n");
     fprintf(stderr,"-LBox <value>                        : comoving box length [kpc]\n");
     fprintf(stderr,"-GRAVITY <value>                     : 0 = flag not set / 1 = flag set (default: 1)\n");
     fprintf(stderr,"-HYDRO <value>                       : 0 = flag not set / 1 = flag set (default: 1)\n");
@@ -799,11 +1094,44 @@ void usage(void) {
     fprintf(stderr,"-headerfile <name>                   : header file in ART native binary format\n");
     fprintf(stderr,"-coordinatesdatafile <name>          : coordinates data file in ART native binary format\n");
     fprintf(stderr,"-starpropertiesfile <name>           : star properties file in ART native binary format\n");
-/*
     fprintf(stderr,"-gasfile <name>                      : gas file in ART native binary format\n");
-*/
     fprintf(stderr,"-v                                   : more informative output to screen\n");
     fprintf(stderr,"-o <name>                            : output file in silo format\n");
     fprintf(stderr,"\n");
     exit(1);
+    }
+
+int check_selection(double r[3], double boxsim[6], double boxsel[6]) {
+
+    int i;
+    int selected = 1;
+    double dsel, LBox;
+
+    for (i = 0; i < 3; i++) {
+	dsel = boxsel[i+3]-boxsel[i];
+	LBox = boxsim[i+3]-boxsim[i];
+	if (dsel > 0) {
+	    if (boxsim[i] <= boxsel[i] && boxsim[i+3] >= boxsel[i+3]) {
+		/*
+		** Selection box is contained within simulation box
+		*/
+		if (r[i] < boxsel[i] || r[i] > boxsel[i+3]) selected = 0;
+		}
+	    else if (boxsel[i] < boxsim[i]) {
+		/*
+		** Selection box exeedes lower simulation box boundary
+		*/
+		if (r[i] < boxsel[i]+LBox && r[i] > boxsel[i+3]) selected = 0;
+		if (r[i] >= boxsel[i]+LBox) r[i] -= LBox;
+		}
+	    else if (boxsel[i+3] > boxsim[i+3]) {
+		/*
+		** Selection box exeedes upper simulation box boundary
+		*/
+		if (r[i] < boxsel[i] && r[i] > boxsel[i+3]-LBox) selected = 0;
+		if (r[i] <= boxsel[i+3]-LBox) r[i] += LBox;
+		}
+	    }
+	}
+    return selected;
     }
