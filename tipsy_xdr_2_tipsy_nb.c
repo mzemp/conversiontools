@@ -49,7 +49,7 @@ int main(int argc, char **argv) {
             usage();
             }
         }
-    xdrstdio_create(&xdrs,stdin,XDR_ENCODE);
+    xdrstdio_create(&xdrs,stdin,XDR_DECODE);
     read_tipsy_xdr_header(&xdrs,&th);
     write_tipsy_nb_header(stdout,&th);
     if (positionprecision == 0) {
