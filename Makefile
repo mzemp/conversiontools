@@ -3,6 +3,7 @@
 NAME	= conversiontools
 TOOLS	= tipsy_xdr_2_tipsy_ascii \
 	tipsy_xdr_2_tipsy_nb \
+	tipsy_xdr_2_tipsy_xdr \
 	tipsy_xdr_2_gadget_nb \
 	tipsy_xdr_2_silo \
 	tipsy_ascii_2_tipsy_xdr \
