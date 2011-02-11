@@ -108,6 +108,12 @@ int main(int argc, char **argv) {
             positionprecision = 1;
             i++;
             }
+        else if (strcmp(argv[i],"-pfm") == 0) {
+	    i++;
+	    if (i >= argc) usage();
+            ad.particle_file_mode = atoi(argv[i]);
+            i++;
+            }
 	else if (strcmp(argv[i],"-scaling") == 0) {
             scaling = 1;
             i++;
@@ -719,6 +725,7 @@ int main(int argc, char **argv) {
 	    }
 	fprintf(stderr,"\n");
 	fprintf(stderr,"ART data properties:\n\n");
+        fprintf(stderr,"Particle File Mode : %d\n",ad.particle_file_mode);
         fprintf(stderr,"Nparticleperrecord : %d\n",ad.Nparticleperrecord);
 	fprintf(stderr,"Nrecord            : %d\n",ad.Nrecord);
 	fprintf(stderr,"Nhydroproperties   : %d\n",ad.Nhydroproperties);
@@ -814,6 +821,7 @@ void usage(void) {
     fprintf(stderr,"\n");
     fprintf(stderr,"-spp                                 : set this flag if output file has single precision positions (default)\n");
     fprintf(stderr,"-dpp                                 : set this flag if output file has double precision positions\n");
+    fprintf(stderr,"-pfm <value>                         : particle file mode of ART file (default: 0)\n");
     fprintf(stderr,"-scaling                             : scaling from ART to tipsy units\n");
     fprintf(stderr,"-noscaling                           : no scaling from ART to tipsy units (default)\n");
     fprintf(stderr,"-massdarkfromdata                    : take dark matter particle masses from data (default)\n");

@@ -135,6 +135,12 @@ int main(int argc, char **argv) {
             positionprecision = 0;
             i++;
             }
+	else if (strcmp(argv[i],"-pfm") == 0) {
+	    i++;
+	    if (i >= argc) usage();
+            ad.particle_file_mode = atoi(argv[i]);
+            i++;
+            }
 /*
         else if (strcmp(argv[i],"-dpp") == 0) {
             positionprecision = 1;
@@ -983,6 +989,7 @@ int main(int argc, char **argv) {
 	    }
 	fprintf(stderr,"\n");
 	fprintf(stderr,"ART data properties:\n\n");
+	fprintf(stderr,"Particle File Mode : %d\n",ad.particle_file_mode);
         fprintf(stderr,"Nparticleperrecord : %d\n",ad.Nparticleperrecord);
 	fprintf(stderr,"Nrecord            : %d\n",ad.Nrecord);
 	fprintf(stderr,"Nhydroproperties   : %d\n",ad.Nhydroproperties);
@@ -1072,6 +1079,7 @@ void usage(void) {
     fprintf(stderr,"-toplevelmassdark <value>            : mass of top level dark matter particles [MU_ART] (default: OmegaDM0/OmegaM0)\n");
     fprintf(stderr,"-softfac <value>                     : softening factor (default: 50)\n");
 */
+    fprintf(stderr,"-pfm <value>                         : particle file mode of ART file (default: 0)\n");
     fprintf(stderr,"-Lmaxgaswrite <value>                : maximum level of gas written out [counting from 0] (default: Lmaxgas in data)\n");
     fprintf(stderr,"-writegas <value>                    : 0 = don't write out gas / 1 = write out gas (default: 1)\n");
     fprintf(stderr,"-writedark <value>                   : 0 = don't write out dark matter / 1 = write out dark matter (default: 1)\n");
