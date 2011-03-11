@@ -531,7 +531,7 @@ int main(int argc, char **argv) {
 	if (ah.N[3] > 0) {
 	    da = realloc(da,ah.N[3]*sizeof(double *));
 	    assert(da != NULL);
-	    for (j = 0; j < ah.N[2]; j++) {
+	    for (j = 0; j < ah.N[3]; j++) {
 		da[j] = NULL;
 		}
 	    }
