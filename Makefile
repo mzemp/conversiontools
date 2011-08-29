@@ -11,6 +11,7 @@ TOOLS	= tipsy_xdr_2_tipsy_ascii \
 	gadget_nb_2_tipsy_xdr \
 	art_nb_2_tipsy_xdr \
 	art_nb_2_silo \
+	art_nb_2_ascii \
 	gic_nb_2_tipsy_xdr \
 	tipsy_xdr_spp_2_tipsy_xdr_dpp \
 	tipsy_xdr_dpp_2_tipsy_xdr_spp \
