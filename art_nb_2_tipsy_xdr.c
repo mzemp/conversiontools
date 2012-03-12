@@ -28,7 +28,7 @@ int main(int argc, char **argv) {
     int *cellrefined = NULL;
     long int i, j, k;
     long int mothercellindex, childcellindex;
-    long int Nparticleread, Nrecordread, Ngasread, Ngaswritten, Ngasselected, Ndarkselected, Nstarselected;
+    long int Nparticleread, Ngasread, Ngaswritten, Ngasselected, Ndarkselected, Nstarselected;
     long int *Icoordinates = NULL;
     double ***coordinates = NULL;
     double r[3];
@@ -73,6 +73,7 @@ int main(int argc, char **argv) {
     cosmous.Hubble0 = 0;
     cosmous.rhocrit0 = 0;
 
+    LBox = 0;
     positionprecision = 0;
     verboselevel = 0;
     scaling = 0;
@@ -563,7 +564,6 @@ int main(int argc, char **argv) {
 	assert(ac != NULL);
 	if (ad.starcontained) move_art_nb_star_filepositions_begin(ad);
 	Nparticleread = 0;
-	Nrecordread = 0;
 	for (i = 0; i < ad.Nrecord; i++) {
 	    read_art_nb_coordinates_record(ad,ac);
 	    for (j = 0; j < ad.Nparticleperrecord; j++) {

@@ -21,14 +21,15 @@ int check_selection(double *, double *, double *);
 int main(int argc, char **argv) {
 
     int verboselevel, Lmaxgaswrite;
-    int L;
+    /* int L; */
     int selected;
     int index[3] = {-1,-1,-1};
     int *cellrefined = NULL;
     long int i, j, k;
     long int mothercellindex, childcellindex;
-/*     long int Nparticleread, Nrecordread; */
-    long int Ngasread, Ngaswritten, Ngasselected, Ndarkselected, Nstarselected;
+    /* long int Nparticleread, Nrecordread; */
+    long int Ngasread, Ngaswritten, Ngasselected;
+    /* long int Ndarkselected, Nstarselected; */
     long int *Icoordinates = NULL;
     double ***coordinates = NULL;
     double r[3];
@@ -59,15 +60,16 @@ int main(int argc, char **argv) {
     cosmous.Hubble0 = 0;
     cosmous.rhocrit0 = 0;
 
+    LBox = 0;
     verboselevel = 0;
     Lmaxgaswrite = -1;
     fH2sel = 0;
     rhosel = 0;
     Ngaswritten = 0;
     Ngasselected = 0;
-    Ndarkselected = 0;
-    Nstarselected = 0;
-    L = 0;
+    /* Ndarkselected = 0; */
+    /* Nstarselected = 0; */
+    /* L = 0; */
     for (i = 0; i < 3; i++) {
 	rsel[i] = 0;
 	dsel[i] = 0;
