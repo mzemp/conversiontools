@@ -1102,6 +1102,8 @@ void usage(void) {
     fprintf(stderr,"-coordinatesdatafile <name>          : coordinates data file in ART native binary format\n");
     fprintf(stderr,"-starpropertiesfile <name>           : star properties file in ART native binary format\n");
     fprintf(stderr,"-gasfile <name>                      : gas file in ART native binary format\n");
+    fprintf(stderr,"-darkdensityfile <name>              : dark matter density file in Tipsy array XDR format\n");
+    fprintf(stderr,"-stardensityfile <name>              : star density file in Tipsy array XDR format\n");
     fprintf(stderr,"-v                                   : more informative output to screen\n");
     fprintf(stderr,"-o <name>                            : output file in silo format\n");
     fprintf(stderr,"\n");
