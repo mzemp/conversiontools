@@ -345,9 +345,9 @@ int main(int argc, char **argv) {
 
     if (scaling == 1) {
 	/* 
-	** ART canonical momentum, Tipsy comoving velocity
+	** ART canonical momentum, Tipsy comoving velocity => use abox
 	*/
-	art2tipsy_ct.V_cssf = 1/pow(ad.ah.aunin,2);
+	art2tipsy_ct.V_cssf = 1/pow(ad.ah.abox,2);
 	/*
 	** Box is shifted by 0.5 LBox in Tipsy units
 	*/
@@ -395,7 +395,7 @@ int main(int argc, char **argv) {
     ** Get output file ready
     */
 
-    th.time = ad.ah.aunin;
+    th.time = ad.ah.abox;
     th.ntotal = 0;
     th.ndim = ad.Ndim;
     th.ngas = 0;
