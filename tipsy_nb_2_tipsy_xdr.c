@@ -94,8 +94,8 @@ void usage(void) {
 	fprintf(stderr,"\n");
 	fprintf(stderr,"Please specify the following parameters:\n");
 	fprintf(stderr,"\n");
-	fprintf(stderr,"-spp	 : set this flag if input and output files have single precision positions (default)\n");
-	fprintf(stderr,"-dpp	 : set this flag if input and output files have double precision positions\n");
+	fprintf(stderr,"-spp     : set this flag if input and output files have single precision positions (default)\n");
+	fprintf(stderr,"-dpp     : set this flag if input and output files have double precision positions\n");
 	fprintf(stderr,"< <name> : input file in tipsy native binary format\n");
 	fprintf(stderr,"> <name> : output file in tipsy XDR format\n");
 	fprintf(stderr,"\n");

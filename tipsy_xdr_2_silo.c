@@ -679,12 +679,12 @@ void usage(void) {
 	fprintf(stderr,"\n");
 	fprintf(stderr,"Please specify the following parameters:\n");
 	fprintf(stderr,"\n");
-	fprintf(stderr,"-spp		   : set this flag if input and output files have single precision positions (default)\n");
-	fprintf(stderr,"-dpp		   : set this flag if input and output files have double precision positions\n");
+	fprintf(stderr,"-spp           : set this flag if input and output files have single precision positions (default)\n");
+	fprintf(stderr,"-dpp           : set this flag if input and output files have double precision positions\n");
 	fprintf(stderr,"-<a><i> <name> : name of array field (optional), <a> array type (i,f or d), <i> array index\n");
-	fprintf(stderr,"-o <name>	   : output file in silo format\n");
+	fprintf(stderr,"-o <name>      : output file in silo format\n");
 	fprintf(stderr,"-array <name>  : array file in array XDR format\n");
-	fprintf(stderr,"< <name>	   : input file in tipsy XDR format\n");
+	fprintf(stderr,"< <name>       : input file in tipsy XDR format\n");
 	fprintf(stderr,"\n");
 	exit(1);
 	}

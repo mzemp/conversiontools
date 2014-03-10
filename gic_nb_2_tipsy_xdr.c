@@ -565,7 +565,7 @@ int main(int argc, char **argv) {
 			/*
 			** Process the data
 			*/
-		
+
 			index = 0;
 			for (i = 0; i < Npage; i++) {
 				assert(gicReadFortranRecordReal(&PosXFile,PosXRec) == 0);
@@ -664,11 +664,11 @@ int main(int argc, char **argv) {
 					index++;
 					}
 				}
-		
+
 			/*
 			** Get streams ready for next level
 			*/
-		
+
 			for (i = 0; i < Npage; i++) {
 				assert(gicSkipFortranRecordReal(&PosXFile) == 0);
 				assert(gicSkipFortranRecordReal(&PosYFile) == 0);
@@ -699,43 +699,43 @@ int main(int argc, char **argv) {
 
 	if (verboselevel >= 1) {
 		fprintf(stderr,"Parameters from GIC file:\n\n");
-		fprintf(stderr,"Name	: %s\n",PosManifest.name);
-		fprintf(stderr,"OmegaB	: %.6e\n",PosManifest.OmegaB);
+		fprintf(stderr,"Name    : %s\n",PosManifest.name);
+		fprintf(stderr,"OmegaB  : %.6e\n",PosManifest.OmegaB);
 		fprintf(stderr,"OmegaDM : %.6e\n",PosManifest.OmegaX);
-		fprintf(stderr,"OmegaL	: %.6e\n",PosManifest.OmegaL);
-		fprintf(stderr,"OmegaN	: %.6e\n",PosManifest.OmegaN);
-		fprintf(stderr,"h100	: %.6e\n",h100);
-		fprintf(stderr,"Deltax	: %.6e chimp\n",dx);
-		fprintf(stderr,"ns		: %.6e\n",PosManifest.ns);
-		fprintf(stderr,"sigma8	: %.6e\n",PosManifest.s8);
-		fprintf(stderr,"kp		: %.6e\n",PosManifest.kp);
-		fprintf(stderr,"aBegin	: %.6e\n",PosHeader.aBegin);
+		fprintf(stderr,"OmegaL  : %.6e\n",PosManifest.OmegaL);
+		fprintf(stderr,"OmegaN  : %.6e\n",PosManifest.OmegaN);
+		fprintf(stderr,"h100    : %.6e\n",h100);
+		fprintf(stderr,"Deltax  : %.6e chimp\n",dx);
+		fprintf(stderr,"ns      : %.6e\n",PosManifest.ns);
+		fprintf(stderr,"sigma8  : %.6e\n",PosManifest.s8);
+		fprintf(stderr,"kp      : %.6e\n",PosManifest.kp);
+		fprintf(stderr,"aBegin  : %.6e\n",PosHeader.aBegin);
 		fprintf(stderr,"DeltaDC : %.6e\n",PosHeader.DeltaDC);
-		fprintf(stderr,"NX		: %d\n",PosHeader.dims[0]);
-		fprintf(stderr,"NY		: %d\n",PosHeader.dims[1]);
-		fprintf(stderr,"NZ		: %d\n",PosHeader.dims[2]);
-		fprintf(stderr,"Seed	: %d\n",PosHeader.seed);
-		fprintf(stderr,"Nrec	: %d\n",Nrec);
-		fprintf(stderr,"LBox	: %.6e chimp\n",LBox);
-		fprintf(stderr,"Lmax	: %d\n\n",Lmax);
+		fprintf(stderr,"NX      : %d\n",PosHeader.dims[0]);
+		fprintf(stderr,"NY      : %d\n",PosHeader.dims[1]);
+		fprintf(stderr,"NZ      : %d\n",PosHeader.dims[2]);
+		fprintf(stderr,"Seed    : %d\n",PosHeader.seed);
+		fprintf(stderr,"Nrec    : %d\n",Nrec);
+		fprintf(stderr,"LBox    : %.6e chimp\n",LBox);
+		fprintf(stderr,"Lmax    : %d\n\n",Lmax);
 		fprintf(stderr,"Cosmology:\n\n");
-		fprintf(stderr,"OmegaM0	 : %.6e\n",OmegaM0);
+		fprintf(stderr,"OmegaM0  : %.6e\n",OmegaM0);
 		fprintf(stderr,"OmegaDM0 : %.6e\n",OmegaDM0);
-		fprintf(stderr,"OmegaB0	 : %.6e\n",OmegaB0);
-		fprintf(stderr,"OmegaL0	 : %.6e\n",OmegaL0);
-		fprintf(stderr,"OmegaK0	 : %.6e\n",OmegaK0);
-		fprintf(stderr,"OmegaR0	 : %.6e\n",OmegaR0);
-		fprintf(stderr,"h100	 : %.6e\n\n",h100);
+		fprintf(stderr,"OmegaB0  : %.6e\n",OmegaB0);
+		fprintf(stderr,"OmegaL0  : %.6e\n",OmegaL0);
+		fprintf(stderr,"OmegaK0  : %.6e\n",OmegaK0);
+		fprintf(stderr,"OmegaR0  : %.6e\n",OmegaR0);
+		fprintf(stderr,"h100     : %.6e\n\n",h100);
 		fprintf(stderr,"Used values:\n\n");
-		fprintf(stderr,"drx		  : %.6e LU_TIPSY\n",dr[0]);
-		fprintf(stderr,"dry		  : %.6e LU_TIPSY\n",dr[1]);
-		fprintf(stderr,"drz		  : %.6e LU_TIPSY\n",dr[2]);
-		fprintf(stderr,"LUsf	  : %.6e\n",LUsf);
-		fprintf(stderr,"VUsf	  : %.6e\n",VUsf);
-		fprintf(stderr,"MUsf	  : %.6e\n",MUsf);
-		fprintf(stderr,"softfac	  : %.6e\n",softfac);
+		fprintf(stderr,"drx       : %.6e LU_TIPSY\n",dr[0]);
+		fprintf(stderr,"dry       : %.6e LU_TIPSY\n",dr[1]);
+		fprintf(stderr,"drz       : %.6e LU_TIPSY\n",dr[2]);
+		fprintf(stderr,"LUsf      : %.6e\n",LUsf);
+		fprintf(stderr,"VUsf      : %.6e\n",VUsf);
+		fprintf(stderr,"MUsf      : %.6e\n",MUsf);
+		fprintf(stderr,"softfac   : %.6e\n",softfac);
 		fprintf(stderr,"Softening : %.6e LU_TIPSY (toplevel)\n",toplevelsoftening);
-		fprintf(stderr,"Mass	  : %.6e MU_TIPSY (toplevel)\n\n",toplevelmass);
+		fprintf(stderr,"Mass      : %.6e MU_TIPSY (toplevel)\n\n",toplevelmass);
 		fprintf(stderr,"Resulting internal GIC units:\n\n");
 		fprintf(stderr,"LU_GIC : %.6e kpc\n",LU_GIC);
 		fprintf(stderr,"TU_GIC : %.6e Gyr\n",TU_GIC/VelConvertFac);
@@ -762,29 +762,29 @@ void usage(void) {
 	fprintf(stderr,"\n");
 	fprintf(stderr,"Please specify the following parameters:\n");
 	fprintf(stderr,"\n");
-	fprintf(stderr,"-spp			 : set this flag if output file has single precision positions (default)\n");
-	fprintf(stderr,"-dpp			 : set this flag if output file has double precision positions\n");
-	fprintf(stderr,"-sr				 : set this flag if input only has single resolution particles (default)\n");
-	fprintf(stderr,"-mr				 : set this flag if input has multi resolution particles\n");
-	fprintf(stderr,"-gas			 : set this flag if input particles are gas particles\n");
-	fprintf(stderr,"-dark			 : set this flag if input particles are dark particles (default)\n");
-	fprintf(stderr,"-star			 : set this flag if input particles are star particles\n");
-	fprintf(stderr,"-drx <value>	 : shift along x-axis [LU_TIPSY] (default: -0.5 LU_TIPSY)\n");
-	fprintf(stderr,"-dry <value>	 : shift along y-axis [LU_TIPSY] (default: -0.5 LU_TIPSY)\n");
-	fprintf(stderr,"-drz <value>	 : shift along z-axis [LU_TIPSY] (default: -0.5 LU_TIPSY)\n");
-	fprintf(stderr,"-soft <value>	 : softening length of top level particles [LU_TIPSY] (default: 1/softfac mean particle separation => LBox/(N1Dlow*softfac) LU_TIPSY)\n");
-	fprintf(stderr,"-mass <value>	 : mass of top level particles [MU_TIPSY] (default: OmegaM0/Nlow - if you want masses from file in mr case set -1)\n");
-	fprintf(stderr,"-LUsf <value>	 : length unit scale factor (default: LU_GIC/LU_TIPSY_DEFAULT)\n");
-	fprintf(stderr,"-VUsf <value>	 : velocity unit scale factor (default: VU_GIC/VU_TIPSY_DEFAULT)\n");
-	fprintf(stderr,"-MUsf <value>	 : mass unit scale factor (default: MU_GIC/MU_TIPSY_DEFAULT - only in mr case when read from file)\n");
+	fprintf(stderr,"-spp             : set this flag if output file has single precision positions (default)\n");
+	fprintf(stderr,"-dpp             : set this flag if output file has double precision positions\n");
+	fprintf(stderr,"-sr              : set this flag if input only has single resolution particles (default)\n");
+	fprintf(stderr,"-mr              : set this flag if input has multi resolution particles\n");
+	fprintf(stderr,"-gas             : set this flag if input particles are gas particles\n");
+	fprintf(stderr,"-dark            : set this flag if input particles are dark particles (default)\n");
+	fprintf(stderr,"-star            : set this flag if input particles are star particles\n");
+	fprintf(stderr,"-drx <value>     : shift along x-axis [LU_TIPSY] (default: -0.5 LU_TIPSY)\n");
+	fprintf(stderr,"-dry <value>     : shift along y-axis [LU_TIPSY] (default: -0.5 LU_TIPSY)\n");
+	fprintf(stderr,"-drz <value>     : shift along z-axis [LU_TIPSY] (default: -0.5 LU_TIPSY)\n");
+	fprintf(stderr,"-soft <value>    : softening length of top level particles [LU_TIPSY] (default: 1/softfac mean particle separation => LBox/(N1Dlow*softfac) LU_TIPSY)\n");
+	fprintf(stderr,"-mass <value>    : mass of top level particles [MU_TIPSY] (default: OmegaM0/Nlow - if you want masses from file in mr case set -1)\n");
+	fprintf(stderr,"-LUsf <value>    : length unit scale factor (default: LU_GIC/LU_TIPSY_DEFAULT)\n");
+	fprintf(stderr,"-VUsf <value>    : velocity unit scale factor (default: VU_GIC/VU_TIPSY_DEFAULT)\n");
+	fprintf(stderr,"-MUsf <value>    : mass unit scale factor (default: MU_GIC/MU_TIPSY_DEFAULT - only in mr case when read from file)\n");
 	fprintf(stderr,"-b2dmfac <value> : baryon to dark matter scale factor (default: OmegaM0/OmegaDM0)\n");
 	fprintf(stderr,"-softfac <value> : softening factor (default: 50)\n");
 	fprintf(stderr,"-refstep <value> : refinement step factor (default: 2)\n");
-	fprintf(stderr,"-noscaling		 : no scaling of data\n");
-	fprintf(stderr,"-v				 : more informative output to screen\n");
-	fprintf(stderr,"-pos <name>		 : positions input file GIC native binary format\n");
-	fprintf(stderr,"-vel <name>		 : velocities input file GIC native binary format\n");
-	fprintf(stderr,"> <name>		 : output file in tipsy XDR format\n");
+	fprintf(stderr,"-noscaling       : no scaling of data\n");
+	fprintf(stderr,"-v               : more informative output to screen\n");
+	fprintf(stderr,"-pos <name>      : positions input file GIC native binary format\n");
+	fprintf(stderr,"-vel <name>      : velocities input file GIC native binary format\n");
+	fprintf(stderr,"> <name>         : output file in tipsy XDR format\n");
 	fprintf(stderr,"\n");
 	exit(1);
 	}

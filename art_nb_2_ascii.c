@@ -550,34 +550,34 @@ int main(int argc, char **argv) {
 
 	if (verboselevel >= 1) {
 		fprintf(stderr,"ART general header:\n\n");
-		fprintf(stderr,"aunin	 : %.6e\n",ad.ah.aunin);
-		fprintf(stderr,"auni0	 : %.6e\n",ad.ah.auni0);
-		fprintf(stderr,"amplt	 : %.6e\n",ad.ah.amplt);
-		fprintf(stderr,"astep	 : %.6e\n",ad.ah.astep);
-		fprintf(stderr,"istep	 : %d\n",ad.ah.istep);
-		fprintf(stderr,"partw	 : %.6e\n",ad.ah.partw);
-		fprintf(stderr,"tintg	 : %.6e\n",ad.ah.tintg);
-		fprintf(stderr,"ekin	 : %.6e\n",ad.ah.ekin);
-		fprintf(stderr,"ekin1	 : %.6e\n",ad.ah.ekin1);
-		fprintf(stderr,"ekin2	 : %.6e\n",ad.ah.ekin2);
-		fprintf(stderr,"au0		 : %.6e\n",ad.ah.au0);
-		fprintf(stderr,"aeu0	 : %.6e\n",ad.ah.aeu0);
-		fprintf(stderr,"Nrow	 : %d\n",ad.ah.Nrow);
-		fprintf(stderr,"Ngrid	 : %d\n",ad.ah.Ngrid);
+		fprintf(stderr,"aunin    : %.6e\n",ad.ah.aunin);
+		fprintf(stderr,"auni0    : %.6e\n",ad.ah.auni0);
+		fprintf(stderr,"amplt    : %.6e\n",ad.ah.amplt);
+		fprintf(stderr,"astep    : %.6e\n",ad.ah.astep);
+		fprintf(stderr,"istep    : %d\n",ad.ah.istep);
+		fprintf(stderr,"partw    : %.6e\n",ad.ah.partw);
+		fprintf(stderr,"tintg    : %.6e\n",ad.ah.tintg);
+		fprintf(stderr,"ekin     : %.6e\n",ad.ah.ekin);
+		fprintf(stderr,"ekin1    : %.6e\n",ad.ah.ekin1);
+		fprintf(stderr,"ekin2    : %.6e\n",ad.ah.ekin2);
+		fprintf(stderr,"au0      : %.6e\n",ad.ah.au0);
+		fprintf(stderr,"aeu0     : %.6e\n",ad.ah.aeu0);
+		fprintf(stderr,"Nrow     : %d\n",ad.ah.Nrow);
+		fprintf(stderr,"Ngrid    : %d\n",ad.ah.Ngrid);
 		fprintf(stderr,"Nspecies : %d\n",ad.ah.Nspecies);
-		fprintf(stderr,"Nseed	 : %d\n",ad.ah.Nseed);
-		fprintf(stderr,"OmM0	 : %.6e\n",ad.ah.OmM0);
-		fprintf(stderr,"OmL0	 : %.6e\n",ad.ah.OmL0);
-		fprintf(stderr,"h100	 : %.6e\n",ad.ah.h100);
-		fprintf(stderr,"Wp5		 : %.6e\n",ad.ah.Wp5);
-		fprintf(stderr,"OmK0	 : %.6e\n",ad.ah.OmK0);
-		fprintf(stderr,"OmB0	 : %.6e\n",ad.ah.OmB0);
-		fprintf(stderr,"magic1	 : %.6e\n",ad.ah.magic1);
-		fprintf(stderr,"DelDC	 : %.6e\n",ad.ah.DelDC);
-		fprintf(stderr,"abox	 : %.6e\n",ad.ah.abox);
-		fprintf(stderr,"Hbox	 : %.6e\n",ad.ah.Hbox);
-		fprintf(stderr,"magic2	 : %.6e\n",ad.ah.magic2);
-		fprintf(stderr,"Banner	 : %s\n",ad.Banner);
+		fprintf(stderr,"Nseed    : %d\n",ad.ah.Nseed);
+		fprintf(stderr,"OmM0     : %.6e\n",ad.ah.OmM0);
+		fprintf(stderr,"OmL0     : %.6e\n",ad.ah.OmL0);
+		fprintf(stderr,"h100     : %.6e\n",ad.ah.h100);
+		fprintf(stderr,"Wp5      : %.6e\n",ad.ah.Wp5);
+		fprintf(stderr,"OmK0     : %.6e\n",ad.ah.OmK0);
+		fprintf(stderr,"OmB0     : %.6e\n",ad.ah.OmB0);
+		fprintf(stderr,"magic1   : %.6e\n",ad.ah.magic1);
+		fprintf(stderr,"DelDC    : %.6e\n",ad.ah.DelDC);
+		fprintf(stderr,"abox     : %.6e\n",ad.ah.abox);
+		fprintf(stderr,"Hbox     : %.6e\n",ad.ah.Hbox);
+		fprintf(stderr,"magic2   : %.6e\n",ad.ah.magic2);
+		fprintf(stderr,"Banner   : %s\n",ad.Banner);
 		for (i = 0; i < 10; i++) {
 			fprintf(stderr,"mass[%ld] : %.6e num[%ld] : %d\n",i,ad.ah.mass[i],i,ad.ah.num[i]);
 			}
@@ -585,25 +585,25 @@ int main(int argc, char **argv) {
 		fprintf(stderr,"ART data properties:\n\n");
 		fprintf(stderr,"Particle File Mode : %d\n",ad.particle_file_mode);
 		fprintf(stderr,"Nparticleperrecord : %d\n",ad.Nparticleperrecord);
-		fprintf(stderr,"Nrecord			   : %d\n",ad.Nrecord);
+		fprintf(stderr,"Nrecord            : %d\n",ad.Nrecord);
 		fprintf(stderr,"Nhydroproperties   : %d\n",ad.Nhydroproperties);
 		fprintf(stderr,"Notherproperties   : %d\n",ad.Notherproperties);
-		fprintf(stderr,"Nrtchemspecies	   : %d\n",ad.Nrtchemspecies);
-		fprintf(stderr,"Nchemspecies	   : %d\n",ad.Nchemspecies);
-		fprintf(stderr,"Nstarproperties	   : %d\n",ad.Nstarproperties);
-		fprintf(stderr,"Lmingas			   : %d\n",ad.Lmingas);
-		fprintf(stderr,"Lmaxgas			   : %d\n",ad.Lmaxgas);
-		fprintf(stderr,"Lmindark		   : %d\n",ad.Lmindark);
-		fprintf(stderr,"Lmaxdark		   : %d\n",ad.Lmaxdark);
+		fprintf(stderr,"Nrtchemspecies     : %d\n",ad.Nrtchemspecies);
+		fprintf(stderr,"Nchemspecies       : %d\n",ad.Nchemspecies);
+		fprintf(stderr,"Nstarproperties    : %d\n",ad.Nstarproperties);
+		fprintf(stderr,"Lmingas            : %d\n",ad.Lmingas);
+		fprintf(stderr,"Lmaxgas            : %d\n",ad.Lmaxgas);
+		fprintf(stderr,"Lmindark           : %d\n",ad.Lmindark);
+		fprintf(stderr,"Lmaxdark           : %d\n",ad.Lmaxdark);
 		fprintf(stderr,"\n");
 		fprintf(stderr,"ART preprocessor flags:\n\n");
-		fprintf(stderr,"-GRAVITY					 : %s\n",(ad.GRAVITY == 0)?"not set":"set");
-		fprintf(stderr,"-HYDRO						 : %s\n",(ad.HYDRO == 0)?"not set":"set");
-		fprintf(stderr,"-ADVECT_SPECIES				 : %s\n",(ad.ADVECT_SPECIES == 0)?"not set":"set");
-		fprintf(stderr,"-STARFORM					 : %s\n",(ad.STARFORM == 0)?"not set":"set");
-		fprintf(stderr,"-ENRICH						 : %s\n",(ad.ENRICH == 0)?"not set":"set");
-		fprintf(stderr,"-ENRICH_SNIa				 : %s\n",(ad.ENRICH_SNIa == 0)?"not set":"set");
-		fprintf(stderr,"-RADIATIVE_TRANSFER			 : %s\n",(ad.RADIATIVE_TRANSFER == 0)?"not set":"set");
+		fprintf(stderr,"-GRAVITY                     : %s\n",(ad.GRAVITY == 0)?"not set":"set");
+		fprintf(stderr,"-HYDRO                       : %s\n",(ad.HYDRO == 0)?"not set":"set");
+		fprintf(stderr,"-ADVECT_SPECIES              : %s\n",(ad.ADVECT_SPECIES == 0)?"not set":"set");
+		fprintf(stderr,"-STARFORM                    : %s\n",(ad.STARFORM == 0)?"not set":"set");
+		fprintf(stderr,"-ENRICH                      : %s\n",(ad.ENRICH == 0)?"not set":"set");
+		fprintf(stderr,"-ENRICH_SNIa                 : %s\n",(ad.ENRICH_SNIa == 0)?"not set":"set");
+		fprintf(stderr,"-RADIATIVE_TRANSFER          : %s\n",(ad.RADIATIVE_TRANSFER == 0)?"not set":"set");
 		fprintf(stderr,"-ELECTRON_ION_NONEQUILIBRIUM : %s\n",(ad.ELECTRON_ION_NONEQUILIBRIUM == 0)?"not set":"set");
 		fprintf(stderr,"\n");
 		fprintf(stderr,"ART units:\n\n");
@@ -619,7 +619,7 @@ int main(int argc, char **argv) {
 		fprintf(stderr,"OmegaL0 : %.6e\n",cp.OmegaL0);
 		fprintf(stderr,"OmegaK0 : %.6e\n",cp.OmegaK0);
 		fprintf(stderr,"OmegaR0 : %.6e\n",cp.OmegaR0);
-		fprintf(stderr,"h0_100	: %.6e\n",cp.h0_100);
+		fprintf(stderr,"h0_100  : %.6e\n",cp.h0_100);
 		fprintf(stderr,"\n");
 		fprintf(stderr,"Selected volume:\n\n");
 		if (dsel[0] == 0 && dsel[1] == 0 && dsel[2] == 0) {
@@ -633,10 +633,10 @@ int main(int argc, char **argv) {
 			fprintf(stderr,"\n");
 			}
 		fprintf(stderr,"Used values:\n\n");
-		fprintf(stderr,"Lmaxgaswrite			   : %d\n",Lmaxgaswrite);
-		fprintf(stderr,"LBox					   : %.6e kpc\n",LBox);
-		fprintf(stderr,"fH2sel					   : %.6e\n",fH2sel);
-		fprintf(stderr,"rhosel					   : %.6e MU LU^{-3}\n",rhosel);
+		fprintf(stderr,"Lmaxgaswrite : %d\n",Lmaxgaswrite);
+		fprintf(stderr,"LBox         : %.6e kpc\n",LBox);
+		fprintf(stderr,"fH2sel       : %.6e\n",fH2sel);
+		fprintf(stderr,"rhosel       : %.6e MU LU^{-3}\n",rhosel);
 		fprintf(stderr,"\n");
 		}
 
@@ -650,31 +650,31 @@ void usage(void) {
 	fprintf(stderr,"\n");
 	fprintf(stderr,"Please specify the following parameters:\n");
 	fprintf(stderr,"\n");
-	fprintf(stderr,"-pfm <value>						 : particle file mode of ART file (default: 0)\n");
-	fprintf(stderr,"-Lmaxgaswrite <value>				 : maximum level of gas written out [counting from 0] (default: Lmaxgas in data)\n");
-	fprintf(stderr,"-rxsel <value>						 : x-coordinate of centre of selection box [LU] (default: 0)\n");
-	fprintf(stderr,"-rysel <value>						 : y-coordinate of centre of selection box [LU] (default: 0)\n");
-	fprintf(stderr,"-rzsel <value>						 : z-coordinate of centre of selection box [LU] (default: 0)\n");
-	fprintf(stderr,"-dxsel <value>						 : x-width of selection box [LU] (default: 0, i.e. no selection)\n");
-	fprintf(stderr,"-dysel <value>						 : y-width of selection box [LU] (default: 0, i.e. no selection)\n");
-	fprintf(stderr,"-dzsel <value>						 : z-width of selection box [LU] (default: 0, i.e. no selection)\n");
-	fprintf(stderr,"-LBox <value>						 : comoving box length [kpc]\n");
-	fprintf(stderr,"-fH2sel <value>						 : molecular hydrogen fraction for selection \n");
-	fprintf(stderr,"-rhosel <value>						 : comoving density for selection [MU LU^{-3}]\n");
-	fprintf(stderr,"-GRAVITY <value>					 : 0 = flag not set / 1 = flag set (default: 1)\n");
-	fprintf(stderr,"-HYDRO <value>						 : 0 = flag not set / 1 = flag set (default: 1)\n");
-	fprintf(stderr,"-ADVECT_SPECIES <value>				 : 0 = flag not set / 1 = flag set (default: 1)\n");
-	fprintf(stderr,"-STARFORM <value>					 : 0 = flag not set / 1 = flag set (default: 1)\n");
-	fprintf(stderr,"-ENRICH <value>						 : 0 = flag not set / 1 = flag set (default: 1)\n");
-	fprintf(stderr,"-ENRICH_SNIa <value>				 : 0 = flag not set / 1 = flag set (default: 1)\n");
-	fprintf(stderr,"-RADIATIVE_TRANSFER <value>			 : 0 = flag not set / 1 = flag set (default: 1)\n");
+	fprintf(stderr,"-pfm <value>                         : particle file mode of ART file (default: 0)\n");
+	fprintf(stderr,"-Lmaxgaswrite <value>                : maximum level of gas written out [counting from 0] (default: Lmaxgas in data)\n");
+	fprintf(stderr,"-rxsel <value>                       : x-coordinate of centre of selection box [LU] (default: 0)\n");
+	fprintf(stderr,"-rysel <value>                       : y-coordinate of centre of selection box [LU] (default: 0)\n");
+	fprintf(stderr,"-rzsel <value>                       : z-coordinate of centre of selection box [LU] (default: 0)\n");
+	fprintf(stderr,"-dxsel <value>                       : x-width of selection box [LU] (default: 0, i.e. no selection)\n");
+	fprintf(stderr,"-dysel <value>                       : y-width of selection box [LU] (default: 0, i.e. no selection)\n");
+	fprintf(stderr,"-dzsel <value>                       : z-width of selection box [LU] (default: 0, i.e. no selection)\n");
+	fprintf(stderr,"-LBox <value>                        : comoving box length [kpc]\n");
+	fprintf(stderr,"-fH2sel <value>                      : molecular hydrogen fraction for selection \n");
+	fprintf(stderr,"-rhosel <value>                      : comoving density for selection [MU LU^{-3}]\n");
+	fprintf(stderr,"-GRAVITY <value>                     : 0 = flag not set / 1 = flag set (default: 1)\n");
+	fprintf(stderr,"-HYDRO <value>                       : 0 = flag not set / 1 = flag set (default: 1)\n");
+	fprintf(stderr,"-ADVECT_SPECIES <value>              : 0 = flag not set / 1 = flag set (default: 1)\n");
+	fprintf(stderr,"-STARFORM <value>                    : 0 = flag not set / 1 = flag set (default: 1)\n");
+	fprintf(stderr,"-ENRICH <value>                      : 0 = flag not set / 1 = flag set (default: 1)\n");
+	fprintf(stderr,"-ENRICH_SNIa <value>                 : 0 = flag not set / 1 = flag set (default: 1)\n");
+	fprintf(stderr,"-RADIATIVE_TRANSFER <value>          : 0 = flag not set / 1 = flag set (default: 1)\n");
 	fprintf(stderr,"-ELECTRON_ION_NONEQUILIBRIUM <value> : 0 = flag not set / 1 = flag set (default: 0)\n");
-	fprintf(stderr,"-headerfile <name>					 : header file in ART native binary format\n");
-/*	   fprintf(stderr,"-coordinatesdatafile <name>			: coordinates data file in ART native binary format\n"); */
-/*	   fprintf(stderr,"-starpropertiesfile <name>			: star properties file in ART native binary format\n"); */
-	fprintf(stderr,"-gasfile <name>						 : gas file in ART native binary format\n");
-	fprintf(stderr,"-v									 : more informative output to screen\n");
-	fprintf(stderr,"> <name>							 : output file in ascii format\n");
+	fprintf(stderr,"-headerfile <name>                   : header file in ART native binary format\n");
+/*	   fprintf(stderr,"-coordinatesdatafile <name>          : coordinates data file in ART native binary format\n"); */
+/*	   fprintf(stderr,"-starpropertiesfile <name>           : star properties file in ART native binary format\n"); */
+	fprintf(stderr,"-gasfile <name>                      : gas file in ART native binary format\n");
+	fprintf(stderr,"-v                                   : more informative output to screen\n");
+	fprintf(stderr,"> <name>                             : output file in ascii format\n");
 	fprintf(stderr,"\n");
 	exit(1);
 	}

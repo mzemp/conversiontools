@@ -101,7 +101,7 @@ int main(int argc, char **argv) {
 		}
 	if (verboselevel >= 1) {
 		fprintf(stderr,"Used values:\n");
-		fprintf(stderr,"a	: %.6e\n",a);
+		fprintf(stderr,"a   : %.6e\n",a);
 		fprintf(stderr,"drx : %.6e LU\n",dx);
 		fprintf(stderr,"dry : %.6e LU\n",dy);
 		fprintf(stderr,"drz : %.6e LU\n",dz);
@@ -123,16 +123,16 @@ void usage(void) {
 	fprintf(stderr,"\n");
 	fprintf(stderr,"Please specify the following parameters:\n");
 	fprintf(stderr,"\n");
-	fprintf(stderr,"-a <value>	 : expansion factor [write -a time for cosmological runs] (default: 1)\n");
+	fprintf(stderr,"-a <value>   : expansion factor [write -a time for cosmological runs] (default: 1)\n");
 	fprintf(stderr,"-drx <value> : shift along x-axis [LU] (default: 0 LU)\n");
 	fprintf(stderr,"-dry <value> : shift along y-axis [LU] (default: 0 LU)\n");
 	fprintf(stderr,"-drz <value> : shift along z-axis [LU] (default: 0 LU)\n");
 	fprintf(stderr,"-dof <value> : degrees of freedom of gas (default: 3 => gamma = (dof+2)/dof = 5/3)\n");
 	fprintf(stderr,"-mmw <value> : mean molecular weight of gas [mp] (default: 1 mp)\n");
 	fprintf(stderr,"-uvf <value> : internal unit of velocity [m s^-1] (default: 977.79219 m s^-1 => 977.79219 m s^-1 = 1 kpc Gyr^-1)\n");
-	fprintf(stderr,"-v			 : more informative output to screen\n");
-	fprintf(stderr,"< <name>	 : input file in gadget native binary format\n");
-	fprintf(stderr,"> <name>	 : output file in tipsy XDR format\n");
+	fprintf(stderr,"-v           : more informative output to screen\n");
+	fprintf(stderr,"< <name>     : input file in gadget native binary format\n");
+	fprintf(stderr,"> <name>     : output file in tipsy XDR format\n");
 	fprintf(stderr,"\n");
 	exit(1);
 	}

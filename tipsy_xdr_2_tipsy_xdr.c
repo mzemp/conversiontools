@@ -130,13 +130,13 @@ void usage(void) {
 	fprintf(stderr,"\n");
 	fprintf(stderr,"Please specify the following parameters:\n");
 	fprintf(stderr,"\n");
-	fprintf(stderr,"-spp			   : set this flag if input and output files have single precision positions (default)\n");
-	fprintf(stderr,"-dpp			   : set this flag if input and output files have double precision positions\n");
+	fprintf(stderr,"-spp               : set this flag if input and output files have single precision positions (default)\n");
+	fprintf(stderr,"-dpp               : set this flag if input and output files have double precision positions\n");
 	fprintf(stderr,"-writegas <value>  : 0 = don't write out gas / 1 = write out gas (default: 1)\n");
 	fprintf(stderr,"-writedark <value> : 0 = don't write out dark matter / 1 = write out dark matter (default: 1)\n");
 	fprintf(stderr,"-writestar <value> : 0 = don't write out stars / 1 = write out stars (default: 1)\n");
-	fprintf(stderr,"< <name>		   : input file in tipsy XDR format\n");
-	fprintf(stderr,"> <name>		   : output file in tipsy XDR format\n");
+	fprintf(stderr,"< <name>           : input file in tipsy XDR format\n");
+	fprintf(stderr,"> <name>           : output file in tipsy XDR format\n");
 	fprintf(stderr,"\n");
 	exit(1);
 	}

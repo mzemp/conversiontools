@@ -104,9 +104,9 @@ void usage(void) {
 	fprintf(stderr,"\n");
 	fprintf(stderr,"Please specify the following parameters:\n");
 	fprintf(stderr,"\n");
-	fprintf(stderr,"-i		 : set this flag if it is an integer array\n");
-	fprintf(stderr,"-f		 : set this flag if it is an float array\n");
-	fprintf(stderr,"-d		 : set this flag if it is an double array\n");
+	fprintf(stderr,"-i       : set this flag if it is an integer array\n");
+	fprintf(stderr,"-f       : set this flag if it is an float array\n");
+	fprintf(stderr,"-d       : set this flag if it is an double array\n");
 	fprintf(stderr,"< <name> : input file in ART native binary format\n");
 	fprintf(stderr,"> <name> : output file in XDR format\n");
 	fprintf(stderr,"\n");
