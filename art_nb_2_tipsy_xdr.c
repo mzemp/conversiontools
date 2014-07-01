@@ -13,7 +13,7 @@
 #include <rpc/types.h>
 #include <rpc/xdr.h>
 #include <iof.h>
-#include <art_sfc.h>
+#include <artsfc.h>
 
 void usage(void);
 int check_selection(double *, double *, double *);

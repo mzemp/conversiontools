@@ -13,7 +13,7 @@
 #include <rpc/types.h>
 #include <rpc/xdr.h>
 #include <iof.h>
-#include <gic_reader.h>
+#include <gicreader.h>
 
 void usage(void);
 

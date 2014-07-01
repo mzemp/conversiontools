@@ -14,7 +14,7 @@
 #include <rpc/xdr.h>
 #include <silo.h>
 #include <iof.h>
-#include <art_sfc.h>
+#include <artsfc.h>
 
 #define GAS_DATA_SIZE 1e6
 #define DARK_DATA_SIZE 1e6
