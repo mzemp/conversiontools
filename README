@@ -1,0 +1,48 @@
+DESCRIPTION
+
+This is a suite of several conversion tools between various data formats used in computational astrophysics.
+
+
+AUTHOR
+
+Marcel Zemp <marcelzemp@gmail.com>
+
+
+OFFICIAL SOURCE
+
+GitHub: https://github.com/mzemp/conversiontools
+
+
+DEPENDENCIES
+
+math library (should already be installed by default)
+silo library (https://wci.llnl.gov/codes/silo)
+iof library (https://github.com/mzemp/iof)
+artsfc library (https://github.com/mzemp/artsfc)
+gicreader library (https://github.com/mzemp/gicreader)
+
+
+COMPILATION
+
+First, make sure you have installed all the libraries mentioned above under dependencies. The Makefile assumes that you have installed that in a local library path (e.g. ~/libraries/ under your home directory) and the following environment variable is set (e.g. in your .bashrc file):
+
+export LOCAL_LIB_PATH=~/libraries
+
+or that the libraries are installed in system-wide path so that the code can be linked against them.
+
+Then clone or download the code from GitHub. In order to compile the code just type make in the conversiontools code directory:
+
+$> make
+
+This will generate all the conversion tools.
+
+In order to clean up the code type:
+
+$> make clean
+
+
+HELP & OPTIONS
+
+For each tool you can find help and a list of all command line options by calling it with the -h option like, for example:
+
+$> tipsy_xdr_2_tipsy_nb -h
