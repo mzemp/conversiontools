@@ -15,7 +15,7 @@ EXES	= $(SRCS:.c=)
 all: $(EXES)
 
 .c:
-	$(CC) $(CFLAGS) $@.c $(LIBS) -o $@
+	$(CC) $(CFLAGS) -DNAME=\"$@\" $@.c $(LIBS) -o $@
 
 clean:
 	rm -f *~ *.o $(EXES)

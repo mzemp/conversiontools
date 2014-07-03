@@ -26,10 +26,17 @@ int main(int argc, char **argv) {
 	dz = 0;
 	dof = 3;
 	mmw = 1;
-	uvf = 977.79219;
+	uvf = ConversionFactors.kpc_per_Gyr_2_km_per_s*1e3;
 	verboselevel = 0;
 	i = 1;
 	while (i < argc) {
+		if ((strcmp(argv[i],"-h") == 0) || (strcmp(argv[i],"-help") == 0)) {
+			usage();
+			}
+		if (strcmp(argv[i],"-version") == 0) {
+			fprintf(stderr,"%s (%s)\n",NAME,VERSION);
+			exit(1);
+			}
 		if (strcmp(argv[i],"-a") == 0) {
 			i++;
 			if (i >= argc) usage();
@@ -77,12 +84,9 @@ int main(int argc, char **argv) {
 			uvf = atof(argv[i]);
 			i++;
 			}
-		else if (strcmp(argv[i],"-v") == 0) {
+		else if (strcmp(argv[i],"-verbose") == 0) {
 			verboselevel = 1;
 			i++;
-			}
-		else if ((strcmp(argv[i],"-h") == 0) || (strcmp(argv[i],"-help") == 0)) {
-			usage();
 			}
 		else {
 			usage();
@@ -118,6 +122,10 @@ int main(int argc, char **argv) {
 
 void usage(void) {
 
+	double uvf = ConversionFactors.kpc_per_Gyr_2_km_per_s*1e3;
+
+	fprintf(stderr,"\n");
+	fprintf(stderr,"%s (%s)\n",NAME,VERSION);
 	fprintf(stderr,"\n");
 	fprintf(stderr,"Program converts gadget native binary format to tipsy XDR format.\n");
 	fprintf(stderr,"\n");
@@ -129,10 +137,15 @@ void usage(void) {
 	fprintf(stderr,"-drz <value> : shift along z-axis [LU] (default: 0 LU)\n");
 	fprintf(stderr,"-dof <value> : degrees of freedom of gas (default: 3 => gamma = (dof+2)/dof = 5/3)\n");
 	fprintf(stderr,"-mmw <value> : mean molecular weight of gas [mp] (default: 1 mp)\n");
-	fprintf(stderr,"-uvf <value> : internal unit of velocity [m s^-1] (default: 977.79219 m s^-1 => 977.79219 m s^-1 = 1 kpc Gyr^-1)\n");
-	fprintf(stderr,"-v           : more informative output to screen\n");
+	fprintf(stderr,"-uvf <value> : internal unit of velocity [m s^-1] (default: %g m s^-1 => %g m s^-1 = 1 kpc Gyr^-1)\n",uvf,uvf);
+	fprintf(stderr,"-verbose     : verbose\n");
 	fprintf(stderr,"< <name>     : input file in gadget native binary format\n");
 	fprintf(stderr,"> <name>     : output file in tipsy XDR format\n");
+	fprintf(stderr,"\n");
+	fprintf(stderr,"Other options:\n");
+	fprintf(stderr,"\n");
+	fprintf(stderr,"-h or -help : display this help and exit\n");
+	fprintf(stderr,"-version    : display version information and exit\n");
 	fprintf(stderr,"\n");
 	exit(1);
 	}

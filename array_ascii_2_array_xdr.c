@@ -27,6 +27,13 @@ int main(int argc, char **argv) {
 	verboselevel = 0;
 	i = 1;
 	while (i < argc) {
+		if ((strcmp(argv[i],"-h") == 0) || (strcmp(argv[i],"-help") == 0)) {
+			usage();
+			}
+		if (strcmp(argv[i],"-version") == 0) {
+			fprintf(stderr,"%s (%s)\n",NAME,VERSION);
+			exit(1);
+			}
 		if (strcmp(argv[i],"-i") == 0) {
 			ah.N[1] = 1;
 			ah.N[2] = 0;
@@ -45,12 +52,9 @@ int main(int argc, char **argv) {
 			ah.N[3] = 1;
 			i++;
 			}
-		else if (strcmp(argv[i],"-v") == 0) {
+		else if (strcmp(argv[i],"-verbose") == 0) {
 			verboselevel = 1;
 			i++;
-			}
-		else if ((strcmp(argv[i],"-h") == 0) || (strcmp(argv[i],"-help") == 0)) {
-			usage();
 			}
 		else {
 			usage();
@@ -93,6 +97,8 @@ int main(int argc, char **argv) {
 void usage(void) {
 
 	fprintf(stderr,"\n");
+	fprintf(stderr,"%s (%s)\n",NAME,VERSION);
+	fprintf(stderr,"\n");
 	fprintf(stderr,"Program converts array in ascii format to array in XDR format.\n");
 	fprintf(stderr,"\n");
 	fprintf(stderr,"Please specify the following parameters:\n");
@@ -100,8 +106,14 @@ void usage(void) {
 	fprintf(stderr,"-i       : set this flag if it is an integer array\n");
 	fprintf(stderr,"-f       : set this flag if it is a float array\n");
 	fprintf(stderr,"-d       : set this flag if it is a double array\n");
+	fprintf(stderr,"-verbose : verbose\n");
 	fprintf(stderr,"< <name> : input file in ascii format\n");
 	fprintf(stderr,"> <name> : output file in XDR format\n");
+	fprintf(stderr,"\n");
+	fprintf(stderr,"Other options:\n");
+	fprintf(stderr,"\n");
+	fprintf(stderr,"-h or -help : display this help and exit\n");
+	fprintf(stderr,"-version    : display version information and exit\n");
 	fprintf(stderr,"\n");
 	exit(1);
 	}

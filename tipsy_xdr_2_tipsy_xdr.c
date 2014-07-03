@@ -34,6 +34,13 @@ int main(int argc, char **argv) {
 	writestar = 1;
 	i = 1;
 	while (i < argc) {
+		if ((strcmp(argv[i],"-h") == 0) || (strcmp(argv[i],"-help") == 0)) {
+			usage();
+			}
+		if (strcmp(argv[i],"-version") == 0) {
+			fprintf(stderr,"%s (%s)\n",NAME,VERSION);
+			exit(1);
+			}
 		if (strcmp(argv[i],"-spp") == 0) {
 			positionprecision = 0;
 			i++;
@@ -60,12 +67,9 @@ int main(int argc, char **argv) {
 			writestar = atoi(argv[i]);
 			i++;
 			}
-		else if (strcmp(argv[i],"-v") == 0) {
+		else if (strcmp(argv[i],"-verbose") == 0) {
 			verboselevel = 1;
 			i++;
-			}
-		else if ((strcmp(argv[i],"-h") == 0) || (strcmp(argv[i],"-help") == 0)) {
-			usage();
 			}
 		else {
 			usage();
@@ -124,7 +128,9 @@ int main(int argc, char **argv) {
 	}
 
 void usage(void) {
- 
+
+	fprintf(stderr,"\n");
+	fprintf(stderr,"%s (%s)\n",NAME,VERSION); 
 	fprintf(stderr,"\n");
 	fprintf(stderr,"Program converts tipsy XDR format to tipsy XDR format.\n");
 	fprintf(stderr,"\n");
@@ -135,8 +141,14 @@ void usage(void) {
 	fprintf(stderr,"-writegas <value>  : 0 = don't write out gas / 1 = write out gas (default: 1)\n");
 	fprintf(stderr,"-writedark <value> : 0 = don't write out dark matter / 1 = write out dark matter (default: 1)\n");
 	fprintf(stderr,"-writestar <value> : 0 = don't write out stars / 1 = write out stars (default: 1)\n");
+	fprintf(stderr,"-verbose : verbose\n");
 	fprintf(stderr,"< <name>           : input file in tipsy XDR format\n");
 	fprintf(stderr,"> <name>           : output file in tipsy XDR format\n");
+	fprintf(stderr,"\n");
+	fprintf(stderr,"Other options:\n");
+	fprintf(stderr,"\n");
+	fprintf(stderr,"-h or -help : display this help and exit\n");
+	fprintf(stderr,"-version    : display version information and exit\n");
 	fprintf(stderr,"\n");
 	exit(1);
 	}

@@ -70,8 +70,8 @@ int main(int argc, char **argv) {
 	softfac = 50;
 	b2dmscalefac = -1;
 	H_TIPSY_DEFAULT = sqrt(8*M_PI/3); /* TU_TIPSY^-1 */
-	VelConvertFac = 1.0227121651152353693;
-	rhocrit = 277.53662719; /* h^2 Mo kpc^-3 */
+	VelConvertFac = ConversionFactors.km_per_s_2_kpc_per_Gyr;
+	rhocrit = PhysicalConstants.rho_crit_cosmology; /* h^2 Mo kpc^-3 */
 
 	/*
 	** Read in options
@@ -79,6 +79,13 @@ int main(int argc, char **argv) {
 
 	i = 1;
 	while (i < argc) {
+		if ((strcmp(argv[i],"-h") == 0) || (strcmp(argv[i],"-help") == 0)) {
+			usage();
+			}
+		if (strcmp(argv[i],"-version") == 0) {
+			fprintf(stderr,"%s (%s)\n",NAME,VERSION);
+			exit(1);
+			}
 		if (strcmp(argv[i],"-spp") == 0) {
 			positionprecision = 0;
 			i++;
@@ -197,12 +204,9 @@ int main(int argc, char **argv) {
 			strcpy(VelFileName,argv[i]);
 			i++;
 			}
-		else if (strcmp(argv[i],"-v") == 0) {
+		else if (strcmp(argv[i],"-verbose") == 0) {
 			verboselevel = 1;
 			i++;
-			}
-		else if ((strcmp(argv[i],"-h") == 0) || (strcmp(argv[i],"-help") == 0)) {
-			usage();
 			}
 		else {
 			usage();
@@ -758,6 +762,8 @@ int main(int argc, char **argv) {
 void usage(void) {
 
 	fprintf(stderr,"\n");
+	fprintf(stderr,"%s (%s)\n",NAME,VERSION);
+	fprintf(stderr,"\n");
 	fprintf(stderr,"Program converts GIC native binary format to tipsy XDR format.\n");
 	fprintf(stderr,"\n");
 	fprintf(stderr,"Please specify the following parameters:\n");
@@ -781,10 +787,15 @@ void usage(void) {
 	fprintf(stderr,"-softfac <value> : softening factor (default: 50)\n");
 	fprintf(stderr,"-refstep <value> : refinement step factor (default: 2)\n");
 	fprintf(stderr,"-noscaling       : no scaling of data\n");
-	fprintf(stderr,"-v               : more informative output to screen\n");
+	fprintf(stderr,"-verbose         : verbose\n");
 	fprintf(stderr,"-pos <name>      : positions input file GIC native binary format\n");
 	fprintf(stderr,"-vel <name>      : velocities input file GIC native binary format\n");
 	fprintf(stderr,"> <name>         : output file in tipsy XDR format\n");
+	fprintf(stderr,"\n");
+	fprintf(stderr,"Other options:\n");
+	fprintf(stderr,"\n");
+	fprintf(stderr,"-h or -help : display this help and exit\n");
+	fprintf(stderr,"-version    : display version information and exit\n");
 	fprintf(stderr,"\n");
 	exit(1);
 	}

@@ -28,6 +28,13 @@ int main(int argc, char **argv) {
 	verboselevel = 0;
 	i = 1;
 	while (i < argc) {
+		if ((strcmp(argv[i],"-h") == 0) || (strcmp(argv[i],"-help") == 0)) {
+			usage();
+			}
+		if (strcmp(argv[i],"-version") == 0) {
+			fprintf(stderr,"%s (%s)\n",NAME,VERSION);
+			exit(1);
+			}
 		if (strcmp(argv[i],"-spp") == 0) {
 			positionprecision = 0;
 			i++;
@@ -36,12 +43,9 @@ int main(int argc, char **argv) {
 			positionprecision = 1;
 			i++;
 			}
-		else if (strcmp(argv[i],"-v") == 0) {
+		else if (strcmp(argv[i],"-verbose") == 0) {
 			verboselevel = 1;
 			i++;
-			}
-		else if ((strcmp(argv[i],"-h") == 0) || (strcmp(argv[i],"-help") == 0)) {
-			usage();
 			}
 		else {
 			usage();
@@ -81,14 +85,22 @@ int main(int argc, char **argv) {
 void usage(void) {
 
 	fprintf(stderr,"\n");
+	fprintf(stderr,"%s (%s)\n",NAME,VERSION);
+	fprintf(stderr,"\n");
 	fprintf(stderr,"Program converts tipsy XDR format to tipsy ascii format.\n");
 	fprintf(stderr,"\n");
 	fprintf(stderr,"Please specify the following parameters:\n");
 	fprintf(stderr,"\n");
 	fprintf(stderr,"-spp     : set this flag if input and output files have single precision positions (default)\n");
 	fprintf(stderr,"-dpp     : set this flag if input and output files have double precision positions\n");
+	fprintf(stderr,"-verbose : verbose\n");
 	fprintf(stderr,"< <name> : input file in tipsy XDR format\n");
 	fprintf(stderr,"> <name> : output file in tipsy ascii format\n");
+	fprintf(stderr,"\n");
+	fprintf(stderr,"Other options:\n");
+	fprintf(stderr,"\n");
+	fprintf(stderr,"-h or -help : display this help and exit\n");
+	fprintf(stderr,"-version    : display version information and exit\n");
 	fprintf(stderr,"\n");
 	exit(1);
 	}

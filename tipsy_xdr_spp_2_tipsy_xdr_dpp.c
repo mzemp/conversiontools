@@ -29,12 +29,16 @@ int main(int argc, char **argv) {
 	verboselevel = 0;
 	i = 1;
 	while (i < argc) {
-		if (strcmp(argv[i],"-v") == 0) {
+		if ((strcmp(argv[i],"-h") == 0) || (strcmp(argv[i],"-help") == 0)) {
+			usage();
+			}
+		if (strcmp(argv[i],"-version") == 0) {
+			fprintf(stderr,"%s (%s)\n",NAME,VERSION);
+			exit(1);
+			}
+		if (strcmp(argv[i],"-verbose") == 0) {
 			verboselevel = 1;
 			i++;
-			}
-		else if ((strcmp(argv[i],"-h") == 0) || (strcmp(argv[i],"-help") == 0)) {
-			usage();
 			}
 		else {
 			usage();
@@ -69,15 +73,23 @@ int main(int argc, char **argv) {
 	}
 
 void usage(void) {
- 
+
+	fprintf(stderr,"\n");
+	fprintf(stderr,"%s (%s)\n",NAME,VERSION); 
 	fprintf(stderr,"\n");
 	fprintf(stderr,"Program converts tipsy XDR format with single precision positions\n");
 	fprintf(stderr,"to tipsy XDR format with double precision positions.\n");
 	fprintf(stderr,"\n");
 	fprintf(stderr,"Please specify the following parameters:\n");
 	fprintf(stderr,"\n");
+	fprintf(stderr,"-verbose : verbose\n");
 	fprintf(stderr,"< <name> : input file in tipsy XDR format with single precision positions\n");
 	fprintf(stderr,"> <name> : output file in tipsy XDR format with double precision positions\n");
+	fprintf(stderr,"\n");
+	fprintf(stderr,"Other options:\n");
+	fprintf(stderr,"\n");
+	fprintf(stderr,"-h or -help : display this help and exit\n");
+	fprintf(stderr,"-version    : display version information and exit\n");
 	fprintf(stderr,"\n");
 	exit(1);
 	}

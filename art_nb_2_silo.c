@@ -131,6 +131,13 @@ int main(int argc, char **argv) {
 
 	i = 1;
 	while (i < argc) {
+		if ((strcmp(argv[i],"-h") == 0) || (strcmp(argv[i],"-help") == 0)) {
+			usage();
+			}
+		if (strcmp(argv[i],"-version") == 0) {
+			fprintf(stderr,"%s (%s)\n",NAME,VERSION);
+			exit(1);
+			}
 		if (strcmp(argv[i],"-spp") == 0) {
 			positionprecision = 0;
 			i++;
@@ -334,12 +341,9 @@ int main(int argc, char **argv) {
 			strcpy(outputname,argv[i]);
 			i++;
 			}
-		else if (strcmp(argv[i],"-v") == 0) {
+		else if (strcmp(argv[i],"-verbose") == 0) {
 			verboselevel = 1;
 			i++;
-			}
-		else if ((strcmp(argv[i],"-h") == 0) || (strcmp(argv[i],"-help") == 0)) {
-			usage();
 			}
 		else {
 			usage();
@@ -1065,6 +1069,8 @@ int main(int argc, char **argv) {
 void usage(void) {
 
 	fprintf(stderr,"\n");
+	fprintf(stderr,"%s (%s)\n",NAME,VERSION);
+	fprintf(stderr,"\n");
 	fprintf(stderr,"Program converts ART native binary format to silo format.\n");
 	fprintf(stderr,"\n");
 	fprintf(stderr,"Please specify the following parameters:\n");
@@ -1104,8 +1110,13 @@ void usage(void) {
 	fprintf(stderr,"-gasfile <name>                      : gas file in ART native binary format\n");
 	fprintf(stderr,"-darkdensityfile <name>              : dark matter density file in Tipsy array XDR format\n");
 	fprintf(stderr,"-stardensityfile <name>              : star density file in Tipsy array XDR format\n");
-	fprintf(stderr,"-v                                   : more informative output to screen\n");
+	fprintf(stderr,"-verbose                             : verbose\n");
 	fprintf(stderr,"-o <name>                            : output file in silo format\n");
+	fprintf(stderr,"\n");
+	fprintf(stderr,"Other options:\n");
+	fprintf(stderr,"\n");
+	fprintf(stderr,"-h or -help : display this help and exit\n");
+	fprintf(stderr,"-version    : display version information and exit\n");
 	fprintf(stderr,"\n");
 	exit(1);
 	}
