@@ -120,7 +120,7 @@ int main(int argc, char **argv) {
 		}
 	xdr_destroy(&xdrsin);
 	xdr_destroy(&xdrsout);
-	if (verboselevel >= 0) {
+	if (verboselevel > 0) {
 		fprintf(stderr,"Time: %g Ntotal: %u Ngas: %u Ndark: %u Nstar: %u\n",
 			thout.time,thout.ntotal,thout.ngas,thout.ndark,thout.nstar);
 		}

@@ -96,7 +96,7 @@ int main(int argc, char **argv) {
 	xdr_destroy(&xdrs1);
 	xdr_destroy(&xdrs2);
 	xdr_destroy(&xdrs3);
-	if (verboselevel >= 0) {
+	if (verboselevel > 0) {
 		fprintf(stderr,"Ntotal_1: %d Ni_1: %d Nf_1: %d Nd_1: %d\n",
 			ah1.N[0],ah1.N[1],ah1.N[2],ah1.N[3]);
 		fprintf(stderr,"Ntotal_2: %d Ni_2: %d Nf_2: %d Nd_2: %d\n",

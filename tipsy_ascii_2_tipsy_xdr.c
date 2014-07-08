@@ -75,7 +75,7 @@ int main(int argc, char **argv) {
 		write_tipsy_xdr_dpp(stdout,tsdpp);
 		th = tsdpp->th;
 		}
-	if (verboselevel >= 0) {
+	if (verboselevel > 0) {
 		fprintf(stderr,"Time: %g Ntotal: %u Ngas: %u Ndark: %u Nstar: %u\n",
 			th->time,th->ntotal,th->ngas,th->ndark,th->nstar);
 		}

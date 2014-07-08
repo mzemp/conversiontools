@@ -225,16 +225,16 @@ int main(int argc, char **argv) {
 	*/
 	xdr_destroy(&xdrsin);
 	xdr_destroy(&xdrsout);
-	if (verboselevel >= 1) {
+	if (verboselevel > 0) {
 		fprintf(stderr,"Used values:\n");
+		fprintf(stderr,"\n");
 		fprintf(stderr,"rcen   : (%+.6e,%+.6e,%+.6e) LUold\n",rcen[0],rcen[1],rcen[2]);
 		fprintf(stderr,"vcen   : (%+.6e,%+.6e,%+.6e) VUold\n",vcen[0],vcen[1],vcen[2]);
 		fprintf(stderr,"mscale : %.6e MUnew/MUold\n",mscale);
 		fprintf(stderr,"rscale : %.6e LUnew/LUold\n",rscale);
 		fprintf(stderr,"vscale : %.6e VUnew/VUold\n",vscale);
 		fprintf(stderr,"Hubble : %.6e VUnew/LUnew\n",hubble);
-		}
-	if (verboselevel >= 0) {
+		fprintf(stderr,"\n");
 		fprintf(stderr,"Time: %g Ntotal: %u Ngas: %u Ndark: %u Nstar: %u\n",
 			th.time,th.ntotal,th.ngas,th.ndark,th.nstar);
 		}

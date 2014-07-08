@@ -94,7 +94,7 @@ int main(int argc, char **argv) {
 	assert(fread(&trailer,sizeof(int),1,stdin) == 1);
 	assert(header == trailer);
 	xdr_destroy(&xdrs);
-	if (verboselevel >= 0) {
+	if (verboselevel > 0) {
 		fprintf(stderr,"Ntotal: %d Ni: %d Nf: %d Nd: %d\n",
 			ah.N[0],ah.N[1],ah.N[2],ah.N[3]);
 		}

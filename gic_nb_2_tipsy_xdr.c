@@ -489,7 +489,7 @@ int main(int argc, char **argv) {
 		** Some info
 		*/
 
-		if (verboselevel >= 1) {
+		if (verboselevel > 0) {
 			fprintf(stderr,"There are %d refinement levels:\n\n",Lmax+1);
 			}
 
@@ -688,7 +688,7 @@ int main(int argc, char **argv) {
 			** Some output about levels
 			*/
 
-			if (verboselevel >= 1) {
+			if (verboselevel > 0) {
 				fprintf(stderr,"L %d Lmax %d Nlev %ld Softening %.6e LU_TIPSY = %.6e kpc Mass %.6e MU_TIPSY = %.6e Mo\n",PosLevelHeader[k].L,PosLevelHeader[k].Lmax,Nlev,soft,soft*LU_TIPSY,mass,mass*MU_TIPSY);
 				if (k == Lmax) fprintf(stderr,"\n");
 				}
@@ -701,8 +701,9 @@ int main(int argc, char **argv) {
 	** Write out some additional stuff depending on verbose level
 	*/
 
-	if (verboselevel >= 1) {
-		fprintf(stderr,"Parameters from GIC file:\n\n");
+	if (verboselevel > 0) {
+		fprintf(stderr,"Parameters from GIC file:\n");
+		fprintf(stderr,"\n");
 		fprintf(stderr,"Name    : %s\n",PosManifest.name);
 		fprintf(stderr,"OmegaB  : %.6e\n",PosManifest.OmegaB);
 		fprintf(stderr,"OmegaDM : %.6e\n",PosManifest.OmegaX);
@@ -721,16 +722,20 @@ int main(int argc, char **argv) {
 		fprintf(stderr,"Seed    : %d\n",PosHeader.seed);
 		fprintf(stderr,"Nrec    : %d\n",Nrec);
 		fprintf(stderr,"LBox    : %.6e chimp\n",LBox);
-		fprintf(stderr,"Lmax    : %d\n\n",Lmax);
-		fprintf(stderr,"Cosmology:\n\n");
+		fprintf(stderr,"Lmax    : %d\n",Lmax);
+		fprintf(stderr,"\n");
+		fprintf(stderr,"Cosmology:\n");
+		fprintf(stderr,"\n");
 		fprintf(stderr,"OmegaM0  : %.6e\n",OmegaM0);
 		fprintf(stderr,"OmegaDM0 : %.6e\n",OmegaDM0);
 		fprintf(stderr,"OmegaB0  : %.6e\n",OmegaB0);
 		fprintf(stderr,"OmegaL0  : %.6e\n",OmegaL0);
 		fprintf(stderr,"OmegaK0  : %.6e\n",OmegaK0);
 		fprintf(stderr,"OmegaR0  : %.6e\n",OmegaR0);
-		fprintf(stderr,"h100     : %.6e\n\n",h100);
-		fprintf(stderr,"Used values:\n\n");
+		fprintf(stderr,"h100     : %.6e\n",h100);
+		fprintf(stderr,"\n");
+		fprintf(stderr,"Used values:\n");
+		fprintf(stderr,"\n");
 		fprintf(stderr,"drx       : %.6e LU_TIPSY\n",dr[0]);
 		fprintf(stderr,"dry       : %.6e LU_TIPSY\n",dr[1]);
 		fprintf(stderr,"drz       : %.6e LU_TIPSY\n",dr[2]);
@@ -739,19 +744,22 @@ int main(int argc, char **argv) {
 		fprintf(stderr,"MUsf      : %.6e\n",MUsf);
 		fprintf(stderr,"softfac   : %.6e\n",softfac);
 		fprintf(stderr,"Softening : %.6e LU_TIPSY (toplevel)\n",toplevelsoftening);
-		fprintf(stderr,"Mass      : %.6e MU_TIPSY (toplevel)\n\n",toplevelmass);
-		fprintf(stderr,"Resulting internal GIC units:\n\n");
+		fprintf(stderr,"Mass      : %.6e MU_TIPSY (toplevel)\n",toplevelmass);
+		fprintf(stderr,"\n");
+		fprintf(stderr,"Resulting internal GIC units:\n");
+		fprintf(stderr,"\n");
 		fprintf(stderr,"LU_GIC : %.6e kpc\n",LU_GIC);
 		fprintf(stderr,"TU_GIC : %.6e Gyr\n",TU_GIC/VelConvertFac);
 		fprintf(stderr,"VU_GIC : %.6e km s^-1 = %.6e kpc Gyr^-1\n",VU_GIC,VU_GIC*VelConvertFac);
-		fprintf(stderr,"MU_GIC : %.6e Mo\n\n",MU_GIC);
-		fprintf(stderr,"Resulting internal tipsy units:\n\n");
+		fprintf(stderr,"MU_GIC : %.6e Mo\n",MU_GIC);
+		fprintf(stderr,"\n");
+		fprintf(stderr,"Resulting internal tipsy units:\n");
+		fprintf(stderr,"\n");
 		fprintf(stderr,"LU_TIPSY : %.6e kpc\n",LU_TIPSY);
 		fprintf(stderr,"TU_TIPSY : %.6e Gyr\n",TU_TIPSY/VelConvertFac);
 		fprintf(stderr,"VU_TIPSY : %.6e km s^-1 = %.6e kpc Gyr^-1\n",VU_TIPSY,VU_TIPSY*VelConvertFac);
-		fprintf(stderr,"MU_TIPSY : %.6e Mo\n\n",MU_TIPSY);
-		}
-	if (verboselevel >= 0) {
+		fprintf(stderr,"MU_TIPSY : %.6e Mo\n",MU_TIPSY);
+		fprintf(stderr,"\n");
 		fprintf(stderr,"Time: %g Ntotal: %u Ngas: %u Ndark: %u Nstar: %u\n",
 			th.time,th.ntotal,th.ngas,th.ndark,th.nstar);
 		}

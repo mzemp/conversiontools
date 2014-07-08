@@ -665,7 +665,7 @@ int main(int argc, char **argv) {
 	** Finish up and write some output
 	*/
 	DBClose(dbfile);
-	if (verboselevel >= 0) {
+	if (verboselevel > 0) {
 		fprintf(stderr,"Time: %g Ntotal: %u Ngas: %u Ndark: %u Nstar: %u\n",
 			th.time,th.ntotal,th.ngas,th.ndark,th.nstar);
 		if (arrayfile == 1) {

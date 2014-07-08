@@ -26,7 +26,7 @@ int main(int argc, char **argv) {
 	dz = 0;
 	dof = 3;
 	mmw = 1;
-	uvf = 977.79219;
+	uvf = ConversionFactors.kpc_per_Gyr_2_km_per_s*1e3;
 	verboselevel = 0;
 	i = 1;
 	while (i < argc) {
@@ -103,8 +103,9 @@ int main(int argc, char **argv) {
 	if (a == -1) {
 		a = ts->th->time;
 		}
-	if (verboselevel >= 1) {
+	if (verboselevel > 0) {
 		fprintf(stderr,"Used values:\n");
+		fprintf(stderr,"\n");
 		fprintf(stderr,"a   : %.6e\n",a);
 		fprintf(stderr,"drx : %.6e LU\n",dx);
 		fprintf(stderr,"dry : %.6e LU\n",dy);
@@ -112,8 +113,7 @@ int main(int argc, char **argv) {
 		fprintf(stderr,"dof : %.6e\n",dof);
 		fprintf(stderr,"mmw : %.6e mp\n",mmw);
 		fprintf(stderr,"uvf : %.6e m s^-1\n",uvf);
-		}
-	if (verboselevel >= 0) {
+		fprintf(stderr,"\n");
 		fprintf(stderr,"Time: %g Ntotal: %u Ngas: %u Ndark: %u Nstar: %u\n",
 			ts->th->time,ts->th->ntotal,ts->th->ngas,ts->th->ndark,ts->th->nstar);
 		}
@@ -121,6 +121,8 @@ int main(int argc, char **argv) {
 	}
 
 void usage(void) {
+
+	double uvf = ConversionFactors.kpc_per_Gyr_2_km_per_s*1e3;
 
 	fprintf(stderr,"\n");
 	fprintf(stderr,"%s (%s)\n",NAME,VERSION);
@@ -135,7 +137,7 @@ void usage(void) {
 	fprintf(stderr,"-drz <value> : shift along z-axis [LU] (default: 0 LU)\n");
 	fprintf(stderr,"-dof <value> : degrees of freedom of gas (default: 3 => gamma = (dof+2)/dof = 5/3)\n");
 	fprintf(stderr,"-mmw <value> : mean molecular weight of gas [mp] (default: 1 mp)\n");
-	fprintf(stderr,"-uvf <value> : internal unit of velocity [m s^-1] (default: 977.79219 m s^-1 => 977.79219 m s^-1 = 1 kpc Gyr^-1)\n");
+	fprintf(stderr,"-uvf <value> : internal unit of velocity [m s^-1] (default: %g m s^-1 => %g m s^-1 = 1 kpc Gyr^-1)\n",uvf,uvf);
 	fprintf(stderr,"-verbose     : verbose\n");
 	fprintf(stderr,"< <name>     : input file in tipsy XDR format\n");
 	fprintf(stderr,"> <name>     : output file in gadget native binary format\n");

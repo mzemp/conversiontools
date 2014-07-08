@@ -552,8 +552,9 @@ int main(int argc, char **argv) {
 	** Write out some additional stuff depending on verbose level
 	*/
 
-	if (verboselevel >= 1) {
-		fprintf(stderr,"ART general header:\n\n");
+	if (verboselevel > 0) {
+		fprintf(stderr,"ART general header:\n");
+		fprintf(stderr,"\n");
 		fprintf(stderr,"aunin    : %.6e\n",ad.ah.aunin);
 		fprintf(stderr,"auni0    : %.6e\n",ad.ah.auni0);
 		fprintf(stderr,"amplt    : %.6e\n",ad.ah.amplt);
@@ -586,7 +587,8 @@ int main(int argc, char **argv) {
 			fprintf(stderr,"mass[%ld] : %.6e num[%ld] : %d\n",i,ad.ah.mass[i],i,ad.ah.num[i]);
 			}
 		fprintf(stderr,"\n");
-		fprintf(stderr,"ART data properties:\n\n");
+		fprintf(stderr,"ART data properties:\n");
+		fprintf(stderr,"\n");
 		fprintf(stderr,"Particle File Mode : %d\n",ad.particle_file_mode);
 		fprintf(stderr,"Nparticleperrecord : %d\n",ad.Nparticleperrecord);
 		fprintf(stderr,"Nrecord            : %d\n",ad.Nrecord);
@@ -600,7 +602,8 @@ int main(int argc, char **argv) {
 		fprintf(stderr,"Lmindark           : %d\n",ad.Lmindark);
 		fprintf(stderr,"Lmaxdark           : %d\n",ad.Lmaxdark);
 		fprintf(stderr,"\n");
-		fprintf(stderr,"ART preprocessor flags:\n\n");
+		fprintf(stderr,"ART preprocessor flags:\n");
+		fprintf(stderr,"\n");
 		fprintf(stderr,"-GRAVITY                     : %s\n",(ad.GRAVITY == 0)?"not set":"set");
 		fprintf(stderr,"-HYDRO                       : %s\n",(ad.HYDRO == 0)?"not set":"set");
 		fprintf(stderr,"-ADVECT_SPECIES              : %s\n",(ad.ADVECT_SPECIES == 0)?"not set":"set");
@@ -610,13 +613,15 @@ int main(int argc, char **argv) {
 		fprintf(stderr,"-RADIATIVE_TRANSFER          : %s\n",(ad.RADIATIVE_TRANSFER == 0)?"not set":"set");
 		fprintf(stderr,"-ELECTRON_ION_NONEQUILIBRIUM : %s\n",(ad.ELECTRON_ION_NONEQUILIBRIUM == 0)?"not set":"set");
 		fprintf(stderr,"\n");
-		fprintf(stderr,"ART units:\n\n");
+		fprintf(stderr,"ART units:\n");
+		fprintf(stderr,"\n");
 		fprintf(stderr,"LU : %.6e kpc\n",art2cosmo_ct.L_usf);
 		fprintf(stderr,"TU : %.6e Gyr\n",art2cosmo_ct.T_usf);
 		fprintf(stderr,"VU : %.6e kpc Gyr^{-1} = %.6e km s^{-1}\n",art2cosmo_ct.V_usf,art2cosmo_ct.V_usf*ConversionFactors.kpc_per_Gyr_2_km_per_s);
 		fprintf(stderr,"MU : %.6e Mo\n",art2cosmo_ct.M_usf);
 		fprintf(stderr,"\n");
-		fprintf(stderr,"Cosmology:\n\n");
+		fprintf(stderr,"Cosmology:\n");
+		fprintf(stderr,"\n");
 		fprintf(stderr,"OmegaM0 : %.6e\n",cp.OmegaM0);
 		fprintf(stderr,"OmegaD0 : %.6e\n",cp.OmegaD0);
 		fprintf(stderr,"OmegaB0 : %.6e\n",cp.OmegaB0);
@@ -625,7 +630,8 @@ int main(int argc, char **argv) {
 		fprintf(stderr,"OmegaR0 : %.6e\n",cp.OmegaR0);
 		fprintf(stderr,"h0_100  : %.6e\n",cp.h0_100);
 		fprintf(stderr,"\n");
-		fprintf(stderr,"Selected volume:\n\n");
+		fprintf(stderr,"Selected volume:\n");
+		fprintf(stderr,"\n");
 		if (dsel[0] == 0 && dsel[1] == 0 && dsel[2] == 0) {
 			fprintf(stderr,"No selection chosen.\n");
 			fprintf(stderr,"\n");
@@ -636,7 +642,8 @@ int main(int argc, char **argv) {
 			fprintf(stderr,"Box: [%.6e ... %.6e] x [%.6e ... %.6e] x [%.6e ... %.6e] LU\n",bsel[0],bsel[3],bsel[1],bsel[4],bsel[2],bsel[5]);
 			fprintf(stderr,"\n");
 			}
-		fprintf(stderr,"Used values:\n\n");
+		fprintf(stderr,"Used values:\n");
+		fprintf(stderr,"\n");
 		fprintf(stderr,"Lmaxgaswrite : %d\n",Lmaxgaswrite);
 		fprintf(stderr,"LBox         : %.6e kpc\n",LBox);
 		fprintf(stderr,"fH2sel       : %.6e\n",fH2sel);

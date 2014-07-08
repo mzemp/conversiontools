@@ -104,7 +104,7 @@ int main(int argc, char **argv) {
 		}
 	xdr_destroy(&xdrs1);
 	xdr_destroy(&xdrs2);
-	if (verboselevel >= 0) {
+	if (verboselevel > 0) {
 		fprintf(stderr,"Ntotal_in: %d Ni_in: %d Nf_in: %d Nd_in: %d\n",
 			ah1.N[0],ah1.N[1],ah1.N[2],ah1.N[3]);
 		fprintf(stderr,"Ntotal_out: %d Ni_out: %d Nf_out: %d Nd_out: %d\n",

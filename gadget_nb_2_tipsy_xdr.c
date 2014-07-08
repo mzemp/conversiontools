@@ -103,8 +103,9 @@ int main(int argc, char **argv) {
 	if (a == -1) {
 		a = ts->th->time;
 		}
-	if (verboselevel >= 1) {
+	if (verboselevel > 0) {
 		fprintf(stderr,"Used values:\n");
+		fprintf(stderr,"\n");
 		fprintf(stderr,"a   : %.6e\n",a);
 		fprintf(stderr,"drx : %.6e LU\n",dx);
 		fprintf(stderr,"dry : %.6e LU\n",dy);
@@ -112,8 +113,7 @@ int main(int argc, char **argv) {
 		fprintf(stderr,"dof : %.6e\n",dof);
 		fprintf(stderr,"mmw : %.6e mp\n",mmw);
 		fprintf(stderr,"uvf : %.6e m s^-1\n",uvf);
-		}
-	if (verboselevel >= 0) {
+		fprintf(stderr,"\n");
 		fprintf(stderr,"Time: %g Ntotal: %u Ngas: %u Ndark: %u Nstar: %u\n",
 			ts->th->time,ts->th->ntotal,ts->th->ngas,ts->th->ndark,ts->th->nstar);
 		}

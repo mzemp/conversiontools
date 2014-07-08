@@ -689,13 +689,14 @@ int main(int argc, char **argv) {
 	** Write out some additional stuff depending on verbose level
 	*/
 
-	if (verboselevel >= 1) {
+	if (verboselevel > 0) {
 		fprintf(stderr,"There are %d refinement levels for the dark matter:\n\n",ad.Nleveldark);
 		for (L = ad.Lmindark; L <= ad.Lmaxdark; L++) {
 			fprintf(stderr,"L %d Lmax %d Nlevel %d Softening %.6e LU_ART = %.6e kpc Mass %.6e MU_ART = %.6e Mo\n",L,ad.Lmaxdark,ad.Ndarklevel[L],ad.softdark[L],ad.softdark[L]*art2cosmo_ct.L_usf,ad.massdark[L],ad.massdark[L]*art2cosmo_ct.M_usf);
 			}
 		fprintf(stderr,"\n");
-		fprintf(stderr,"ART general header:\n\n");
+		fprintf(stderr,"ART general header:\n");
+		fprintf(stderr,"\n");
 		fprintf(stderr,"aunin    : %.6e\n",ad.ah.aunin);
 		fprintf(stderr,"auni0    : %.6e\n",ad.ah.auni0);
 		fprintf(stderr,"amplt    : %.6e\n",ad.ah.amplt);
@@ -728,7 +729,8 @@ int main(int argc, char **argv) {
 			fprintf(stderr,"mass[%ld] : %.6e num[%ld] : %d\n",i,ad.ah.mass[i],i,ad.ah.num[i]);
 			}
 		fprintf(stderr,"\n");
-		fprintf(stderr,"ART data properties:\n\n");
+		fprintf(stderr,"ART data properties:\n");
+		fprintf(stderr,"\n");
 		fprintf(stderr,"Particle File Mode : %d\n",ad.particle_file_mode);
 		fprintf(stderr,"Nparticleperrecord : %d\n",ad.Nparticleperrecord);
 		fprintf(stderr,"Nrecord            : %d\n",ad.Nrecord);
@@ -744,7 +746,8 @@ int main(int argc, char **argv) {
 		fprintf(stderr,"Toplevelsoftdark   : %.6e LU_ART = %.6e kpc\n",ad.toplevelsoftdark,ad.toplevelsoftdark*art2cosmo_ct.L_usf);
 		fprintf(stderr,"Toplevelmassdark   : %.6e MU_ART = %.6e Mo\n",ad.toplevelmassdark,ad.toplevelmassdark*art2cosmo_ct.M_usf);
 		fprintf(stderr,"\n");
-		fprintf(stderr,"ART preprocessor flags:\n\n");
+		fprintf(stderr,"ART preprocessor flags:\n");
+		fprintf(stderr,"\n");
 		fprintf(stderr,"-GRAVITY                     : %s\n",(ad.GRAVITY == 0)?"not set":"set");
 		fprintf(stderr,"-HYDRO                       : %s\n",(ad.HYDRO == 0)?"not set":"set");
 		fprintf(stderr,"-ADVECT_SPECIES              : %s\n",(ad.ADVECT_SPECIES == 0)?"not set":"set");
@@ -754,19 +757,22 @@ int main(int argc, char **argv) {
 		fprintf(stderr,"-RADIATIVE_TRANSFER          : %s\n",(ad.RADIATIVE_TRANSFER == 0)?"not set":"set");
 		fprintf(stderr,"-ELECTRON_ION_NONEQUILIBRIUM : %s\n",(ad.ELECTRON_ION_NONEQUILIBRIUM == 0)?"not set":"set");
 		fprintf(stderr,"\n");
-		fprintf(stderr,"ART units:\n\n");
+		fprintf(stderr,"ART units:\n");
+		fprintf(stderr,"\n");
 		fprintf(stderr,"LU_ART   : %.6e kpc\n",art2cosmo_ct.L_usf);
 		fprintf(stderr,"TU_ART   : %.6e Gyr\n",art2cosmo_ct.T_usf);
 		fprintf(stderr,"VU_ART   : %.6e kpc Gyr^{-1} = %.6e km s^{-1}\n",art2cosmo_ct.V_usf,art2cosmo_ct.V_usf*ConversionFactors.kpc_per_Gyr_2_km_per_s);
 		fprintf(stderr,"MU_ART   : %.6e Mo\n",art2cosmo_ct.M_usf);
 		fprintf(stderr,"\n");
-		fprintf(stderr,"Tipsy units:\n\n");
+		fprintf(stderr,"Tipsy units:\n");
+		fprintf(stderr,"\n");
 		fprintf(stderr,"LU_TIPSY : %.6e kpc\n",tipsy2cosmo_ct.L_usf);
 		fprintf(stderr,"TU_TIPSY : %.6e Gyr\n",tipsy2cosmo_ct.T_usf);
 		fprintf(stderr,"VU_TIPSY : %.6e kpc Gyr^{-1} = %.6e km s^{-1}\n",tipsy2cosmo_ct.V_usf,tipsy2cosmo_ct.V_usf*ConversionFactors.kpc_per_Gyr_2_km_per_s);
 		fprintf(stderr,"MU_TIPSY : %.6e Mo\n",tipsy2cosmo_ct.M_usf);
 		fprintf(stderr,"\n");
-		fprintf(stderr,"Cosmology:\n\n");
+		fprintf(stderr,"Cosmology:\n");
+		fprintf(stderr,"\n");
 		fprintf(stderr,"OmegaM0 : %.6e\n",cp.OmegaM0);
 		fprintf(stderr,"OmegaD0 : %.6e\n",cp.OmegaD0);
 		fprintf(stderr,"OmegaB0 : %.6e\n",cp.OmegaB0);
@@ -775,7 +781,8 @@ int main(int argc, char **argv) {
 		fprintf(stderr,"OmegaR0 : %.6e\n",cp.OmegaR0);
 		fprintf(stderr,"h0_100  : %.6e\n",cp.h0_100);
 		fprintf(stderr,"\n");
-		fprintf(stderr,"Selected volume:\n\n");
+		fprintf(stderr,"Selected volume:\n");
+		fprintf(stderr,"\n");
 		if (dsel[0] == 0 && dsel[1] == 0 && dsel[2] == 0) {
 			fprintf(stderr,"No selection chosen.\n");
 			fprintf(stderr,"\n");
@@ -786,7 +793,8 @@ int main(int argc, char **argv) {
 			fprintf(stderr,"Box: [%.6e ... %.6e] x [%.6e ... %.6e] x [%.6e ... %.6e] LU_ART\n",bsel[0],bsel[3],bsel[1],bsel[4],bsel[2],bsel[5]);
 			fprintf(stderr,"\n");
 			}
-		fprintf(stderr,"Coordinate transformation:\n\n");
+		fprintf(stderr,"Coordinate transformation:\n");
+		fprintf(stderr,"\n");
 		fprintf(stderr,"L_usf    : %.6e\n",art2tipsy_ct.L_usf);
 		fprintf(stderr,"T_usf    : %.6e\n",art2tipsy_ct.T_usf);
 		fprintf(stderr,"V_usf    : %.6e\n",art2tipsy_ct.V_usf);
@@ -796,7 +804,8 @@ int main(int argc, char **argv) {
 		for (i = 0; i < 3; i++) fprintf(stderr,"L_css[%ld] : %.6e\n",i,art2tipsy_ct.L_css[i]);
 		for (i = 0; i < 3; i++) fprintf(stderr,"V_css[%ld] : %.6e\n",i,art2tipsy_ct.V_css[i]);
 		fprintf(stderr,"\n");
-		fprintf(stderr,"Used values:\n\n");
+		fprintf(stderr,"Used values:\n");
+		fprintf(stderr,"\n");
 		fprintf(stderr,"softfac                    : %.6e\n",softfac);
 		fprintf(stderr,"Lmaxgaswrite               : %d\n",Lmaxgaswrite);
 		fprintf(stderr,"LBox                       : %.6e kpc\n",LBox);
@@ -807,8 +816,6 @@ int main(int argc, char **argv) {
 		fprintf(stderr,"Written out dark matter    : %s\n",(writedark == 0)?"no":"yes");
 		fprintf(stderr,"Written out stars          : %s\n",(writestar == 0)?"no":"yes");
 		fprintf(stderr,"\n");
-		}
-	if (verboselevel >= 0) {
 		fprintf(stderr,"Time: %g Ntotal: %u Ngas: %u Ndark: %u Nstar: %u\n",
 			th.time,th.ntotal,th.ngas,th.ndark,th.nstar);
 		}
